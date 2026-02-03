@@ -1,4 +1,4 @@
-# 🎓 Đồ án CTDL & GT: Quản lý điểm sinh viên (Hệ tín chỉ)
+# 🎓 Đồ án CTDL & GT: Quản lý điểm sinh viên 
 
 Dự án quản lý dữ liệu học vụ sử dụng các cấu trúc dữ liệu thuần túy trong C++, đảm bảo tối ưu hóa bộ nhớ và tốc độ truy xuất.
 
