@@ -3,7 +3,8 @@
 $\color{Yellow}{\text{CẤU TRÚC (STRUCTURE VÀ DATA)}}$
 - **Nhiệm vụ trọng tâm:** Xây dựng nền móng dữ liệu cho toàn bộ dự án.
 - **Chi tiết công việc:**
-    -	$\color{Cyan}{\text{Định nghĩa Struct:}}$ Thiết lập toàn bộ các cấu trúc dữ liệu: Cây AVL, Danh sách liên kết đơn, Mảng con trỏ theo đúng yêu cầu bảng dữ liệu.$\color{Gray}{\text{(Bảng ở README.md)}}$
+    -	$\color{Cyan}{\text{Định nghĩa Struct:}}$ Thiết lập toàn bộ các cấu trúc dữ liệu: Cây AVL, Danh sách liên kết đơn, Mảng con trỏ theo đúng yêu cầu bảng dữ liệu.
+    $\color{Gray}{\text{(Bảng ở README.md)}}$
     - $\color{Cyan}{\text{File I/O:}}$ Viết các hàm nạp và lưu dữ liệu từ file để đảm bảo dữ liệu không bị mất khi thoát chương trình.
     - $\color{Cyan}{\text{Hàm tiện ích:}}$ Xử lý chuỗi, tính độ dài tiếng Việt có dấu $\color{Red}{\text{(quan trọng để kẻ bảng không bị vỡ)}}$. các hàm phục vụ cho dự án khi người làm Logic hoặc Giao diện yêu cầu.
     - $\color{Cyan}{\text{Data Collector:}}$ Thu thập dữ liệu môn học/sinh viên thật từ website PTIT để làm dữ liệu mẫu.
