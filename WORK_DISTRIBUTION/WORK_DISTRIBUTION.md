@@ -1,13 +1,14 @@
 ## 📑KHỐI LƯỢNG CÔNG VIỆC
 
-$\color{Yellow}{\text{CẤU TRÚC (STRUCTURE VÀ DATA)}}$
+$\color{Yellow}{\text{I.CẤU TRÚC (STRUCTURE VÀ DATA)}}$
 - **Nhiệm vụ trọng tâm:** Xây dựng nền móng dữ liệu cho toàn bộ dự án.
 - **Chi tiết công việc:**
     -	$\color{Cyan}{\text{Định nghĩa Struct:}}$ Thiết lập toàn bộ các cấu trúc dữ liệu: Cây AVL, Danh sách liên kết đơn, Mảng con trỏ theo đúng yêu cầu bảng dữ liệu.
-    $\color{Gray}{\text{(Bảng ở README.md)}}$
+    $\color{Gray}{\text{(Bảng ở README.md)}}$ <br>
+$\color{Gray}{\text{Định nghĩa Struct: Thiết lập khai báo toàn bộ cấu trúc dữ liệu (không bao gồm hàm xử lý)}.}$
     - $\color{Cyan}{\text{File I/O:}}$ Viết các hàm nạp và lưu dữ liệu từ file để đảm bảo dữ liệu không bị mất khi thoát chương trình.
     - $\color{Cyan}{\text{Hàm tiện ích:}}$ Xử lý chuỗi, tính độ dài tiếng Việt có dấu $\color{Red}{\text{(quan trọng để kẻ bảng không bị vỡ)}}$. các hàm phục vụ cho dự án khi người làm Logic hoặc Giao diện yêu cầu.
-    - $\color{Cyan}{\text{Data Collector:}}$ Thu thập dữ liệu môn học/sinh viên thật từ website PTIT để làm dữ liệu mẫu.
+    - $\color{Cyan}{\text{Data Collector:}}$ Thu thập dữ liệu môn học/sinh viên thật từ website PTIT để làm dữ liệu mẫu. 
  ---
 $\color{Yellow}{\text{II.LOGIC:}}$
 - **Nhiệm vụ trọng tâm:** Xử lý thuật toán và các thao tác dữ liệu phức tạp.
@@ -20,6 +21,7 @@ $\color{Yellow}{\text{II.LOGIC:}}$
 $\color{Yellow}{\text{III. GIAO DIỆN VÀ QUY ƯỚC (UI AND CONTRACT)}}$
 - **Nhiệm vụ trọng tâm:** Thiết kế trải nghiệm người dùng và điều phối dự án.
 - **Chi tiết công việc:**
-    - $\color{Cyan}{\text{Hợp đồng dữ liệu (Convention):}}$ Quy định tên hàm, kiểu trả về và mã lỗi để Người làm Logic và Struct tuân theo.
+    - $\color{Cyan}{\text{Hợp đồng dữ liệu (Convention):}}$ Quy định tên hàm, kiểu trả về và mã lỗi để Người làm Logic và Struct tuân theo. Contract được thống nhất trước khi triển khai Logic & UI
     - $\color{Cyan}{\text{Triển khai UI:}}$ Làm giao diện cho toàn bộ 11 chức năng từ a đến k dựa trên dữ liệu thô nhận được.
     - $\color{Cyan}{\text{Xử lý sự kiện:}}$ Bắt phím điều hướng, phân trang danh sách, kẻ bảng biểu, menu động v..v..
+
