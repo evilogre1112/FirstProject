@@ -79,4 +79,5 @@ Dự án quản lý dữ liệu học vụ sử dụng các cấu trúc dữ li�
 *Ghi chú: Toàn bộ dữ liệu được lưu trữ và nạp tự động qua file văn bản.*
 
 Hình ảnh minh hoạ ở trong folder picture.
-[Bảng phân chia Khối lượng Công việc](./WORK_DISTRIBUTION.md)
+<br> 
+[Bảng phân chia Khối lượng Công việc](./WORK_DISTRIBUTION/WORK_DISTRIBUTION.md)
