@@ -16,7 +16,7 @@ $\color{Yellow}{\text{II.LOGIC:}}$
     - $\color{Cyan}{\text{Dữ liệu thô (Raw Data):}}$ Cung cấp kết quả tính toán/sắp xếp cho các câu a, f, g, h, i dưới dạng mảng con trỏ để UI chỉ việc hiển thị.
     - $\color{Cyan}{\text{Cấu trúc đặc biệt:}}$ Xử lý logic "Danh sách trong Danh sách" (Lớp tín chỉ chứa con trỏ đến danh sách đăng ký).
  ---
-$\color{Yellow}{\text{III. GIAO DIỆN VÀ QUY ƯỚC (UI \& CONTRACT)}}$
+$\color{Yellow}{\text{III. GIAO DIỆN VÀ QUY ƯỚC (UI AND CONTRACT)}}$
 - **Nhiệm vụ trọng tâm:** Thiết kế trải nghiệm người dùng và điều phối dự án.
 - **Chi tiết công việc:**
     - $\color{Cyan}{\text{Hợp đồng dữ liệu (Convention):}}$ Quy định tên hàm, kiểu trả về và mã lỗi để Người làm Logic và Struct tuân theo.
