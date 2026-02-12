@@ -1,9 +1,3 @@
-Chào bạn, một sự chuyển đổi từ "Quản lý sinh viên" sang "Quản lý chuyến bay" rất thú vị! Đây là một bài toán kinh điển trong môn CTDL & GT tại PTIT, yêu cầu khả năng xử lý con trỏ và cây nhị phân thực thụ hơn.
-
-Dưới đây là nội dung đồ án đã được cập nhật và trình bày lại theo đúng "văn phong" chuyên nghiệp để bạn đưa vào file `README.md` hoặc tài liệu nhóm:
-
----
-
 # ✈️ Đồ án CTDL & GT: Quản lý các chuyến bay nội địa
 
 Dự án quản lý vận hành hàng không, tập trung vào tối ưu hóa việc lưu trữ thông tin máy bay, điều phối chuyến bay và quản lý đặt vé của hành khách thông qua các cấu trúc dữ liệu thuần túy.
@@ -72,3 +66,6 @@ DANH SÁCH HÀNH KHÁCH THUỘC CHUYẾN BAY: [Mã CB]
 
 </div>
 ---
+Hình ảnh minh hoạ ở trong folder picture.
+<br> 
+[Bảng phân chia Khối lượng Công việc](./WORK_DISTRIBUTION/WORK_DISTRIBUTION.md)
