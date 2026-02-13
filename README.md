@@ -8,10 +8,10 @@ Dự án quản lý vận hành hàng không, tập trung vào tối ưu hóa vi
 
 | Đối tượng | Cấu trúc dữ liệu | Chi tiết thông tin |
 | --- | --- | --- |
-| **Máy bay** | `Mảng con trỏ` | Tối đa 300 máy bay. Số hiệu MB (C15 - Duy nhất), Loại MB (C40), Số chỗ (≥ 20). |
-| **Chuyến bay** | `Danh sách liên kết đơn` | Mã CB (C15 - Duy nhất), Ngày giờ khởi hành, Sân bay đến, Trạng thái (0-3), Số hiệu MB, Danh sách vé cho biết thông tin vé trên chuyến bay, số CMND của hành khách đã đặt vé đó.Mỗi vé có  số vé  là số thứ tự trên chuyến từ số 1 đến số chỗ . (Luôn tăng dần theo Mã CB). |
-| **Hành khách** | `Cây Nhị phân Tìm kiếm (BST)` | Số CMND (Duy nhất), Họ, Tên, Phái. |
-| **Danh sách Vé** | `Mảng/Dãy số` | Số vé (1 đến Số chỗ), Số CMND hành khách đã đặt. |
+| **Máy bay (MB)** | `Mảng con trỏ` | Tối đa 300 máy bay. Số hiệu MB (C15 - Duy nhất), Loại MB (C40), Số chỗ (≥ 20). |
+| **Chuyến bay (CB)** | `Danh sách liên kết đơn` | Mã CB (C15 - Duy nhất), Ngày giờ khởi hành, Sân bay đến, Trạng thái (0-3), Số hiệu MB, Danh sách vé cho biết thông tin vé trên chuyến bay. (Luôn tăng dần theo Mã CB). |
+| **Hành khách (HK)** | `Cây Nhị phân Tìm kiếm (BST)` | Số CMND (Duy nhất), Họ, Tên, Phái. |
+| **Danh sách Vé (DSV)** | `Mảng/Dãy số` | Số vé (1 đến Số chỗ), Số CMND hành khách đã đặt. |
 
 > **Trạng thái chuyến bay:** 0: Hủy chuyến | 1: Còn vé | 2: Hết vé | 3: Hoàn tất.
 
@@ -27,7 +27,8 @@ Dự án quản lý vận hành hàng không, tập trung vào tối ưu hóa vi
     * $\color{Red}{\text{DSCB luôn có thứ tự tăng dần theo mã chuyến bay}}$
 
 
-* [ ] **c. Đặt vé:** * Kiểm tra CMND: Nếu mới thì cập nhật vào **Cây BST**(Danh sách khách hàng), nếu có rồi thì in thông tin kiểm tra.
+* [ ] **c. Đặt vé:** 
+    * Kiểm tra CMND: Nếu mới thì cập nhật vào **Cây BST**(Danh sách khách hàng), nếu có rồi thì in thông tin kiểm tra.
     * Mỗi khách chỉ được mua 1 vé/chuyến.
     * nếu hành khách chưa có số CMND thì yêu cầu nhập thông tin hành khách trước
 
@@ -79,6 +80,7 @@ DANH SÁCH HÀNH KHÁCH THUỘC CHUYẾN BAY:  ###### [Mã CB]
 | :--- | :--- | :--- |
 | **CTDL & GT** | Cấu trúc dữ liệu và Giải thuật | Nền tảng chính của đồ án (tuyệt đối không dùng thư viện STL). |
 | **BST** | Binary Search Tree | Cây nhị phân tìm kiếm, dùng để quản lý danh sách hành khách. |
+| **DSV** | Danh sách vé | Gồm các vé, mỗi vé có số ghế và cmnd |
 | **MB** | Máy bay | Đối tượng lưu trữ trong mảng con trỏ (tối đa 300). |
 | **CB** | Chuyến bay | Đối tượng lưu trữ trong danh sách liên kết đơn. |
 | **DSCB** | Danh sách chuyến bay | Luôn được sắp xếp tăng dần theo mã khi thêm mới (Insert). |
@@ -88,8 +90,6 @@ DANH SÁCH HÀNH KHÁCH THUỘC CHUYẾN BAY:  ###### [Mã CB]
 | **Trạng thái** | 0, 1, 2, 3 | Các mã số đại diện cho tình trạng vận hành của chuyến bay. |
 | **dd/mm/yyyy** | Ngày/Tháng/Năm | Định dạng chuẩn khi nhập liệu và hiển thị ngày khởi hành. |
 | **hh:mm** | Giờ:Phút | Định dạng chuẩn cho thời gian cất cánh. |
-
----
 
 ---
 
