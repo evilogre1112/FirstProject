@@ -206,7 +206,7 @@ int* Get_Empty_Seats(CB* const dsCB ,const char* maCB, int &sldsVT);
 // Tạo struct lưu trữ hai giá trị là Máy Bay và Số Lần Bay như sau.
 /*
     struct MB_Stat {
-        string SHMB[15];  // Lấy từ cấu trúc Máy bay
+        char SHMB[15];  // Lấy từ cấu trúc Máy bay
         int SLB;        // Biến đếm số lần xuất hiện trong DSCB
     };
 */
