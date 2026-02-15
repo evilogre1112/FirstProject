@@ -33,7 +33,7 @@ bool Add_MB(MB* dsMB[], int &slMB, MB* newMB);
  * @param soHieuMB  Chuỗi C15 chứa mã máy bay cần xóa
  * @return          true nếu tìm thấy và xóa thành công, false nếu không tìm thấy
  */
-bool Del_MB(MB* dsMB[], int &slMB, const string& soHieuMB);
+bool Del_MB(MB* dsMB[], int &slMB, const char* soHieuMB);
 
 /**
  * @brief               Hiệu chỉnh thông tin máy bay
@@ -43,7 +43,7 @@ bool Del_MB(MB* dsMB[], int &slMB, const string& soHieuMB);
  * @param infoUpdate    thông tin cập nhật cho soHieuMB trong mảng
  * @return              true nếu hiệu chỉnh thành công
  */
-bool Edit_MB(MB* dsMB[], int slMB, const string& soHieuMB , MB* infoUpdate);
+bool Edit_MB(MB* dsMB[], int slMB, const char* soHieuMB , MB* infoUpdate);
 
 /**
  * @brief           tìm máy bay X trong danh sách máy bay
@@ -52,7 +52,7 @@ bool Edit_MB(MB* dsMB[], int slMB, const string& soHieuMB , MB* infoUpdate);
  * @param soHieuMB  chuỗi C15 chứa mã máy bay cần tìm
  * @return          vị trí máy bay trong danh sách
  */
-int Find_MB(MB* const dsMB[],int slMB,const string& soHieuMB);
+int Find_MB(MB* const dsMB[],int slMB,const char* soHieuMB);
 
 // --- CÂU B: QUẢN LÝ CHUYẾN BAY ---
 // Thao tác trên DSCB
@@ -81,7 +81,7 @@ bool Update_Time_CB(CB* dsCB, const string& maCB, const DateTime& newTime);
  * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm để hủy
  * @return      True nếu huỷ  được và thành công
 */
-bool Cancel_CB(CB* &dsCB, const string& maCB);
+bool Cancel_CB(CB* &dsCB, const char* maCB);
 
 /**
  * @brief       Cho biết trạng thái của chuyến bay trong DSCB.
@@ -94,7 +94,7 @@ bool Cancel_CB(CB* &dsCB, const string& maCB);
  *                  0: Đã hủy
  *                  -1: Không tìm thấy mã chuyến bay này trong hệ thống.
  */
- int Status_CB(CB* dsCB, const string& maCB);
+ int Status_CB(CB* dsCB, const char* maCB);
 
 /**
  * @brief           Khởi tạo danh sách vé trống cho chuyến bay vừa lập
@@ -109,7 +109,7 @@ void Init_Tickets(CB* newCB, int soCho);
  * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm.
  * @return      Địa chỉ của Node chuyến bay nếu thấy, ngược lại trả về NULL
 */
-CB* Find_CB(CB* const dsCB,const string& maCB);
+CB* Find_CB(CB* const dsCB,const char* maCB);
 
 // --- CÂU C: ĐẶT VÉ ---
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)
@@ -121,7 +121,7 @@ CB* Find_CB(CB* const dsCB,const string& maCB);
  * @param CMND  Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
-HK* Find_HK(CB* const dsCB, HK* const dsHK,const string& maCB, const string& cmnd);
+HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
 
 /**
  * @brief       Thêm một hành khách mới vào cây BST
@@ -132,7 +132,7 @@ HK* Find_HK(CB* const dsCB, HK* const dsHK,const string& maCB, const string& cmn
  * @param phai  Phái Nam/Nu
  * @return      true nếu thêm thành công, false nếu trùng mã CMND
  */
-bool Add_HK(HK* &dsHK,const string&  ho,const string& ten ,const string& cmnd,const string& phai );
+bool Add_HK(HK* &dsHK,const char*  ho,const char* ten ,const char* cmnd,const char* phai );
 
 /**
  * @brief       Kiểm tra hành khách đã mua vé trên chuyến bay này chưa (1 vé/chuyến)
@@ -141,7 +141,7 @@ bool Add_HK(HK* &dsHK,const string&  ho,const string& ten ,const string& cmnd,co
  * @param CMND  Số CMND cần kiểm tra trong danh sách vé
  * @return      True nếu đã có tên trong danh sách vé, false nếu chưa
  */
-bool Is_Ticket_Booked(CB* const dsCB,const string& maCB,const string& CMND);
+bool Is_Ticket_Booked(CB* const dsCB,const char* maCB,const char* CMND);
 
 /**
  * @brief               Thực hiện đặt vé (ghi CMND vào chỗ ngồi) trên một chuyến bay cụ thể
@@ -151,7 +151,7 @@ bool Is_Ticket_Booked(CB* const dsCB,const string& maCB,const string& CMND);
  * @param seatNumber    Số thứ tự ghế khách chọn (từ 1 đến Số chỗ)
  * @return              True nếu đặt thành công, false nếu ghế đã có người hoặc chuyến bay không còn cho đặt hoặc khách hàng mới chưa có trong dsKH
  */
-bool Book_Ticket(CB* dsCB,const string& maCB,const string& CMND, int seatNumber);
+bool Book_Ticket(CB* dsCB,const char* maCB,const char* CMND, int seatNumber);
 
 // --- CÂU D: HỦY VÉ ---
 
@@ -161,7 +161,7 @@ bool Book_Ticket(CB* dsCB,const string& maCB,const string& CMND, int seatNumber)
  * @param seatNumber    Số thứ tự ghế cần hủy (tính từ 1 đến n)
  * @return              True nếu hủy thành công, false nếu ghế đó vốn dĩ đang trống hoặc chuyến bay không còn cho phép hủy
  */
-bool Cancel_Ticket(CB* &dsCB, const string& maCB , int seatNumber);
+bool Cancel_Ticket(CB* &dsCB, const char* maCB , int seatNumber);
 
 // -- CÂU E: IN DANH SÁCH HÀNH KHÁCH THEO MÃ CB --
 
@@ -174,7 +174,7 @@ bool Cancel_Ticket(CB* &dsCB, const string& maCB , int seatNumber);
  * @return          Trả về mảng con trỏ hành khách
  * @note            Trả về NULL nếu không thấy chuyến bay hoặc không có khách. UI phải delete[] sau khi dùng.
  */
-HK** Get_DSHKCB(CB* const dsCB, HK* const dsHK,const string& maCB, int &sldsHK);
+HK** Get_DSHKCB(CB* const dsCB, HK* const dsHK,const char* maCB, int &sldsHK);
 
 // -- CÂU F: TRA CỨU CÁC CHUYẾN BAY DỰA VÀO NGÀY VÀ NƠI ĐẾN --
 
@@ -187,7 +187,7 @@ HK** Get_DSHKCB(CB* const dsCB, HK* const dsHK,const string& maCB, int &sldsHK);
  * @return          Danh sách chuyến bay theo ngày và địa chỉ (mảng con trỏ)
  * @note            UI có trách nhiệm delete[] mảng này sau khi in xong.
  */
-CB** Search_CB(CB* const dsCB ,const DateTime& date,const string& address, int& sldsCB);
+CB** Search_CB(CB* const dsCB ,const DateTime& date,const char* address, int& sldsCB);
 
 // -- CÂU G: IN DANH SÁCH VÉ TRỐNG --
 
@@ -199,14 +199,14 @@ CB** Search_CB(CB* const dsCB ,const DateTime& date,const string& address, int& 
  * @return          Danh sách vé trống
  * @note            UI có trách nhiệm delete[] mảng này sau khi in xong để tránh rò rỉ bộ nhớ.
  */
-int* Get_Empty_Seats(CB* const dsCB ,const string& maCB, int &sldsVT);
+int* Get_Empty_Seats(CB* const dsCB ,const char* maCB, int &sldsVT);
 
 // -- CÂU H: THỐNG KÊ LƯỢT BAY --
 
 // Tạo struct lưu trữ hai giá trị là Máy Bay và Số Lần Bay như sau.
 /*
     struct MB_Stat {
-        string SHMB[15];  // Lấy từ cấu trúc Máy bay
+        char SHMB[15];  // Lấy từ cấu trúc Máy bay
         int SLB;        // Biến đếm số lần xuất hiện trong DSCB
     };
 */
