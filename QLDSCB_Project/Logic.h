@@ -14,11 +14,16 @@
 // Logic quy định cho struct viết cấu trúc của ngày giờ có tên là DateTime (dd/mm/yyyy)
 
 // Một số tiện ích
-int ss_str(char* a, char* b); // so sánh 2 chuỗi
+int ss_str(char* const a, char* const b); // so sánh 2 chuỗi
+
+
 
 // --- CÂU A: QUẢN LÝ MÁY BAY ---
 // Thao tác trên DSMB
 // MB = type của cấu trúc 1 máy bay
+// LƯU Ý :: CÁC HÀM MÁY BAY ĐÃ ĐƯỢC TỐI ƯU SẴN, HÃY ĐẢM BẢO KHI SỬ DỤNG, DANH SÁCH MÁY BAY ĐÃ ĐƯỢC SẮP XẾP. DANH SÁCH MÁY BAY CHƯA ĐƯỢC SẮP XẾP SẼ CHO RA KẾT QUẢ SAI Ở MỌI HÀM.
+
+
 
 /**
  * @brief       sắp xếp danh sách máy bay theo mã máy bay, sử dụng merge_sort
@@ -27,8 +32,11 @@ int ss_str(char* a, char* b); // so sánh 2 chuỗi
  * @return      void
  */
 
-void Merge_MB(MB* dsMB[], int l,int m, int r); // Hàm tiện ích, phục vụ cho merge_sort
+void Merge_MB(MB* dsMB[], int l, int m, int r); // Hàm tiện ích, phục vụ cho merge_sort
 void Sort_MB(MB* dsMB[], int l, int r);
+
+// Tìm vị trí chèn
+int find_insert_pos(MB *const dsMB[], int slMB, char* const soHieuMB);
 
 /**
  * @brief           tìm máy bay X trong danh sách máy bay
@@ -37,7 +45,7 @@ void Sort_MB(MB* dsMB[], int l, int r);
  * @param soHieuMB  chuỗi C15 chứa mã máy bay cần tìm
  * @return          vị trí máy bay trong danh sách
  */
-int Find_MB(MB* const dsMB[],int slMB,const char* soHieuMB);
+int Find_MB(MB* const dsMB[], int slMB, char* const soHieuMB);
 
 /**
  * @brief       Thêm 1 máy bay mới vào mảng con trỏ
@@ -55,7 +63,7 @@ bool Add_MB(MB* dsMB[], int &slMB, MB* newMB);
  * @param soHieuMB  Chuỗi C15 chứa mã máy bay cần xóa
  * @return          true nếu tìm thấy và xóa thành công, false nếu không tìm thấy
  */
-bool Del_MB(MB* dsMB[], int &slMB, const char* soHieuMB);
+bool Del_MB(MB* dsMB[], int &slMB, char* const soHieuMB);
 
 /**
  * @brief               Hiệu chỉnh thông tin máy bay
@@ -65,7 +73,7 @@ bool Del_MB(MB* dsMB[], int &slMB, const char* soHieuMB);
  * @param infoUpdate    thông tin cập nhật cho soHieuMB trong mảng
  * @return              true nếu hiệu chỉnh thành công
  */
-bool Edit_MB(MB* dsMB[], int slMB, const char* soHieuMB , MB* infoUpdate);
+bool Edit_MB(MB* dsMB[], int slMB, char* const soHieuMB , MB* infoUpdate);
 
 // --- CÂU B: QUẢN LÝ CHUYẾN BAY ---
 // Thao tác trên DSCB
