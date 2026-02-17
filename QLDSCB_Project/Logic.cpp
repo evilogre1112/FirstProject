@@ -14,6 +14,12 @@ int ss_str(char* const a, char* const b) {
     return 0;
 } // a == b return 0, a > b return 1, a < b return 2
 
+
+// May Bay
+// Hàm Đọc và Ghi file
+bool Read_MB(ifstream& read, MB* dsMB[], int slMB);
+bool Save_MB(ofstream& save, MB* dsMB[], int slMB);
+
 // Tiện ích sắp xếp
 void Merge_MB(MB* dsMB[], int l,int m, int r) {
     int x_size = m - l + 1; int y_size = r - m;

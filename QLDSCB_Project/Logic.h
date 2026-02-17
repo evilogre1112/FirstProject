@@ -23,19 +23,41 @@ int ss_str(char* const a, char* const b); // so sánh 2 chuỗi
 // MB = type của cấu trúc 1 máy bay
 // LƯU Ý :: CÁC HÀM MÁY BAY ĐÃ ĐƯỢC TỐI ƯU SẴN, HÃY ĐẢM BẢO KHI SỬ DỤNG, DANH SÁCH MÁY BAY ĐÃ ĐƯỢC SẮP XẾP. DANH SÁCH MÁY BAY CHƯA ĐƯỢC SẮP XẾP SẼ CHO RA KẾT QUẢ SAI Ở MỌI HÀM.
 
+/**
+ * @brief       Đọc dsMB từ file văn bản txt
+ * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
+ * @param slMB  Số lượng máy bay hiện có trong dsMB
+ * @param save  Tham chiếu biến đọc nội dung trong dsMB từ file txt
+ * @return     true nếu đọc file thành công. false nếu ngược lại
+ */
+bool Read_MB(ifstream& read, MB* dsMB[], int slMB);
 
+/**
+ * @brief       Lưu dsMB vào file văn bản txt
+ * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
+ * @param slMB  Số lượng máy bay hiện có trong dsMB
+ * @param save  Tham chiếu biến ghi nội dung trong dsMB vào file txt
+ * @return     true nếu ghi file thành công. false nếu ngược lại
+ */
+bool Save_MB(ofstream& save, MB* dsMB[], int slMB);
 
 /**
  * @brief       sắp xếp danh sách máy bay theo mã máy bay, sử dụng merge_sort
  * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
- * @param n     Số lượng máy bay hiện có (truyền tham chiếu để cập nhật)
+ * @param l  vị trí bắt đầu trong mảng muốn sắp xếp
+ * @param r vị trí kết thúc trong mảng muốn sắp xếp ( Sắp xếp từ vị trí l đên r )
  * @return      void
  */
-
 void Merge_MB(MB* dsMB[], int l, int m, int r); // Hàm tiện ích, phục vụ cho merge_sort
 void Sort_MB(MB* dsMB[], int l, int r);
 
-// Tìm vị trí chèn
+/**
+ * @brief       Tìm vị trí chính xác để chèn MB theo soHieuMB tăng dần
+ * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
+ * @param slMB  số lượng máy bay hiện có trong danh sách MB
+ * @param soHieuMB số hiệu máy bay cần tìm vị trí chèn
+ * @return   trả về vị trí chính xác cần chèn để chèn MB có soHieuMB
+ */
 int find_insert_pos(MB *const dsMB[], int slMB, char* const soHieuMB);
 
 /**
@@ -43,7 +65,7 @@ int find_insert_pos(MB *const dsMB[], int slMB, char* const soHieuMB);
  * @param dsMB      mảng các con trỏ
  * @param slMB      Số lượng máy bay hiện có
  * @param soHieuMB  chuỗi C15 chứa mã máy bay cần tìm
- * @return          vị trí máy bay trong danh sách
+ * @return          vị trí máy bay trong danh sách, trar về -1 nếu không tìm thấy
  */
 int Find_MB(MB* const dsMB[], int slMB, char* const soHieuMB);
 
