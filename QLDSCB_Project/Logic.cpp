@@ -1,7 +1,7 @@
 #include "Logic.h"
 
 // Một số tiện ích
-int ss_str(char* a, char* b) {
+int ss_str(char* const a, char* const b) {
     unsigned long len_a = strlen(a);
     unsigned long len_b = strlen(b);
     unsigned long n = min (len_a, len_b);
@@ -14,11 +14,17 @@ int ss_str(char* a, char* b) {
     return 0;
 } // a == b return 0, a > b return 1, a < b return 2
 
+
+// May Bay
+// Hàm Đọc và Ghi file
+bool Read_MB(ifstream& read, MB* dsMB[], int slMB);
+bool Save_MB(ofstream& save, MB* dsMB[], int slMB);
+
 // Tiện ích sắp xếp
 void Merge_MB(MB* dsMB[], int l,int m, int r) {
-    int x_size = m - l; int y_size = r - m + 1;
-    MB* x[x_size]; MB* y[y_size];
-    int nx = l; int ny = m;
+    int x_size = m - l + 1; int y_size = r - m;
+    MB** x = new MB*[x_size]; MB** y = new MB*[y_size];
+    int nx = l; int ny = m + 1;
     for (int i = 0; i < x_size; i++) {
         x[i] = dsMB[nx];
         nx++;
@@ -27,9 +33,9 @@ void Merge_MB(MB* dsMB[], int l,int m, int r) {
         y[j] = dsMB[ny];
         ny++;
     }
-    int i = j = 0;
+    int i = 0; int j = 0;
     while (i < x_size && j < y_size) {
-        if (x[i]->soHieuMB <= y[j]->soHieuMB) {
+        if (ss_str(x[i]->soHieuMB, y[j]->soHieuMB) != 1) {
             dsMB[l] = x[i];
             i++;
         }
@@ -51,36 +57,93 @@ void Merge_MB(MB* dsMB[], int l,int m, int r) {
             l++;
         }
     }
+    delete[] x;
+    delete[] y;
 }
 // Merge sort MB
 void Sort_MB(MB* dsMB[], int l, int r) {
     if (l >= r) return;
     int m = (r + l) / 2;
-    Sort_MB(dsMB, l, m - 1);
-    Sort_MB(dsMB, m, r);
+    Sort_MB(dsMB, l, m);
+    Sort_MB(dsMB, m + 1, r);
     Merge_MB(dsMB, l, m, r);
 }
 
-int Find_MB(MB *const dsMB[], int slMB, const char* soHieuMB)
-{
-    return 0;
+// Tìm vị trí chèn
+int find_insert_pos(MB *const dsMB[], int slMB, char* const soHieuMB) {
+    int l = 0, r = slMB - 1;
+    int m = (l + r) / 2;
+    while (l <= r) {
+        int result = ss_str(dsMB[m]->soHieuMB, soHieuMB);
+        if (result == 0) return m;
+        else if (result == 1) r = m - 1;
+        else l = m + 1;
+        m = (l + r) / 2;
+    }
+    return l; // tra ve vi tri can chen
 }
 
-bool Add_MB(MB *dsMB[], int &slMB, MB *newMB)
-{
-    return false;
+int Find_MB(MB *const dsMB[], int slMB, char* const soHieuMB) {
+    int l = 0, r = slMB - 1;
+    int m = (l + r) / 2;
+    while (l <= r) {
+        int result = ss_str(dsMB[m]->soHieuMB, soHieuMB);
+        if (result == 0) return m;
+        else if (result == 1) r = m - 1;
+        else l = m + 1;
+        m = (l + r) / 2;
+    }
+    return -1; // not found
 }
 
-bool Del_MB(MB *dsMB[], int &slMB, const char* soHieuMB)
-{
-    return false;
+bool Add_MB(MB *dsMB[], int &slMB, MB *newMB) {
+    if (slMB >= 300) {
+        return false;
+    }
+    int index = find_insert_pos(dsMB, slMB, newMB->soHieuMB);
+    if (index == slMB) {
+        dsMB[index] = newMB;
+        slMB++;
+        return true;
+    }
+    if (ss_str(dsMB[index]->soHieuMB, newMB->soHieuMB) == 0) {
+        return false;
+    }
+    for (int i = slMB; i > index; i--) dsMB[i] = dsMB[i - 1];
+    dsMB[index] = newMB;
+    slMB++;
+    return true;
 }
 
-bool Edit_MB(MB *dsMB[], int slMB, const char* soHieuMB, MB *infoUpdate)
-{
-    return false;
+bool Del_MB(MB *dsMB[], int &slMB, char* const soHieuMB) {
+    int index = Find_MB(dsMB, slMB, soHieuMB);
+    if (index == -1) return false;
+    delete dsMB[index];
+    for (int i = index; i < slMB - 1; i++) {
+        dsMB[i] = dsMB[i + 1];
+    }
+    dsMB[slMB - 1] = NULL;
+    slMB--;
+    return true;
 }
 
+bool Edit_MB(MB *dsMB[], int slMB, char* const soHieuMB, MB *infoUpdate) {
+    int index = Find_MB(dsMB, slMB, soHieuMB);
+    if (index == -1) return false;
+    if (ss_str(dsMB[index]->soHieuMB, infoUpdate->soHieuMB) == 0) {
+        *dsMB[index] = *infoUpdate;
+        return true;
+    }
+    int exist = Find_MB(dsMB, slMB, infoUpdate->soHieuMB);
+    if (exist != -1) return false;
+    MB* newMB = new MB();
+    *newMB = *infoUpdate;
+    Del_MB(dsMB, slMB, soHieuMB);
+    Add_MB(dsMB, slMB, newMB);
+    return true;
+}
+
+// Chuyen Bay
 bool Add_CB(CB *&dsCB, CB *newCB)
 {
     return false;
