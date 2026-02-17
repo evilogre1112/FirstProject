@@ -13,6 +13,14 @@
 
 // Logic quy định cho struct viết cấu trúc của ngày giờ có tên là DateTime (dd/mm/yyyy)
 
+
+/* khách hàng thì có 3 cái data chính :
+*   cmnd
+*   ho và tên đệp chung 1 biến ho
+*   tên
+*/
+
+
 // Một số tiện ích
 int ss_str(char* a, char* b); // so sánh 2 chuỗi
 
