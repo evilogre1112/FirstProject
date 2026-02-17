@@ -23,5 +23,14 @@ extern int sldsHK;  // Số lượng hành khách (dùng để thống kê)
 extern int sldsCB;  // Số lượng chuyến bay
 extern int sldsVT;  // Số lượng vé trống (dùng tạm trong các hàm tra cứu)
 
+/**
+ * @brief       Đọc dsMB từ file văn bản txt
+ * @param slMB  Số lượng máy bay hiện có trong dsMB
+ * @param save  Tham chiếu biến đọc nội dung trong dsMB từ file txt
+ * @return      Trả về mảng con trỏ chứa các MB.
+ */
+
+MB** Read_MB(ifstream& DSMB, int slMB);
+
 
 #endif

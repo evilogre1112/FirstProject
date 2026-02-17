@@ -17,8 +17,9 @@ int ss_str(char* const a, char* const b) {
 
 // May Bay
 // Hàm Đọc và Ghi file
-bool Read_MB(ifstream& read, MB* dsMB[], int slMB);
-bool Save_MB(ofstream& save, MB* dsMB[], int slMB);
+bool Save_MB(ofstream& save, MB* dsMB[], int slMB){
+    return true ;
+}
 
 // Tiện ích sắp xếp
 void Merge_MB(MB* dsMB[], int l,int m, int r) {
@@ -144,22 +145,22 @@ bool Edit_MB(MB *dsMB[], int slMB, char* const soHieuMB, MB *infoUpdate) {
 }
 
 // Chuyen Bay
-bool Add_CB(CB *&dsCB, CB *newCB)
+bool Add_CB(CB *&headCB, CB *newCB)
 {
     return false;
 }
 
-bool Update_Time_CB(CB *dsCB, const char* maCB, const DateTime &newTime)
+bool Update_Time_CB(CB *headCB, const char* maCB, const DateTime &newTime)
 {
     return false;
 }
 
-bool Cancel_CB(CB *&dsCB, const char* maCB)
+bool Cancel_CB(CB *&headCB, const char* maCB)
 {
     return false;
 }
 
-int Status_CB(CB *dsCB, const char* maCB)
+int Status_CB(CB *headCB, const char* maCB)
 {
     return 0;
 }
@@ -168,12 +169,12 @@ void Init_Tickets(CB *newCB, int soCho)
 {
 }
 
-CB *Find_CB(CB *const dsCB, const char* maCB)
+CB *Find_CB(CB *const headCB, const char* maCB)
 {
     return nullptr;
 }
 
-HK *Find_HK(CB *const dsCB, HK *const dsHK, const char* maCB, const char* cmnd)
+HK *Find_HK(CB *const headCB, HK *const dsHK, const char* maCB, const char* cmnd)
 {
     return nullptr;
 }
@@ -183,37 +184,37 @@ bool Add_HK(HK *&dsHK, const char* ho, const char* ten, const char* cmnd, const 
     return false;
 }
 
-bool Is_Ticket_Booked(CB *const dsCB, const char* maCB, const char* CMND)
+bool Is_Ticket_Booked(CB *const headCB, const char* maCB, const char* CMND)
 {
     return false;
 }
 
-bool Book_Ticket(CB *dsCB, const char* maCB, const char* CMND, int seatNumber)
+bool Book_Ticket(CB *headCB, const char* maCB, const char* CMND, int seatNumber)
 {
     return false;
 }
 
-bool Cancel_Ticket(CB *&dsCB, const char* maCB, int seatNumber)
+bool Cancel_Ticket(CB *&headCB, const char* maCB, int seatNumber)
 {
     return false;
 }
 
-HK **Get_DSHKCB(CB *const dsCB, HK *const dsHK, const char* maCB, int &sldsHK)
+HK **Get_DSHKCB(CB *const headCB, HK *const dsHK, const char* maCB, int &sldsHK)
 {
     return nullptr;
 }
 
-CB **Search_CB(CB *const dsCB, const DateTime &date, const char* address, int &sldsCB)
+CB **Search_CB(CB *const headCB, const DateTime &date, const char* address, int &sldsCB)
 {
     return nullptr;
 }
 
-int *Get_Empty_Seats(CB *const dsCB, const char* maCB, int &sldsVT)
+int *Get_Empty_Seats(CB *const headCB, const char* maCB, int &sldsVT)
 {
     return nullptr;
 }
 
-MB_Stat *Get_Flight_Statistics(CB *const dsCB, int &count)
+MB_Stat *Get_Flight_Statistics(CB *const headCB, int &count)
 {
     return nullptr;
 }

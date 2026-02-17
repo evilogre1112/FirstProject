@@ -23,14 +23,7 @@ int ss_str(char* const a, char* const b); // so sánh 2 chuỗi
 // MB = type của cấu trúc 1 máy bay
 // LƯU Ý :: CÁC HÀM MÁY BAY ĐÃ ĐƯỢC TỐI ƯU SẴN, HÃY ĐẢM BẢO KHI SỬ DỤNG, DANH SÁCH MÁY BAY ĐÃ ĐƯỢC SẮP XẾP. DANH SÁCH MÁY BAY CHƯA ĐƯỢC SẮP XẾP SẼ CHO RA KẾT QUẢ SAI Ở MỌI HÀM.
 
-/**
- * @brief       Đọc dsMB từ file văn bản txt
- * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
- * @param slMB  Số lượng máy bay hiện có trong dsMB
- * @param save  Tham chiếu biến đọc nội dung trong dsMB từ file txt
- * @return     true nếu đọc file thành công. false nếu ngược lại
- */
-bool Read_MB(ifstream& read, MB* dsMB[], int slMB);
+
 
 /**
  * @brief       Lưu dsMB vào file văn bản txt
@@ -103,68 +96,68 @@ bool Edit_MB(MB* dsMB[], int slMB, char* const soHieuMB , MB* infoUpdate);
 
 /**
  * @brief           Thêm 1 chuyến bay mới vào danh sách liên kết đơn
- * @param dsCB      Danh sách chuyến bay
+ * @param headCB    Danh sách chuyến bay
  * @param newCB     Con trỏ trỏ đến node chuyến bay mới đã được cấp phát
  * @return          true nếu thêm thành công, false nếu trùng mã chuyến bay
  */
-bool Add_CB(CB* &dsCB, CB* newCB);
+bool Add_CB(CB* &headCB, CB* newCB);
 
 /**
  * @brief           Hiệu chỉnh ngày giờ khởi hành của một chuyến bay
- * @param dsCB      danh sách chuyến bay
+ * @param headCB    Danh sách chuyến bay
  * @param maCB      Mã hiệu chuyến bay cần tìm để sửa
  * @param newTime   Cấu trúc chứa ngày giờ mới
  * @return          true nếu tìm thấy và sửa thành công
  */
-bool Update_Time_CB(CB* dsCB, const string& maCB, const DateTime& newTime);
+bool Update_Time_CB(CB* headCB, const char* maCB, const DateTime& newTime);
 
 /**
- * @brief       Huỷ 1 chuyến bay trong danh sách liên kết đơn
- * @param dsCB  Danh sách chuyến bay
- * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm để hủy
- * @return      True nếu huỷ  được và thành công
+ * @brief           Huỷ 1 chuyến bay trong danh sách liên kết đơn
+ * @param headCB    Danh sách chuyến bay
+ * @param maCB      Chuỗi C15 chứa mã hiệu chuyến bay cần tìm để hủy
+ * @return          True nếu huỷ  được và thành công
 */
-bool Cancel_CB(CB* &dsCB, const char* maCB);
+bool Cancel_CB(CB* &headCB, const char* maCB);
 
 /**
- * @brief       Cho biết trạng thái của chuyến bay trong DSCB.
- * @param dsCb  Danh sách chuyến bay
- * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm để trả về trạng thái
- * @return      Trạng thái chuyến bay:
+ * @brief           Cho biết trạng thái của chuyến bay trong DSCB.
+ * @param headCB    Danh sách chuyến bay
+ * @param maCB      Chuỗi C15 chứa mã hiệu chuyến bay cần tìm để trả về trạng thái
+ * @return          Trạng thái chuyến bay:
  *                  1: Còn vé
  *                  2: Hết vé
  *                  3: Hoàn tất (đã bay)
  *                  0: Đã hủy
  *                  -1: Không tìm thấy mã chuyến bay này trong hệ thống.
  */
- int Status_CB(CB* dsCB, const char* maCB);
+ int Status_CB(CB* headCB, const char* maCB);
 
 /**
  * @brief           Khởi tạo danh sách vé trống cho chuyến bay vừa lập
  * @param newCB     Node chuyến bay mới
  * @param soCho     Số chỗ lấy từ thông tin máy bay thực hiện chuyến đó
  */
-void Init_Tickets(CB* newCB, int soCho);
+void Init_Tickets(CB* newCB, int socho);
 
 /**
- * @brief       Tìm chuyến bay trong DSCB.
- * @param dsCB  Danh sách chuyến bay
- * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm.
- * @return      Địa chỉ của Node chuyến bay nếu thấy, ngược lại trả về NULL
+ * @brief           Tìm chuyến bay trong DSCB.
+ * @param headCB    Danh sách chuyến bay
+ * @param maCB      Chuỗi C15 chứa mã hiệu chuyến bay cần tìm.
+ * @return          Địa chỉ của Node chuyến bay nếu thấy, ngược lại trả về NULL
 */
-CB* Find_CB(CB* const dsCB,const char* maCB);
+CB* Find_CB(CB* const headCB,const char* maCB);
 
 // --- CÂU C: ĐẶT VÉ ---
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)
 
 /**
- * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
- * @param dsCB  danh sách chuyến bay
- * @param dsHK  Danh sách hành khách tổng quát (Cây BST)
- * @param CMND  Số chứng minh nhân dân của khách cần tìm
- * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
+ * @brief           Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
+ * @param headCB    danh sách chuyến bay
+ * @param dsHK      Danh sách hành khách tổng quát (Cây BST)
+ * @param CMND      Số chứng minh nhân dân của khách cần tìm
+ * @return          Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
-HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
+HK* Find_HK(CB* const headCB, HK* const dsHK,const char* maCB, const char* cmnd);
 
 /**
  * @brief       Thêm một hành khách mới vào cây BST
@@ -178,71 +171,71 @@ HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
 bool Add_HK(HK* &dsHK,const char*  ho,const char* ten ,const char* cmnd,const char* phai );
 
 /**
- * @brief       Kiểm tra hành khách đã mua vé trên chuyến bay này chưa (1 vé/chuyến)
- * @param dsCB  Danh sách chuyến bay
- * @param maCB  Mã chuyến bay
- * @param CMND  Số CMND cần kiểm tra trong danh sách vé
- * @return      True nếu đã có tên trong danh sách vé, false nếu chưa
+ * @brief           Kiểm tra hành khách đã mua vé trên chuyến bay này chưa (1 vé/chuyến)
+ * @param headCB    Danh sách chuyến bay
+ * @param maCB      Mã chuyến bay
+ * @param CMND      Số CMND cần kiểm tra trong danh sách vé
+ * @return          True nếu đã có tên trong danh sách vé, false nếu chưa
  */
-bool Is_Ticket_Booked(CB* const dsCB,const char* maCB,const char* CMND);
+bool Is_Ticket_Booked(CB* const headCB,const char* maCB,const char* cmnd);
 
 /**
  * @brief               Thực hiện đặt vé (ghi CMND vào chỗ ngồi) trên một chuyến bay cụ thể
- * @param dsCB          Danh sách chuyến bay
+ * @param headCB        Danh sách chuyến bay
  * @param maCB          Mã chuyến bay
  * @param CMND          Số chứng minh nhân dân của hành khách
  * @param seatNumber    Số thứ tự ghế khách chọn (từ 1 đến Số chỗ)
  * @return              True nếu đặt thành công, false nếu ghế đã có người hoặc chuyến bay không còn cho đặt hoặc khách hàng mới chưa có trong dsKH
  */
-bool Book_Ticket(CB* dsCB,const char* maCB,const char* CMND, int seatNumber);
+bool Book_Ticket(CB* headCB,const char* maCB,const char* cmnd, int seatNumber);
 
 // --- CÂU D: HỦY VÉ ---
 
 /**
  * @brief               Thực hiện hủy vé của hành khách trên một chuyến bay
- * @param dsCB          Danh sách chuyến bay
+ * @param headCB       Danh sách chuyến bay
  * @param seatNumber    Số thứ tự ghế cần hủy (tính từ 1 đến n)
  * @return              True nếu hủy thành công, false nếu ghế đó vốn dĩ đang trống hoặc chuyến bay không còn cho phép hủy
  */
-bool Cancel_Ticket(CB* &dsCB, const char* maCB , int seatNumber);
+bool Cancel_Ticket(CB* &headCB, const char* maCB , int seatNumber);
 
 // -- CÂU E: IN DANH SÁCH HÀNH KHÁCH THEO MÃ CB --
 
 /**
  * @brief           Thu thập thông tin cá nhân của toàn bộ hành khách trên 1 chuyến bay
- * @param dsCB      Danh sách chuyến bay
+ * @param headCB   Danh sách chuyến bay
  * @param dsHK      Gốc cây BST hành khách (danh sách hành khách)
  * @param maCB      Mã chuyến bay cần lấy danh sách
  * @param sldsHK    Tham chiếu để trả về số lượng hành khách thực tế
  * @return          Trả về mảng con trỏ hành khách
  * @note            Trả về NULL nếu không thấy chuyến bay hoặc không có khách. UI phải delete[] sau khi dùng.
  */
-HK** Get_DSHKCB(CB* const dsCB, HK* const dsHK,const char* maCB, int &sldsHK);
+HK** Get_DSHKCB(CB* const headCB, HK* const dsHK,const char* maCB, int &sldsHK);
 
 // -- CÂU F: TRA CỨU CÁC CHUYẾN BAY DỰA VÀO NGÀY VÀ NƠI ĐẾN --
 
 /**
  * @brief           Tìm thông tin chuyến bay theo ngày và địa chỉ
- * @param dsCB      Sách liên kết đơn của các chuyến bay 
+ * @param headCB    Sách liên kết đơn của các chuyến bay 
  * @param date      Định dạng dd/mm/yyyy
  * @param address   Nơi đến XXXXX
  * @param sldsCB    Logic sẽ đếm và ghi số lượng danh sách chuyến bay vào đây trước khi return.
  * @return          Danh sách chuyến bay theo ngày và địa chỉ (mảng con trỏ)
  * @note            UI có trách nhiệm delete[] mảng này sau khi in xong.
  */
-CB** Search_CB(CB* const dsCB ,const DateTime& date,const char* address, int& sldsCB);
+CB** Search_CB(CB* const headCB,const DateTime& date,const char* address, int& sldsCB);
 
 // -- CÂU G: IN DANH SÁCH VÉ TRỐNG --
 
 /**
  * @brief           Lấy danh sách các số ghế còn trống của MỘT chuyến bay X 
- * @param dsCB      sách liên kết đơn của các chuyến bay 
+ * @param headCB    Sách liên kết đơn của các chuyến bay 
  * @param maCB      Logic sẽ đếm và ghi số lượng danh sách vé trống vào đây trước khi return.
  * @param sldsVT    Logic sẽ đếm và ghi số lượng danh sách chuyến bay vào đây trước khi return.
  * @return          Danh sách vé trống
  * @note            UI có trách nhiệm delete[] mảng này sau khi in xong để tránh rò rỉ bộ nhớ.
  */
-int* Get_Empty_Seats(CB* const dsCB ,const char* maCB, int &sldsVT);
+int* Get_Empty_Seats(CB* const headCB, const char* maCB, int &sldsVT);
 
 // -- CÂU H: THỐNG KÊ LƯỢT BAY --
 
@@ -255,14 +248,14 @@ int* Get_Empty_Seats(CB* const dsCB ,const char* maCB, int &sldsVT);
 */
 
 /**
- * @brief       Thống kê số lần thực hiện chuyến bay của từng máy bay có trong hệ thống
- * @param dsCB  Đầu danh sách liên kết đơn các chuyến bay
- * @param count Tham chiếu để Logic trả về số lượng máy bay tìm thấy (lượt bay > 0)
- * @return      Trả về mảng MB_Stat chứa Số hiệu máy bay và Số lượt bay
- * @note        Thứ tự mảng: Sắp xếp giảm dần theo số lượt thực hiện chuyến bay.
- * @note        UI có trách nhiệm delete[] mảng này sau khi in xong.
+ * @brief           Thống kê số lần thực hiện chuyến bay của từng máy bay có trong hệ thống
+ * @param headCB    Đầu danh sách liên kết đơn các chuyến bay
+ * @param count     Tham chiếu để Logic trả về số lượng máy bay tìm thấy (lượt bay > 0)
+ * @return          Trả về mảng MB_Stat chứa Số hiệu máy bay và Số lượt bay
+ * @note            Thứ tự mảng: Sắp xếp giảm dần theo số lượt thực hiện chuyến bay.
+ * @note            UI có trách nhiệm delete[] mảng này sau khi in xong.
  */
-MB_Stat* Get_Flight_Statistics(CB* const dsCB, int& count);
+MB_Stat* Get_Flight_Statistics(CB* const headCB, int& count);
 
 
 #endif
