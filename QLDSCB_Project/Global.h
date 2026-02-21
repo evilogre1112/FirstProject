@@ -46,6 +46,16 @@ struct MB_Stat {
 struct DateTime{
     short hh, mm, dd, mt, yy;
     DateTime();
+    short get_hh();
+    short get_mm();
+    short get_dd();
+    short get_mt();
+    short get_yy();
+    bool set_hh(short h);
+    bool set_mm(short m);
+    bool set_dd(short d);
+    bool set_mt(short t);
+    bool set_yy(short y);
     void kiemtraDate();
 };
 
@@ -75,14 +85,21 @@ struct HK{
     char* cmnd;                         // cmnd có 13 kí tự
     char* ho_ten_full;
     HK *trai, *phai;                  
-    HK();                             
-    void ho_ten();                 // kt chuỗi có số ko cho so bat nhap lai
-    void nhap_cmnd();              
+    HK();
+    ~HK();                             
+    bool set_ho_ten();                 // kt chuỗi có số ko cho so bat nhap lai
+    char* get_ho();                   // trả về tên đệm vầ họ
+    bool set_cmnd();                  // nhap cmnd
+    char* get_cmnd();                 // trả về cmnd
+    char* get_ten();
+    bool kts();                     // có chữ là false
+    bool ktc();                     // có số là false
 };  
 
 struct listHK{
     HK *goc ;
     int slHK;
     listHK();
+
 };
 #endif
