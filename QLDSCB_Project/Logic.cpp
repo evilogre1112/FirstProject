@@ -17,43 +17,42 @@ int ss_str(char* const a, char* const b) {
 
 // May Bay
 // Hàm Đọc và Ghi file
-bool Read_MB(ifstream& read, MB* dsMB[], int slMB);
-bool Save_MB(ofstream& save, MB* dsMB[], int slMB);
+bool Save_MB(ofstream& save, listMB& dsMB);
 
 // Tiện ích sắp xếp
-void Merge_MB(MB* dsMB[], int l,int m, int r) {
+void Merge_MB(listMB& dsMB, int l,int m, int r) {
     int x_size = m - l + 1; int y_size = r - m;
     MB** x = new MB*[x_size]; MB** y = new MB*[y_size];
     int nx = l; int ny = m + 1;
     for (int i = 0; i < x_size; i++) {
-        x[i] = dsMB[nx];
+        x[i] = dsMB.list[nx];
         nx++;
     }
     for (int j = 0; j < y_size; j++) {
-        y[j] = dsMB[ny];
+        y[j] = dsMB.list[ny];
         ny++;
     }
     int i = 0; int j = 0;
     while (i < x_size && j < y_size) {
         if (ss_str(x[i]->soHieuMB, y[j]->soHieuMB) != 1) {
-            dsMB[l] = x[i];
+            dsMB.list[l] = x[i];
             i++;
         }
         else {
-            dsMB[l] = y[j];
+            dsMB.list[l] = y[j];
             j++;
         }
         l++;
     }
     if (i == x_size) {
         for (int s = j; s < y_size; s++) {
-            dsMB[l] = y[s];
+            dsMB.list[l] = y[s];
             l++;
         }
     }
     else {
         for (int s = i; s < x_size; s++) {
-            dsMB[l] = x[s];
+            dsMB.list[l] = x[s];
             l++;
         }
     }
@@ -61,7 +60,7 @@ void Merge_MB(MB* dsMB[], int l,int m, int r) {
     delete[] y;
 }
 // Merge sort MB
-void Sort_MB(MB* dsMB[], int l, int r) {
+void Sort_MB(listMB& dsMB, int l, int r) {
     if (l >= r) return;
     int m = (r + l) / 2;
     Sort_MB(dsMB, l, m);
@@ -70,11 +69,11 @@ void Sort_MB(MB* dsMB[], int l, int r) {
 }
 
 // Tìm vị trí chèn
-int find_insert_pos(MB *const dsMB[], int slMB, char* const soHieuMB) {
-    int l = 0, r = slMB - 1;
+int find_insert_pos(listMB& dsMB, char* const soHieuMB) {
+    int l = 0, r = dsMB.slMB - 1;
     int m = (l + r) / 2;
     while (l <= r) {
-        int result = ss_str(dsMB[m]->soHieuMB, soHieuMB);
+        int result = ss_str(dsMB.list[m]->soHieuMB, soHieuMB);
         if (result == 0) return m;
         else if (result == 1) r = m - 1;
         else l = m + 1;
@@ -83,11 +82,11 @@ int find_insert_pos(MB *const dsMB[], int slMB, char* const soHieuMB) {
     return l; // tra ve vi tri can chen
 }
 
-int Find_MB(MB *const dsMB[], int slMB, char* const soHieuMB) {
-    int l = 0, r = slMB - 1;
+int Find_MB(listMB& dsMB, char* const soHieuMB) {
+    int l = 0, r = dsMB.slMB - 1;
     int m = (l + r) / 2;
     while (l <= r) {
-        int result = ss_str(dsMB[m]->soHieuMB, soHieuMB);
+        int result = ss_str(dsMB.list[m]->soHieuMB, soHieuMB);
         if (result == 0) return m;
         else if (result == 1) r = m - 1;
         else l = m + 1;
@@ -96,56 +95,55 @@ int Find_MB(MB *const dsMB[], int slMB, char* const soHieuMB) {
     return -1; // not found
 }
 
-bool Add_MB(MB *dsMB[], int &slMB, MB *newMB) {
-    if (slMB >= 300) {
+bool Add_MB(listMB& dsMB, MB *newMB) {
+    if (dsMB.slMB >= 300) {
         return false;
     }
-    int index = find_insert_pos(dsMB, slMB, newMB->soHieuMB);
-    if (index == slMB) {
-        dsMB[index] = newMB;
-        slMB++;
+    int index = find_insert_pos(dsMB, newMB->soHieuMB);
+    if (index == dsMB.slMB) {
+        dsMB.list[index] = newMB;
+        dsMB.slMB++;
         return true;
     }
-    if (ss_str(dsMB[index]->soHieuMB, newMB->soHieuMB) == 0) {
+    if (ss_str(dsMB.list[index]->soHieuMB, newMB->soHieuMB) == 0) {
         return false;
     }
-    for (int i = slMB; i > index; i--) dsMB[i] = dsMB[i - 1];
-    dsMB[index] = newMB;
-    slMB++;
+    for (int i = dsMB.slMB; i > index; i--) dsMB.list[i] = dsMB.list[i - 1];
+    dsMB.list[index] = newMB;
+    dsMB.slMB++;
     return true;
 }
 
-bool Del_MB(MB *dsMB[], int &slMB, char* const soHieuMB) {
-    int index = Find_MB(dsMB, slMB, soHieuMB);
+bool Del_MB(listMB& dsMB, char* const soHieuMB) {
+    int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false;
-    delete dsMB[index];
-    for (int i = index; i < slMB - 1; i++) {
-        dsMB[i] = dsMB[i + 1];
+    delete dsMB.list[index];
+    for (int i = index; i < dsMB.slMB - 1; i++) {
+        dsMB.list[i] = dsMB.list[i + 1];
     }
-    dsMB[slMB - 1] = NULL;
-    slMB--;
+    dsMB.list[dsMB.slMB - 1] = NULL;
+    dsMB.slMB--;
     return true;
 }
 
-bool Edit_MB(MB *dsMB[], int slMB, char* const soHieuMB, MB *infoUpdate) {
-    int index = Find_MB(dsMB, slMB, soHieuMB);
+bool Edit_MB(listMB& dsMB, char* const soHieuMB, MB *infoUpdate) {
+    int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false;
-    if (ss_str(dsMB[index]->soHieuMB, infoUpdate->soHieuMB) == 0) {
-        *dsMB[index] = *infoUpdate;
+    if (ss_str(dsMB.list[index]->soHieuMB, infoUpdate->soHieuMB) == 0) {
+        *dsMB.list[index] = *infoUpdate;
         return true;
     }
-    int exist = Find_MB(dsMB, slMB, infoUpdate->soHieuMB);
+    int exist = Find_MB(dsMB, infoUpdate->soHieuMB);
     if (exist != -1) return false;
     MB* newMB = new MB();
     *newMB = *infoUpdate;
-    Del_MB(dsMB, slMB, soHieuMB);
-    Add_MB(dsMB, slMB, newMB);
+    Del_MB(dsMB, soHieuMB);
+    Add_MB(dsMB, newMB);
     return true;
 }
 
 // Chuyen Bay
-bool Add_CB(CB *&dsCB, CB *newCB)
-{
+bool Add_CB(listCB &dsCB, CB *newCB) {
     return false;
 }
 

@@ -17,11 +17,30 @@
 
 using namespace std;
 
-// --- BIẾN TOÀN CỤC (EXTERN) ---
-extern int slMB;    // Số lượng máy bay hiện có
-extern int sldsHK;  // Số lượng hành khách (dùng để thống kê)
-extern int sldsCB;  // Số lượng chuyến bay
-extern int sldsVT;  // Số lượng vé trống (dùng tạm trong các hàm tra cứu)
+const int slMB_max = 300;
+const int soHieuMB_max = 15;
+const int loaiMB_max = 40;
+
+struct MB {
+    char soHieuMB[soHieuMB_max];
+    char loaiMB[loaiMB_max];
+    int socho;
+    MB() {
+        strcpy(soHieuMB,"");
+        strcpy(loaiMB,"");
+        socho = 0;
+    }
+};
+
+struct listMB {
+    int slMB;
+    MB* list[slMB_max];
+    listMB() {
+        slMB = 0;
+        for (int i = 0; i < slMB_max; i++)
+            list[i] = NULL;
+    }
+};
 
 
 #endif
