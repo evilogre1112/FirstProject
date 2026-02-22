@@ -51,12 +51,11 @@ struct DateTime{
     short get_dd();
     short get_mt();
     short get_yy();
-    bool set_hh(short h);
+    bool set_hh(short h);           
     bool set_mm(short m);
     bool set_dd(short d);
     bool set_mt(short t);
     bool set_yy(short y);
-    void kiemtraDate();
 };
 
 struct CB{
@@ -65,35 +64,36 @@ struct CB{
     char* sbDich;                     // sân bay đích
     int trangThai;                    // 0 hủy chuyến, 1 còn vé, 2 hết vé, 3 hoàn tất
     char soHieuMB[soHieuMB_max];      // số hiệu máy bay
-    int socho;
+    int socho;                        // số chỗ trên máy bay
     char **DSV;                       // mảng con trỏ chứa cmnd chảu khách hàng
-    CB* next;                         // chứa địa chỉ contror tiếp theo
+    CB* next;                         // chứa địa chỉ contro tiếp theo
+    CB();                             // ko tham số
     CB(int sc);
+
     ~CB();
 };
 
 struct listCB{
     int slCB;                         // số lượng chuyến bay
-    CB* CBdau;                        // chuyến bay dầu tiên
+    CB* head;                        // chuyến bay dầu tiên
     listCB();
 };
 
-// --- cấu trúc hành khách ---
+// --- cấu trúc hành khách cây nhị phân ---
 struct HK{
-    char* ho;                         // họ và tên đệm chứa 40 kí tự
-    char* ten;                        // ten cho 15 ki tu
+    char* ho;                           // họ và tên đệm chứa 40 kí tự
+    char* ten;                          // ten cho 15 ki tu
     char* cmnd;                         // cmnd có 13 kí tự
-    char* ho_ten_full;
-    HK *trai, *phai;                  
+    bool gioi_tinh;                     // true = gái   ;false = trai
+    HK *left, *right;                  
     HK();
     ~HK();                             
-    bool set_ho_ten();                 // kt chuỗi có số ko cho so bat nhap lai
+    bool set_ho(char *new_ho);          // true thì đã cập nhật tên họ mới 
+    bool set_ten(char *new_ten);
     char* get_ho();                   // trả về tên đệm vầ họ
-    bool set_cmnd();                  // nhap cmnd
+    bool set_cmnd();                  // nhâp cmnd
     char* get_cmnd();                 // trả về cmnd
     char* get_ten();
-    bool kts();                     // có chữ là false
-    bool ktc();                     // có số là false
 };  
 
 struct listHK{

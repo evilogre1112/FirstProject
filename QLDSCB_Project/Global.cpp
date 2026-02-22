@@ -78,7 +78,6 @@ bool DateTime::set_dd(short d){
     // ---- cấu trúc chuyến bay ----
 
 CB::CB(int sc) {                      // truyền tham số socho 
-        next = NULL;
         maCB[0] = '\0';
         trangThai = 1;
         soHieuMB[0] = '\0';
@@ -94,7 +93,11 @@ CB::CB(int sc) {                      // truyền tham số socho
                 DSV[i][0] = '\0';
             }
         } else { DSV=NULL;}
-    }    
+    }
+CB::CB(){
+    next = NULL;
+    socho = 0;
+}    
 
     CB::~CB(){
         if(sbDich != NULL) delete[] sbDich;
@@ -108,7 +111,7 @@ CB::CB(int sc) {                      // truyền tham số socho
     }
     listCB::listCB(){
         slCB = 0;
-        CBdau = NULL;
+        head = NULL;
     }
 
     // ---- cấu trúc hành khách ----//
@@ -116,48 +119,31 @@ CB::CB(int sc) {                      // truyền tham số socho
         ho = new char[41];
         ten = new char[16];
         cmnd = new char[14];
-        ho_ten_full = new char[61];
-        trai = phai = NULL;
-    }
-    
-    bool HK::ktc(){
-        int n = strlen(ho_ten_full);
-        for(int i = 0; i < n; i++)
-        if(ho_ten_full[i] >= '0' && ho_ten_full[i] <= '9') return false;
-        return true;
-    } 
-
-    bool HK::kts(){
-        int n = strlen(cmnd);
-        for(int i = 0; i < n; i++)
-        if(cmnd[i] < '0' || cmnd[i] > '9') return false;
-        return true;
+        left = right = NULL;
     }
 
-    bool HK::set_ho_ten(){
-        cout<<"nhap ho va ten : ";
-        cin.getline(ho_ten_full,60);
-        if(ktc()){                     // có số là false
-            // tách tên và họ ra
-            int n = strlen(ho_ten_full);
-            int pos = -1;
-            for(pos=n-1;pos >= 0 && ho_ten_full[pos] != ' ';pos--);
-            if(pos < 0){
-                strcpy(ho,"");
-                strcpy(ten,ho_ten_full);
-            }else{
-                strcpy(ten, ho_ten_full + pos + 1);     //con tro chuoi
-                strncpy(ho, ho_ten_full, pos);
-                ho[pos] = '\0';
-            }
-            return true;
-        }     
-        return false;                    
-    }
     
     bool HK::set_cmnd(){
         cin.getline(cmnd,14);
-        return kts();            
+        int n = strlen(cmnd);
+        for(int i = 0; i < n; i++)
+        if(cmnd[i] < '0' || cmnd[i] > '9') return false;
+        return true;           
+    }
+
+    bool HK::set_ho(char *new_ho){
+        int n = strlen(new_ho);
+        for(int i = 0; i < n; i++)
+        if(new_ho[i] >= '0' && new_ho[i] <= '9') return false;
+        ho = new_ho;
+        return true;
+    }
+    bool HK::set_ten(char *new_ten){
+        int n = strlen(new_ten);
+        for(int i = 0; i < n; i++)
+        if(new_ten[i] >= '0' && new_ten[i] <= '9') return false;
+        ten = new_ten;
+        return true;
     }
 
     char* HK::get_cmnd(){
@@ -176,7 +162,6 @@ CB::CB(int sc) {                      // truyền tham số socho
         delete[] ho;
         delete[] ten;
         delete[] cmnd;
-        delete[] ho_ten_full;
     }
 
 
