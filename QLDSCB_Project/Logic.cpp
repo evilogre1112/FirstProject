@@ -1,4 +1,7 @@
 #include "Logic.h"
+#include "Global.h"
+#include <iostream>
+#include <fstream>
 
 // Một số tiện ích
 int ss_str(char* const a, char* const b) {
