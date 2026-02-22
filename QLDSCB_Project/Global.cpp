@@ -81,7 +81,7 @@ CB::CB(int sc) {                      // truyền tham số socho
         maCB[0] = '\0';
         trangThai = 1;
         soHieuMB[0] = '\0';
-        DSV[0] = '\0';
+        DSV[0] = nullptr;
         socho = sc;
         sbDich = new char[50];        // độ dài tên 50 kí tự
         sbDich[0] = '\0';
