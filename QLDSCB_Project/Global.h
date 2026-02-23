@@ -38,24 +38,24 @@ struct listMB {
 };
 
 struct MB_Stat {
-        char soHieuMB[soHieuMB_max];  // Lấy từ cấu trúc Máy bay
-        int SLB;                      // Biến đếm số lần xuất hiện trong DSCB
-    };
+    char soHieuMB[soHieuMB_max];  // Lấy từ cấu trúc Máy bay
+    int SLB;                      // Biến đếm số lần xuất hiện trong DSCB
+};
 
 // --- cấu trúc chuyến bay ---
 struct DateTime{
-    short hh, mm, dd, mt, yy;
+    int hh, mm, dd, mt, yy;
     DateTime();
-    short get_hh();
-    short get_mm();
-    short get_dd();
-    short get_mt();
-    short get_yy();
-    bool set_hh(short h);           
-    bool set_mm(short m);
-    bool set_dd(short d);
-    bool set_mt(short t);
-    bool set_yy(short y);
+    int get_hh();
+    int get_mm();
+    int get_dd();
+    int get_mt();
+    int get_yy();
+    bool set_hh(int h);
+    bool set_mm(int m);
+    bool set_dd(int d);
+    bool set_mt(int t);
+    bool set_yy(int y);
 };
 
 struct CB{
@@ -69,7 +69,6 @@ struct CB{
     CB* next;                         // chứa địa chỉ contro tiếp theo
     CB();                             // ko tham số
     CB(int sc);
-
     ~CB();
 };
 
@@ -100,6 +99,5 @@ struct listHK{
     HK *goc ;
     int slHK;
     listHK();
-
 };
 #endif

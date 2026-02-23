@@ -1,71 +1,71 @@
 #include "Global.h"
 
 
-// ---- cấu trúc chuyến bay ----//
+// ---- cấu trúc máy bay ----//
  MB::MB() {
-        strcpy(soHieuMB,"");    // hàm này copy từ phía phải sang trái
-        strcpy(loaiMB,"");      // có cáh tương đương đó là cho phần [0]='\0';
-        socho = 0;
-    }
+    strcpy(soHieuMB,"");    // hàm này copy từ phía phải sang trái
+    strcpy(loaiMB,"");      // có cáh tương đương đó là cho phần [0]='\0';
+    socho = 0;
+}
 
 listMB::listMB() {
-        slMB = 0;
-        for (int i = 0; i < slMB_max; i++)
-            list[i] = NULL;
-    }
+    slMB = 0;
+    for (int i = 0; i < slMB_max; i++)
+        list[i] = NULL;
+}
 
 DateTime::DateTime (){
-        hh=12;
-        mm=00;
-        dd=1;
-        mt=1;
-        yy=2026;
-    }
+    hh=12;
+    mm=00;
+    dd=1;
+    mt=1;
+    yy=2026;
+}
 
-short DateTime::get_hh(){
+int DateTime::get_hh(){
         return hh;
 }
-short DateTime::get_mm(){
+int DateTime::get_mm(){
     return mm;
 }
-short DateTime::get_dd(){
+int DateTime::get_dd(){
         return dd;
 }
-short DateTime::get_mt(){
+int DateTime::get_mt(){
         return mt;
 }
-short DateTime::get_yy(){
+int DateTime::get_yy(){
         return yy;
 }
-bool DateTime::set_hh(short h){
+bool DateTime::set_hh(int h){
     if (h >= 0 && h <= 23) {
         hh = h;
         return true;
     }
     return false;
 }
-bool DateTime::set_mm(short m){
+bool DateTime::set_mm(int m){
     if (m >= 0 && m <= 59) {
         mm = m;
         return true;
     }
     return false;
 }
-bool DateTime::set_mt(short t){
+bool DateTime::set_mt(int t){
     if (t >= 1 && t <= 12) {
         mt = t;
         return true;
     }
     return false;
 }
-bool DateTime::set_yy(short y){
+bool DateTime::set_yy(int y){
     if (y >= 1900 && y <= 2100) { // Giới hạn năm hợp lý
         yy = y;
         return true;
     }
     return false;
 }
-bool DateTime::set_dd(short d){
+bool DateTime::set_dd(int d){
     short thang[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if (yy % 4==0 && yy % 100 == 0) thang[2]=29;
     if (d >= 1 && d <= thang[mt]) {
