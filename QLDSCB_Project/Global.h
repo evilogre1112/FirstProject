@@ -99,4 +99,6 @@ struct listHK{
     int slHK;
     listHK();
 };
+
+void ClearScreen();
 #endif

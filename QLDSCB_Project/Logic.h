@@ -3,6 +3,7 @@
 
 #include "Global.h"
 #include <string>
+
 // Các biến sau là biến toàn cục(extern) trong "Global.h"
 /**
  *  slMB số lượng máy bay

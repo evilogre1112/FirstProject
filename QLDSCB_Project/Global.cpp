@@ -170,3 +170,12 @@ CB::CB(){
         slHK = 0;
         goc = NULL;
     }
+
+void ClearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    // Các hệ điều hành dựa trên UNIX (Linux, macOS)
+    system("clear");
+#endif
+}
