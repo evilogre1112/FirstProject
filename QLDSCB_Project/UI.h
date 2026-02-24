@@ -7,6 +7,9 @@
 #include "Logic.h"
 using namespace std;
 extern int TotalWidth;
+extern string options_1[] ;
+extern string options_2[] ;
+extern string options_3[] ;
 #define boxWidth 60
 
 #define RESET       "\033[0m"
@@ -34,6 +37,7 @@ extern int TotalWidth;
 int GetTerminalWidth();
 int visualLength(const string& s);
 void PrintBox(string text,bool ABOVE , bool UNDER );
+void SubMenu(string title, string options[], int numOptions);
 void MainScreen();
 
 #endif
