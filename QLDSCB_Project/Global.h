@@ -14,14 +14,13 @@
 #include <ctime>
 #include <iomanip>
 #include <fstream>
-#include <conio.h>
 
 using namespace std;
 
 const int slMB_max = 300;
-const int soHieuMB_max = 15;
-const int loaiMB_max = 40;
-const int maCB_max= 15;
+const int soHieuMB_max = 16;
+const int loaiMB_max = 41;
+const int maCB_max= 16;
 
 // --- cấu trúc máy bay ---
 struct MB {

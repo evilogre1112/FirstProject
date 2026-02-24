@@ -107,6 +107,7 @@ CB::CB(){
                 delete[] DSV[i];        //giải phóng chuỗi Cmnd
             }
             delete[] DSV;
+            DSV = NULL;
         }
     }
     listCB::listCB(){
