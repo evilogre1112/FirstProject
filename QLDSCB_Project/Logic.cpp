@@ -73,7 +73,7 @@ void Sort_MB(listMB& dsMB, int l, int r) {
 }
 
 // Tìm vị trí chèn
-int find_insert_posMB(listMB& dsMB, char* const soHieuMB) {
+int find_insert_pos(listMB& dsMB, char* const soHieuMB) {
     int l = 0, r = dsMB.slMB - 1;
     int m = (l + r) / 2;
     while (l <= r) {
@@ -103,7 +103,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
     if (dsMB.slMB >= 300) {
         return false;
     }
-    int index = find_insert_posMB(dsMB, newMB->soHieuMB);
+    int index = find_insert_pos(dsMB, newMB->soHieuMB);
     if (index == dsMB.slMB) {
         dsMB.list[index] = newMB;
         dsMB.slMB++;
@@ -147,122 +147,13 @@ bool Edit_MB(listMB& dsMB, char* const soHieuMB, MB *infoUpdate) {
 }
 
 // Chuyen Bay
-
-void Swap_CB(CB* &CB1, CB* &CB2) {
-    
-    char tmp_maCB[maCB_max];
-    strcpy(tmp_maCB, CB1->maCB);
-    strcpy(CB1->maCB, CB2->maCB);
-    strcpy(CB2->maCB, tmp_maCB);
-
-    DateTime tmpDate = CB1->ngayKH;
-    CB1->ngayKH = CB2->ngayKH;
-    CB2->ngayKH = tmpDate;
-   
-    char* tmpSB = CB1->sbDich;
-    CB1->sbDich = CB2->sbDich;
-    CB2->sbDich = tmpSB;
-  
-    int tmpTrangThai = CB1->trangThai;
-    CB1->trangThai = CB2->trangThai;
-    CB2->trangThai = tmpTrangThai;
-   
-    char tmp_soHieu[soHieuMB_max];
-    strcpy(tmp_soHieu, CB1->soHieuMB);
-    strcpy(CB1->soHieuMB, CB2->soHieuMB);
-    strcpy(CB2->soHieuMB, tmp_soHieu);
-  
-    int tmpSoCho = CB1->socho;
-    CB1->socho = CB2->socho;
-    CB2->socho = tmpSoCho;
-
-    char** tmpDSV = CB1->DSV;
-    CB1->DSV = CB2->DSV;
-    CB2->DSV = tmpDSV;
+bool Add_CB(listCB &dsCB, CB *newCB) {
+    return false;
 }
 
-void Sort_CB(listCB &dsCB) {
-    CB* temp1 = dsCB.head;
-    if (temp1 == NULL) return;
-    CB* temp2;
-    while (temp1 != NULL) {
-        temp2 = temp1->next;
-        while (temp2 != NULL) {
-            if (ss_str(temp1->maCB, temp2->maCB) == 1) {
-                Swap_CB(temp1, temp2);
-            }
-            temp2 = temp2->next;
-        }
-        temp1 = temp1->next;
-    }
-}
-
-CB *Find_CB(listCB &dsCB, char* const maCB) {
-    CB* temp = dsCB.head;
-    if (temp == NULL) return NULL;
-    while(temp != NULL) {
-        if (ss_str(temp->maCB, maCB) == 0) return temp;
-        if (ss_str(temp->maCB, maCB) == 1) return NULL;
-        temp = temp->next;
-    }
-    return NULL;
-}
-
-CB* find_insert_posCB(listCB &dsCB, char* const maCB) {
-    if (dsCB.head == NULL) return NULL;
-    if (ss_str(dsCB.head->maCB, maCB) == 1) return NULL;
-    if (ss_str(dsCB.head->maCB, maCB) == 0) return dsCB.head;
-    CB* temp1 = dsCB.head;
-    CB* temp2 = dsCB.head->next;
-    while (temp1 != NULL) {
-        if (temp2 == NULL) return temp1;
-        if (ss_str(temp2->maCB, maCB) == 0) return temp2;
-        if (ss_str(temp2->maCB, maCB) == 1) return temp1;
-        temp1 = temp1->next;
-        temp2 = temp2->next;
-    }
-    return NULL;
-}
-
-CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB) {
-    CB* temp = dsCB.head;
-    while(temp != NULL) {
-        if (ss_str(temp->soHieuMB, soHieuMB) == 0) {
-            if (temp->trangThai == 1 || temp->trangThai == 2) return temp;
-        }
-        temp = temp->next;
-    }
-    return NULL;
-}
-
-bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
-    if (Find_Active_MB(dsCB, newCB->soHieuMB) != NULL) return false;
-    if (Find_MB(dsMB, newCB->soHieuMB) == -1) return false;
-    CB* temp = find_insert_posCB(dsCB, newCB->maCB);
-    if (temp == NULL && dsCB.head == NULL) {
-        dsCB.head = newCB;
-        dsCB.slCB++;
-        return true;
-    }
-    if (temp == NULL && dsCB.head != NULL) {
-        newCB->next = dsCB.head;
-        dsCB.head = newCB;
-        dsCB.slCB++;
-        return true;
-    }
-    if (ss_str(temp->maCB, newCB->maCB) == 0) return false;
-    CB* temp2 = temp->next;
-    temp->next = newCB;
-    newCB->next = temp2;
-    dsCB.slCB++;
-    return true;
-}
-
-bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime &newTime) {
-    CB* temp = Find_CB(dsCB, maCB);
-    if (temp == NULL) return false;
-    temp->ngayKH = newTime;
-    return true;
+bool Update_Time_CB(CB *dsCB, const char* maCB, const DateTime &newTime)
+{
+    return false;
 }
 
 bool Cancel_CB(CB *&dsCB, const char* maCB)
@@ -279,6 +170,10 @@ void Init_Tickets(CB *newCB, int soCho)
 {
 }
 
+CB *Find_CB(CB *const dsCB, const char* maCB)
+{
+    return nullptr;
+}
 
 HK *Find_HK(CB *const dsCB, HK *const dsHK, const char* maCB, const char* cmnd)
 {
