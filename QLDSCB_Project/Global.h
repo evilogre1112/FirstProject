@@ -14,7 +14,11 @@
 #include <ctime>
 #include <iomanip>
 #include <fstream>
-#include <conio.h>
+
+#ifdef _WIN32
+    #define WIN32_LEAN_AND_MEAN
+    #include <conio.h>
+#endif
 
 using namespace std;
 
@@ -44,13 +48,13 @@ struct MB_Stat {
 
 // --- cấu trúc chuyến bay ---
 struct DateTime{
-    short hh, mm, dd, mt, yy;
+    int hh, mm, dd, mt, yy;
     DateTime();
-    short get_hh();
-    short get_mm();
-    short get_dd();
-    short get_mt();
-    short get_yy();
+    int get_hh();
+    int get_mm();
+    int get_dd();
+    int get_mt();
+    int get_yy();
     bool set_hh(short h);           
     bool set_mm(short m);
     bool set_dd(short d);
@@ -102,4 +106,6 @@ struct listHK{
     listHK();
 
 };
+
+void ClearScreen();
 #endif

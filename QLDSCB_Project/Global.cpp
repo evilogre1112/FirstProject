@@ -1,6 +1,5 @@
 #include "Global.h"
 
-
 // ---- cấu trúc chuyến bay ----//
  MB::MB() {
         strcpy(soHieuMB,"");    // hàm này copy từ phía phải sang trái
@@ -22,19 +21,19 @@ DateTime::DateTime (){
         yy=2026;
     }
 
-short DateTime::get_hh(){
+int DateTime::get_hh(){
         return hh;
 }
-short DateTime::get_mm(){
+int DateTime::get_mm(){
     return mm;
 }
-short DateTime::get_dd(){
+int DateTime::get_dd(){
         return dd;
 }
-short DateTime::get_mt(){
+int DateTime::get_mt(){
         return mt;
 }
-short DateTime::get_yy(){
+int DateTime::get_yy(){
         return yy;
 }
 bool DateTime::set_hh(short h){
@@ -169,3 +168,12 @@ CB::CB(){
         slHK = 0;
         goc = NULL;
     }
+
+void ClearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    // Các hệ điều hành dựa trên UNIX (Linux, macOS)
+    system("clear");
+#endif
+}
