@@ -47,7 +47,7 @@ void Sort_MB(listMB& dsMB, int l, int r);
  * @param soHieuMB số hiệu máy bay cần tìm vị trí chèn
  * @return   trả về vị trí chính xác cần chèn để chèn MB có soHieuMB
  */
-int find_insert_pos(listMB& dsMB, char* const soHieuMB);
+int find_insert_posMB(listMB& dsMB, char* const soHieuMB);
 
 /**
  * @brief           tìm máy bay X trong danh sách máy bay
@@ -87,13 +87,52 @@ bool Edit_MB(listMB& dsMB, char* const soHieuMB , MB* infoUpdate);
 // Thao tác trên DSCB
 // CB = type của 1 chuyến bay
 
+// LƯU Ý :: CÁC HÀM CHUYẾN BAY ĐÃ ĐƯỢC TỐI ƯU SẴN, HÃY ĐẢM BẢO KHI SỬ DỤNG, DANH SÁCH CHUYẾN BAY ĐÃ ĐƯỢC SẮP XẾP THEO maCB. DANH SÁCH CHUYẾN BAY CHƯA ĐƯỢC SẮP XẾP SẼ CHO RA KẾT QUẢ SAI Ở MỌI HÀM.
+
+/**
+ * @brief         Swap data của 2 CB
+ * @param CB1               CB thứ 1
+ * @param CB2               CB thứ 2
+*/
+void Swap_CB(CB* &CB1, CB* &CB2);
+
+/**
+ * @brief         Sắp xếp listCB theo thứ tự maCB tăng dần
+ * @param dsCB         Danh sách chuyến bay
+*/
+void Sort_CB(listCB &dsCB);
+
+/**
+ * @brief       Tìm chuyến bay trong DSCB.
+ * @param dsCB  Danh sách chuyến bay
+ * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm.
+ * @return      Địa chỉ của Node chuyến bay nếu thấy, ngược lại trả về NULL
+*/
+CB* Find_CB(listCB &dsCB, char* const maCB);
+
+/**
+ * @brief       Tìm vị trí chèn chuyến bay trong DSCB đã được sắp xếp theo mã CB.
+ * @param dsCB  Danh sách chuyến bay
+ * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm.
+ * @return      Địa chỉ của CB trước vị trí chèn cần chèn
+*/
+CB* find_insert_posCB(listCB &dsCB, char* const maCB);
+
+/**
+ * @brief       Tìm soHieuMB trong DSCB để kiểm tra xem MB do có đang còn hoạt động hay không.
+ * @param dsCB  Danh sách chuyến bay
+ * @param soHieuMB  Chuỗi C15 chứa mã hiệu máy bay cần tìm.
+ * @return      Địa chỉ của Node chuyến bay nếu thấy, ngược lại trả về NULL
+*/
+CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB);
+
 /**
  * @brief           Thêm 1 chuyến bay mới vào danh sách liên kết đơn
  * @param dsCB      Danh sách chuyến bay
  * @param newCB     Con trỏ trỏ đến node chuyến bay mới đã được cấp phát
  * @return          true nếu thêm thành công, false nếu trùng mã chuyến bay
  */
-bool Add_CB(CB* &dsCB, CB* newCB);
+bool Add_CB(listCB &dsCB, listMB &dsMB, CB* newCB);
 
 /**
  * @brief           Hiệu chỉnh ngày giờ khởi hành của một chuyến bay
@@ -102,7 +141,7 @@ bool Add_CB(CB* &dsCB, CB* newCB);
  * @param newTime   Cấu trúc chứa ngày giờ mới
  * @return          true nếu tìm thấy và sửa thành công
  */
-bool Update_Time_CB(CB* dsCB, const string& maCB, const DateTime& newTime);
+bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime& newTime);
 
 /**
  * @brief       Huỷ 1 chuyến bay trong danh sách liên kết đơn
@@ -114,7 +153,7 @@ bool Cancel_CB(CB* &dsCB, const char* maCB);
 
 /**
  * @brief       Cho biết trạng thái của chuyến bay trong DSCB.
- * @param dsCb  Danh sách chuyến bay
+ * @param dsCB  Danh sách chuyến bay
  * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm để trả về trạng thái
  * @return      Trạng thái chuyến bay:
  *                  1: Còn vé
@@ -132,13 +171,7 @@ bool Cancel_CB(CB* &dsCB, const char* maCB);
  */
 void Init_Tickets(CB* newCB, int soCho);
 
-/**
- * @brief       Tìm chuyến bay trong DSCB.
- * @param dsCB  Danh sách chuyến bay
- * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm.
- * @return      Địa chỉ của Node chuyến bay nếu thấy, ngược lại trả về NULL
-*/
-CB* Find_CB(CB* const dsCB,const char* maCB);
+
 
 // --- CÂU C: ĐẶT VÉ ---
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)
@@ -147,7 +180,7 @@ CB* Find_CB(CB* const dsCB,const char* maCB);
  * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
  * @param dsCB  danh sách chuyến bay
  * @param dsHK  Danh sách hành khách tổng quát (Cây BST)
- * @param CMND  Số chứng minh nhân dân của khách cần tìm
+ * @param cmnd Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
 HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
