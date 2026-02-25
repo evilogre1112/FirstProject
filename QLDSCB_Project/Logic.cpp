@@ -265,18 +265,21 @@ bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime &newTime) {
     return true;
 }
 
-bool Cancel_CB(CB *&dsCB, const char* maCB)
-{
-    return false;
+bool Cancel_CB(listCB &dsCB, char* const maCB) {
+    CB* temp = Find_CB(dsCB, maCB);
+    if (temp == NULL) return false;
+    temp->trangThai = 0;
+    return true;
 }
 
-int Status_CB(CB *dsCB, const char* maCB)
-{
-    return 0;
+int Status_CB(listCB &dsCB, char* const maCB) {
+    CB* temp = Find_CB(dsCB, maCB);
+    if (temp == NULL) return -1;
+    return temp->trangThai;
 }
 
-void Init_Tickets(CB *newCB, int soCho)
-{
+void Init_Tickets(CB *newCB, int soCho) {
+    newCB->DSV = new char*[soCho];
 }
 
 
