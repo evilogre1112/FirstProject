@@ -1,10 +1,12 @@
 {
 	"version": "2.0.0",
 	"tasks": [
+		
+			
 		{
 			"type": "cppbuild",
 			"label": "C/C++: g++.exe build active file",
-			"command": "C:\\mingw64\\bin\\g++.exe",
+			"command": "C:\\mingw64\\mingw64\\bin\\g++.exe",
 			"args": [
 				"-fdiagnostics-color=always",
 				"-g",
@@ -19,7 +21,7 @@
 				"$gcc"
 			],
 			"group": "build",
-			"detail": "compiler: C:\\mingw64\\bin\\g++.exe"
+			"detail": "compiler: C:\\mingw64\\mingw64\\bin\\g++.exe"
 		}
 	]
 }

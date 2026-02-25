@@ -34,7 +34,7 @@ short DateTime::get_dd(){
 short DateTime::get_mt(){
         return mt;
 }
-short DateTime::get_yy(){
+int DateTime::get_yy(){
         return yy;
 }
 bool DateTime::set_hh(short h){
@@ -58,7 +58,7 @@ bool DateTime::set_mt(short t){
     }
     return false;
 }
-bool DateTime::set_yy(short y){
+bool DateTime::set_yy(int y){
     if (y >= 1900 && y <= 2100) { // Giới hạn năm hợp lý
         yy = y;
         return true;
@@ -81,7 +81,6 @@ CB::CB(int sc) {                      // truyền tham số socho
         maCB[0] = '\0';
         trangThai = 1;
         soHieuMB[0] = '\0';
-        DSV[0] = '\0';
         socho = sc;
         sbDich = new char[50];        // độ dài tên 50 kí tự
         sbDich[0] = '\0';
@@ -89,7 +88,7 @@ CB::CB(int sc) {                      // truyền tham số socho
             DSV= new char*[socho];
             for(int i=0;i<sc;i++)
             {
-                DSV[i] = new char[13];
+                DSV[i] = new char[cmnd_max];
                 DSV[i][0] = '\0';
             }
         } else { DSV=NULL;}
@@ -119,6 +118,7 @@ CB::CB(){
         ho = new char[41];
         ten = new char[16];
         cmnd = new char[14];
+        phai = false;
         left = right = NULL;
     }
 
@@ -158,6 +158,15 @@ CB::CB(){
     char* HK::get_ten(){
         return ten;
     }
+//--------------------------------------------------
+    bool HK::set_phai(bool gt){
+        phai = gt;
+        return true;
+    }
+    bool HK::get_phai(){
+        return phai;
+    }
+
     HK::~HK(){
         delete[] ho;
         delete[] ten;
@@ -168,4 +177,108 @@ CB::CB(){
     listHK::listHK(){
         slHK = 0;
         goc = NULL;
+    }
+
+    // ---- đọc file ----
+
+
+    bool set_CB(listCB &dsCB, const char *cb){
+        ifstream f(cb);                         // mở file cb
+        if( !f.is_open() ) return false;
+        dsCB.slCB=0;
+        dsCB.head = NULL;
+        CB* last = NULL;    // con trỏ lưu trữ địa chỉ cuối trước đó
+        
+        while(!f.eof()){
+            CB* tmp =new CB();
+            f.getline(tmp->maCB,maCB_max,' ');
+            //---doc ngay thang---
+            f >> tmp->ngayKH.hh;
+            f.ignore();
+            f >> tmp->ngayKH.mm;
+            f.ignore();
+            f >> tmp->ngayKH.dd;
+            f.ignore();
+            f >> tmp->ngayKH.mt;
+            f.ignore();
+            f >> tmp->ngayKH.yy;
+            f.ignore();
+            //---sân bay đích---
+            tmp->sbDich = new char[50];
+            f.getline(tmp->sbDich,50 ,' ');
+            //---trang thai---
+            f>>tmp->trangThai;
+            //---số hiệu máy bay---
+            f.getline(tmp->soHieuMB, soHieuMB_max,' ');
+            //---số chỗ ----
+            f >> tmp->socho;
+            //---mảng danh sách cmnd----
+            tmp->DSV = new char*[tmp->socho];
+            for(int i=0;i< tmp->socho;i++){
+                tmp->DSV[i] = new char[cmnd_max];
+                f >> tmp->DSV[i];
+            }
+            f.ignore();
+            //---con tro next---
+            tmp->next=NULL;
+            if(dsCB.head == NULL)
+            {
+                dsCB.head=tmp;
+                //nút dầu tiên
+            }else {
+                last->next=tmp;
+                // last này là nút trước đó đang nối với nút mới
+            }
+            last=tmp;
+            // cập nhật nut nới
+        }
+        f.close();
+        return true;
+    }
+
+    bool set_MB(listMB &dsMB, const char *mb){
+        ifstream f(mb);
+        if(!f.is_open()) return false;
+        dsMB.slMB=0;
+        while(dsMB.slMB < slMB_max&& !f.eof() ){//đọc đến cuối file
+            MB* tmp =new MB();                  //tạo ô nhớ chưaas MB
+            f.getline(tmp->soHieuMB,soHieuMB_max,' ');
+            // --- số hiệu máy bay----
+            if(strlen(tmp->soHieuMB)== 0||f.eof()){
+                delete tmp;
+                break;
+            }
+            //---loai mb----
+            f.getline(tmp->loaiMB, loaiMB_max,' ');
+            f>> tmp->socho;
+            // xóa dáu cách còn lại dấu chống dòng
+            f.ignore();
+            dsMB.list[dsMB.slMB]=tmp;
+            dsMB.slMB++;
+        }
+        f.close();
+        return true;
+    }
+
+    bool set_KH_tree(HK* & goc, HK * moi){
+
+    }
+    bool set_HK(listHK &dsHK, const char *hk){
+        ifstream f(hk);
+        if(!f.is_open()) return false;
+        dsHK.goc =NULL;         // cây rỗng
+        dsHK.slHK=0;
+        while(!f.eof()){
+            HK* tmp = new HK();
+            
+        }
+        return true;
+    }
+
+    bool set_file(listMB &dsMB, listCB &dsCB, listHK &dsHK, const char *mb, const char *cb, const char *hk ){
+        bool ok1 = set_MB(dsMB , mb);
+        bool ok2= set_CB(dsCB , cb);
+        bool ok3 = set_HK(dsHK , hk);
+
+        return ok1&&ok2&&ok3;
     }
