@@ -37,6 +37,37 @@ string options_2[] = {  "1. Đặt Vé",
 string options_3[] = {  "1. Tra Cứu Chuyến Bay", 
                         "2. Thống Kê Chuyến Bay",};
 
+NavKey GetNavKey() {
+    int key = _getch();
+
+#ifdef _WIN32
+    if(key == 224 || key == 0) {
+        key = _getch();
+        if(key == 72) return NAV_UP;
+        if(key == 80) return NAV_DOWN;
+    } 
+    else if(key == 13) return NAV_ENTER;
+    else if(key == 27) return NAV_ESC;
+
+#else
+    if (key == 27) { 
+        key = _getch();
+        if (key == 91) {
+            key = _getch();
+            if (key == 65) return NAV_UP;
+            if (key == 66) return NAV_DOWN;
+        } else {
+            return NAV_ESC;
+        }
+    }
+    else if(key == 10 || key == 13) return NAV_ENTER;
+    else if(key == 'w' || key == 'W') return NAV_UP;
+    else if(key == 's' || key == 'S') return NAV_DOWN;
+#endif
+
+    return NAV_UNKNOWN;
+}
+
 int GetTerminalWidth(){
       #ifdef _WIN32
         // Code đo chiều rộng dành cho Windows
@@ -67,7 +98,7 @@ int visualLength(const string& s) {
 
 void PrintBox(string text, bool ABOVE , bool UNDER ){
     //Tính khoảng trắng lề trái để đẩy toàn bộ khung ra giữa màn hình
-    int marginLeft = (TotalWidth - boxWidth)/2 ;
+    int marginLeft = (TotalWidth > boxWidth) ? (TotalWidth - boxWidth)/2 : 0;
     string margin = string(marginLeft,' ');   // Tạo chuỗi khoảng trắng đẩy lề
     string line = "";               // Tạo chuỗi đường kẻ ngang cho viền trên và dưới
     for(int i=0;i<boxWidth-2;i++) line += "═";
@@ -91,39 +122,35 @@ void SubMenu(string title, string options[], int numOptions){
         ClearScreen();
         PrintBox(title, true , false);
         for(int i = 0 ; i < numOptions;i++){
-            string s = (selectedIdx == i) ? string(BOLDYELLOW) + "▶ " + options[i] + " ◀" + string(RESET) : "  " + options[i];
+            string s = (selectedIdx == i) ? string(BG_BRIGHT_YELLOW) + string(TEXT_BLACK) + " ▶ " + options[i] + " ◀ " + string(RESET) : options[i];
             if(i != numOptions -1){
                 PrintBox(s,false,false);
             }else{
                 PrintBox(s,false,true);
             }
         }
-        cout << string((TotalWidth - boxWidth)/2, ' ') << string(GRAY) << "Dùng phím ↑/↓ để di chuyển || Enter để chọn || ESC để quay lại" << RESET << endl; 
-        int key = _getch();
-        if(key == 224){
-            key = _getch();
-            switch(key){
-                case 72: // Mũi tên Lên
-                    if(selectedIdx > 0) selectedIdx--;
-                    else selectedIdx = numOptions - 1; // Nhảy vòng xuống cuối
+        int innerWidth = (TotalWidth > boxWidth) ? (TotalWidth - boxWidth)/2 : 0; // Đảm bảo không chia cho 0
+        cout << string(innerWidth, ' ') << string(GRAY) << "Dùng phím ↑/↓ để di chuyển || Enter để chọn || ESC để quay lại" << RESET << endl; 
+        int key = GetNavKey();
+        switch(key){
+            case NAV_UP:
+                if(selectedIdx > 0) selectedIdx--;
+                else selectedIdx = numOptions - 1; // Nhảy vòng xuống cuối
                     break;
-                case 80: // Mũi tên Xuống
+                case NAV_DOWN: // Mũi tên Xuống
                     if(selectedIdx < numOptions - 1) selectedIdx++;
                     else selectedIdx = 0; // Nhảy vòng lên đầu
                     break;
-            }
-        }
-        else if(key == 13){ // Phím Enter
-            ClearScreen();
-            cout << "Bạn đã chọn: " << BOLDGREEN << options[selectedIdx] << RESET << endl;
-            cout << "\nNhấn phím bất kỳ để quay lại menu...";
-            _getch();
-        }
-        else if(key == 27){ // Phím ESC để quay lại
-            break;
+            case NAV_ENTER: // Phím Enter
+                ClearScreen();
+                cout << "Bạn đã chọn: " << BOLDGREEN << options[selectedIdx] << RESET << endl;
+                cout << "\nNhấn phím bất kỳ để quay lại menu...";
+                _getch();
+                break;
+            case NAV_ESC: // Phím ESC để quay lại
+                return;
         }
     }
-
 }
 
 void MainScreen(){
@@ -138,46 +165,44 @@ void MainScreen(){
         ClearScreen();
         PrintBox("QUẢN LÝ CHUYẾN BAY NỘI ĐỊA", true , false);
         for(int i = 0 ; i < numOptions;i++){
-            string s = (selectedIdx == i) ? string(BOLDYELLOW) + "▶ " + options[i] + " ◀" + string(RESET) : "  " + options[i];
+            string s = (selectedIdx == i) ? string(BG_BRIGHT_YELLOW) + string(TEXT_BLACK) + " ▶ " + options[i] + " ◀ " + string(RESET) : options[i];
             if(i != numOptions -1){
                 PrintBox(s,false,false);
             }else{
                 PrintBox(s,false,true);
             }
         }
-        cout << string((TotalWidth - boxWidth)/2, ' ') << string(GRAY) << "Dùng phím ↑/↓ để di chuyển || Enter để chọn || ESC để thoát" << RESET << endl; 
-        int key = _getch();
-        if(key == 224){
-            key = _getch();
-            switch(key){
-                case 72: // Mũi tên Lên
-                    if(selectedIdx > 0) selectedIdx--;
-                    else selectedIdx = numOptions - 1; // Nhảy vòng xuống cuối
-                    break;
-                case 80: // Mũi tên Xuống
-                    if(selectedIdx < numOptions - 1) selectedIdx++;
-                    else selectedIdx = 0; // Nhảy vòng lên đầu
-                    break;
-            }
-        }
-        else if(key == 13){ // Phím Enter
-            switch (selectedIdx)
-            {
-            case 0:
-                SubMenu("Quản Lý Hệ Thống", options_1, 3);
+        int innerWidth = (TotalWidth - boxWidth > 0)? (TotalWidth - boxWidth)/2 : 0; // Bỏ đi 2 ký tự viền
+        cout << string(innerWidth, ' ') << string(GRAY) << "Dùng phím ↑/↓ để di chuyển || Enter để chọn || ESC để thoát" << RESET << endl; 
+        int key = GetNavKey();
+        switch(key){
+            case NAV_UP:
+                if(selectedIdx > 0) selectedIdx--;
+                else selectedIdx = numOptions - 1; // Nhảy vòng xuống cuối
                 break;
-            case 1:
-                SubMenu("Quản Lý Vé", options_2, 2);
+            case NAV_DOWN:
+                if(selectedIdx < numOptions - 1) selectedIdx++;
+                else selectedIdx = 0; // Nhảy vòng lên đầu
                 break;
-            case 2:
-                SubMenu("Tra Cứu & Thống Kê", options_3, 2);
+            case NAV_ENTER:
+                switch (selectedIdx){
+                    case 0:
+                        SubMenu("Quản Lý Hệ Thống", options_1, 3);
+                        break;
+                    case 1:
+                        SubMenu("Quản Lý Vé", options_2, 2);
+                        break;
+                    case 2:
+                        SubMenu("Tra Cứu & Thống Kê", options_3, 2);
+                        break;
+                    case 4:
+                        return;
+                    default:
+                        break;
+                    }
                 break;
-            default:
-                break;
-            }
-        }
-        else if(key == 27){ // Phím ESC để thoát
-            break;
+            case NAV_ESC: // Phím ESC để thoát
+                return;
         }
 
     }
