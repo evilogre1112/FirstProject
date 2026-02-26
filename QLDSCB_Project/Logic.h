@@ -28,24 +28,24 @@ int ss_str(char* const a, char* const b); // so sánh 2 chuỗi
  * @brief       Lưu dsMB vào file văn bản txt
  * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
  * @param save  Tham chiếu biến ghi nội dung trong dsMB vào file txt
- * @return     true nếu ghi file thành công. false nếu ngược lại
+ * @return      true nếu ghi file thành công. false nếu ngược lại
  */
 bool Save_MB(ofstream& save, listMB& dsMB);
 
 /**
  * @brief       sắp xếp danh sách máy bay theo mã máy bay, sử dụng merge_sort
  * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
- * @param l  vị trí bắt đầu trong mảng muốn sắp xếp
- * @param r vị trí kết thúc trong mảng muốn sắp xếp ( Sắp xếp từ vị trí l đên r )
+ * @param l     vị trí bắt đầu trong mảng muốn sắp xếp
+ * @param r     vị trí kết thúc trong mảng muốn sắp xếp ( Sắp xếp từ vị trí l đên r )
  */
 void Merge_MB(listMB& dsMB, int l, int m, int r); // Hàm tiện ích, phục vụ cho merge_sort
 void Sort_MB(listMB& dsMB, int l, int r);
 
 /**
- * @brief       Tìm vị trí chính xác để chèn MB theo soHieuMB tăng dần
- * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
- * @param soHieuMB số hiệu máy bay cần tìm vị trí chèn
- * @return   trả về vị trí chính xác cần chèn để chèn MB có soHieuMB
+ * @brief           Tìm vị trí chính xác để chèn MB theo soHieuMB tăng dần
+ * @param dsMB      Mảng các con trỏ trỏ đến đối tượng máy bay
+ * @param soHieuMB  số hiệu máy bay cần tìm vị trí chèn
+ * @return          trả về vị trí chính xác cần chèn để chèn MB có soHieuMB
  */
 int find_insert_posMB(listMB& dsMB, char* const soHieuMB);
 
@@ -91,8 +91,8 @@ bool Edit_MB(listMB& dsMB, char* const soHieuMB , MB* infoUpdate);
 
 /**
  * @brief         Swap data của 2 CB
- * @param CB1               CB thứ 1
- * @param CB2               CB thứ 2
+ * @param CB1     CB thứ 1
+ * @param CB2     CB thứ 2
 */
 void Swap_CB(CB* &CB1, CB* &CB2);
 
@@ -119,10 +119,10 @@ CB* Find_CB(listCB &dsCB, char* const maCB);
 CB* find_insert_posCB(listCB &dsCB, char* const maCB);
 
 /**
- * @brief       Tìm soHieuMB trong DSCB để kiểm tra xem MB do có đang còn hoạt động hay không.
- * @param dsCB  Danh sách chuyến bay
+ * @brief           Tìm soHieuMB trong DSCB để kiểm tra xem MB do có đang còn hoạt động hay không.
+ * @param dsCB      Danh sách chuyến bay
  * @param soHieuMB  Chuỗi C15 chứa mã hiệu máy bay cần tìm.
- * @return      Địa chỉ của Node chuyến bay nếu thấy, ngược lại trả về NULL
+ * @return          Địa chỉ của Node chuyến bay nếu thấy, ngược lại trả về NULL
 */
 CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB);
 
@@ -180,7 +180,7 @@ void Init_Tickets(CB* newCB, int soCho);
  * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
  * @param dsCB  danh sách chuyến bay
  * @param dsHK  Danh sách hành khách tổng quát (Cây BST)
- * @param cmnd Số chứng minh nhân dân của khách cần tìm
+ * @param cmnd  Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
 HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
