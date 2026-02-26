@@ -149,7 +149,7 @@ bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime& newTime);
  * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm để hủy
  * @return      True nếu huỷ  được và thành công
 */
-bool Cancel_CB(CB* &dsCB, const char* maCB);
+bool Cancel_CB(listCB &dsCB, char* const maCB);
 
 /**
  * @brief       Cho biết trạng thái của chuyến bay trong DSCB.
@@ -162,7 +162,7 @@ bool Cancel_CB(CB* &dsCB, const char* maCB);
  *                  0: Đã hủy
  *                  -1: Không tìm thấy mã chuyến bay này trong hệ thống.
  */
- int Status_CB(CB* dsCB, const char* maCB);
+ int Status_CB(listCB &dsCB, char* const maCB);
 
 /**
  * @brief           Khởi tạo danh sách vé trống cho chuyến bay vừa lập
