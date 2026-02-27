@@ -45,6 +45,7 @@ enum NavKey {
 
 // ╔ ═ ╗ ║ ╠ ╚ ╝ ▶ ■
 int GetTerminalWidth();
+void ClearScreen();
 int visualLength(const string& s);
 void PrintBox(string text,bool ABOVE , bool UNDER );
 void SubMenu(string title, string options[], int numOptions);

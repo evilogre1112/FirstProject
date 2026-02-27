@@ -100,5 +100,5 @@ struct listHK{
     listHK();
 };
 
-void ClearScreen();
+
 #endif
