@@ -38,9 +38,9 @@ string options_3[] = {  "1. Tra Cứu Chuyến Bay",
                         "2. Thống Kê Chuyến Bay",};
 
 NavKey GetNavKey() {
-    int key = _getch();
 
 #ifdef _WIN32
+    int key = _getch();
     if(key == 224 || key == 0) {
         key = _getch();
         if(key == 72) return NAV_UP;
@@ -50,19 +50,39 @@ NavKey GetNavKey() {
     else if(key == 27) return NAV_ESC;
 
 #else
-    if (key == 27) { 
-        key = _getch();
-        if (key == 91) {
-            key = _getch();
-            if (key == 65) return NAV_UP;
-            if (key == 66) return NAV_DOWN;
-        } else {
-            return NAV_ESC;
-        }
+    struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    
+    // Thiết lập đọc không khóa (Non-blocking read) cho chuỗi ANSI
+    newt.c_cc[VMIN] = 0; 
+    newt.c_cc[VTIME] = 1; // Đợi tối đa 0.1s
+    
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    char seq[3];
+    int bytesRead = read(STDIN_FILENO, &seq[0], 1); // Đọc byte đầu tiên
+    NavKey result = NAV_UNKNOWN;
+
+    if (bytesRead == 1) {
+        if (seq[0] == 27) { // Nếu là phím ESC hoặc bắt đầu phím mũi tên
+            if (read(STDIN_FILENO, &seq[1], 1) == 1 && read(STDIN_FILENO, &seq[2], 1) == 1) {
+                if (seq[1] == 91) {
+                    if (seq[2] == 65) result = NAV_UP;
+                    else if (seq[2] == 66) result = NAV_DOWN;
+                }
+            } else {
+                result = NAV_ESC; // Bấm ESC thật sự
+            }
+        } 
+        else if (seq[0] == 10 || seq[0] == 13) result = NAV_ENTER;
+        else if (seq[0] == 'w' || seq[0] == 'W') result = NAV_UP;
+        else if (seq[0] == 's' || seq[0] == 'S') result = NAV_DOWN;
     }
-    else if(key == 10 || key == 13) return NAV_ENTER;
-    else if(key == 'w' || key == 'W') return NAV_UP;
-    else if(key == 's' || key == 'S') return NAV_DOWN;
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // Trả lại cấu hình Terminal
+    return result;
 #endif
 
     return NAV_UNKNOWN;
@@ -80,6 +100,15 @@ int GetTerminalWidth(){
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
         return w.ws_col;
     #endif
+}
+
+void ClearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    // Các hệ điều hành dựa trên UNIX (Linux, macOS)
+    system("clear");
+#endif
 }
 
 int visualLength(const string& s) {
