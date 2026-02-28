@@ -118,7 +118,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
     return true;
 }
 
-bool Del_MB(listMB& dsMB, char* const soHieuMB) {
+bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false;
     delete dsMB.list[index];
@@ -127,22 +127,53 @@ bool Del_MB(listMB& dsMB, char* const soHieuMB) {
     }
     dsMB.list[dsMB.slMB - 1] = NULL;
     dsMB.slMB--;
+    CB* temp = Find_Active_MB(dsCB, soHieuMB);
+    if (temp != NULL) Cancel_CB(dsCB, temp->maCB);
     return true;
 }
 
-bool Edit_MB(listMB& dsMB, char* const soHieuMB, MB *infoUpdate) {
+bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false;
+    if (infoUpdate->socho < dsMB.list[index]->socho) return false;
+    // Trường hợp cập nhật trùng mã máy bay
     if (ss_str(dsMB.list[index]->soHieuMB, infoUpdate->soHieuMB) == 0) {
         *dsMB.list[index] = *infoUpdate;
+        CB* temp = Find_Active_MB(dsCB, soHieuMB);
+        if (temp != NULL) {
+            char **newDSV = new char* [infoUpdate->socho];
+            for (int i = 0; i < temp->socho; i++)
+                newDSV[i] = temp->DSV[i];
+            for (int i = temp->socho; i < infoUpdate->socho; i++) {
+                newDSV[i] = new char[cmnd_max];
+                newDSV[i][0] = '\0';
+            }
+            temp->socho = infoUpdate->socho;
+            strcpy(temp->soHieuMB, infoUpdate->soHieuMB);
+            delete[] temp->DSV;
+            temp->DSV = newDSV;
+        }
         return true;
     }
+    // Trường hợp cập nhật khác mã máy bay
     int exist = Find_MB(dsMB, infoUpdate->soHieuMB);
     if (exist != -1) return false;
-    MB* newMB = new MB();
-    *newMB = *infoUpdate;
-    Del_MB(dsMB, soHieuMB);
-    Add_MB(dsMB, newMB);
+    *dsMB.list[index] = *infoUpdate;
+    CB* temp = Find_Active_MB(dsCB, soHieuMB);
+    if (temp != NULL) {
+        char **newDSV = new char* [infoUpdate->socho];
+        for (int i = 0; i < temp->socho; i++)
+            newDSV[i] = temp->DSV[i];
+        for (int i = temp->socho; i < infoUpdate->socho; i++) {
+            newDSV[i] = new char[cmnd_max];
+            newDSV[i][0] = '\0';
+        }
+        temp->socho = infoUpdate->socho;
+        strcpy(temp->soHieuMB, infoUpdate->soHieuMB);
+        delete[] temp->DSV;
+        temp->DSV = newDSV;
+    }
+    Sort_MB(dsMB, 0, dsMB.slMB - 1);
     return true;
 }
 
@@ -269,6 +300,10 @@ bool Cancel_CB(listCB &dsCB, char* const maCB) {
     CB* temp = Find_CB(dsCB, maCB);
     if (temp == NULL) return false;
     temp->trangThai = 0;
+    for (int i = 0; i < temp->socho; i++)
+        delete[] temp->DSV[i];
+    delete[] temp->DSV;
+    temp->DSV = NULL;
     return true;
 }
 
@@ -280,16 +315,20 @@ int Status_CB(listCB &dsCB, char* const maCB) {
 
 void Init_Tickets(CB *newCB, int soCho) {
     newCB->DSV = new char*[soCho];
+    for (int i = 0; i < soCho; i++) {
+        newCB->DSV[i] = new char[cmnd_max];
+        newCB->DSV[i][0] = '\0';
+    }
 }
 
-
-HK *Find_HK(CB *const dsCB, HK *const dsHK, const char* maCB, const char* cmnd)
-{
-    return nullptr;
+HK* Find_HK(HK* root, char* const cmnd) {
+    if (root == NULL) return NULL;
+    if (ss_str(root->cmnd, cmnd) == 0) return root;
+    if (ss_str(root->cmnd, cmnd) == 1) return Find_HK(root->left, cmnd);
+    return Find_HK(root->right, cmnd);
 }
 
-bool Add_HK(HK *&dsHK, const char* ho, const char* ten, const char* cmnd, const char* phai)
-{
+bool Add_HK(HK *&dsHK, const char* ho, const char* ten, const char* cmnd, const char* phai) {
     return false;
 }
 
