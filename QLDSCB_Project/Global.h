@@ -21,6 +21,7 @@ const int slMB_max = 300;
 const int soHieuMB_max = 16;
 const int loaiMB_max = 41;
 const int maCB_max= 16;
+const int cmnd_max = 13;
 
 // --- cấu trúc máy bay ---
 struct MB {

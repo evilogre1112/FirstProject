@@ -68,10 +68,11 @@ bool Add_MB(listMB& dsMB, MB* newMB);
 /**
  * @brief           Xóa máy bay dựa trên Số hiệu máy bay (Mã duy nhất)
  * @param dsMB      Mảng các con trỏ
+ * @param dsCB      DS liên kết đơn CB
  * @param soHieuMB  Chuỗi C15 chứa mã máy bay cần xóa
  * @return          true nếu tìm thấy và xóa thành công, false nếu không tìm thấy
  */
-bool Del_MB(listMB& dsMB, char* const soHieuMB);
+bool Del_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB);
 
 /**
  * @brief               Hiệu chỉnh thông tin máy bay
@@ -81,7 +82,7 @@ bool Del_MB(listMB& dsMB, char* const soHieuMB);
  * @return              true nếu hiệu chỉnh thành công
  */
 // LUƯ Ý: infoUpdate SẼ KHÔNG TỰ ĐÔNG ĐƯỢC GIẢI PHÓNG BỘ NHỚ TRONG HÀM
-bool Edit_MB(listMB& dsMB, char* const soHieuMB , MB* infoUpdate);
+bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB* infoUpdate);
 
 // --- CÂU B: QUẢN LÝ CHUYẾN BAY ---
 // Thao tác trên DSCB
@@ -171,19 +172,16 @@ bool Cancel_CB(listCB &dsCB, char* const maCB);
  */
 void Init_Tickets(CB* newCB, int soCho);
 
-
-
 // --- CÂU C: ĐẶT VÉ ---
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)
 
 /**
- * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
- * @param dsCB  danh sách chuyến bay
- * @param dsHK  Danh sách hành khách tổng quát (Cây BST)
- * @param cmnd  Số chứng minh nhân dân của khách cần tìm
+ * @brief       Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
+ * @param   root    Gốc của dsHK
+ * @param   cmnd    Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
-HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
+HK* Find_HK(HK* root, char* const cmnd);
 
 /**
  * @brief       Thêm một hành khách mới vào cây BST
