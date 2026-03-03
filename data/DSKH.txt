@@ -1,0 +1,2 @@
+123456789234|Nguyen Van|An|0
+987654321234|Tran Thi|Binh|1
