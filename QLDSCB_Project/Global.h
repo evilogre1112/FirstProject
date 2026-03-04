@@ -25,9 +25,9 @@ const int maCB_max= 15;
 const int cmnd_max=13;
 const int ho_max=55;
 const int ten_max=14;
-const char* path_file_CB="Data/DSCB.txt";
-const char* path_file_MB="Data/DSMB.txt";
-const char* path_file_HK="Data/DSHK.txt";
+static const char* path_file_CB = "Data/DSCB.txt";
+static const char* path_file_MB = "Data/DSMB.txt";
+static const char* path_file_HK = "Data/DSHK.txt";
 
 // --- cấu trúc máy bay ---
 struct MB {
