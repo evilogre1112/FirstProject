@@ -14,20 +14,24 @@
 #include <ctime>
 #include <iomanip>
 #include <fstream>
-#include <conio.h>
+#include <algorithm> 
+#include <iomanip>   
 
 using namespace std;
 
 const int slMB_max = 300;
-const int soHieuMB_max = 15;
-const int loaiMB_max = 40;
-const int maCB_max= 15;
+const int soHieuMB_max = 16;
+const int loaiMB_max = 41;
+const int maCB_max= 16;
 const int cmnd_max=13;
 const int ho_max=55;
 const int ten_max=14;
+const int sbDich_max=50;
+const int socho_max=500;
 static const char* path_file_CB = "Data/DSCB.txt";
 static const char* path_file_MB = "Data/DSMB.txt";
 static const char* path_file_HK = "Data/DSHK.txt";
+
 
 // --- cấu trúc máy bay ---
 struct MB {
@@ -44,9 +48,9 @@ struct listMB {
 };
 
 struct MB_Stat {
-        char soHieuMB[soHieuMB_max];  // Lấy từ cấu trúc Máy bay
-        int SLB;                      // Biến đếm số lần xuất hiện trong DSCB
-    };
+    char soHieuMB[soHieuMB_max];  // Lấy từ cấu trúc Máy bay
+    int SLB;                      // Biến đếm số lần xuất hiện trong DSCB
+};
 
 // --- cấu trúc chuyến bay ---
 struct DateTime{
@@ -96,15 +100,15 @@ struct HK{
     char *ho;                           // họ và tên đệm chứa 40 kí tự
     char *ten;                          // ten cho 15 ki tu
     char *cmnd;                         // cmnd có 13 kí tự
-    bool phai;                     // true = gái   ;false = trai
+    bool phai;                          // true = gái   ;false = trai
     HK *left, *right;                  
     HK();
     ~HK();                             
     bool set_ho(char *new_ho);          // true thì đã cập nhật tên họ mới 
     bool set_ten(char *new_ten);
-    char* get_ho();                   // trả về tên đệm vầ họ
-    bool set_cmnd(char *new_cmnd);                  // nhâp cmnd
-    char* get_cmnd();                 // trả về cmnd
+    char* get_ho();                     // trả về tên đệm vầ họ
+    bool set_cmnd(char *new_cmnd);      // nhâp cmnd
+    char* get_cmnd();                   // trả về cmnd
     char* get_ten();
     bool set_phai(bool gt);
     bool get_phai();
@@ -114,7 +118,6 @@ struct listHK{
     HK *goc ;
     int slHK;
     listHK();
-
 };
 
 /**
@@ -124,20 +127,20 @@ struct listHK{
  * @return true nếu lấy thành công
  */
 
-bool set_CB(listCB &dsCB, const char *path_file_CB);
+bool Get_Data_CB(listCB &dsCB, const char *path_file_CB);
 /**
  * @brief đọc file máy bay
  * @param dsMB danh sách máy bay
  * @param path_file_MB đường dẫn file máy bay
  * @return true nếu lấy thành công
  */
-bool set_MB(listMB &dsMB, const char *path_file_MB);
+bool Get_Data_MB(listMB &dsMB, const char *path_file_MB);
 /*
     1.  ho 
     2.  ten
     3.   cmnd
 */
-bool set_HK(listHK &dsHK, const char *path_file_HK);
+bool Get_Data_HK(listHK &dsHK, const char *path_file_HK);
 
 
 #endif

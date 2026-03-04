@@ -1,7 +1,16 @@
 
-cấu trúc file lưu chuyến bay theo 1 hàng
-    mã_chuyến_bay|giờ_khởi_hành|ngày_khởi_hành|sân_bay_đích|trạng_thái|số_hiệu_máy_bay|số_chỗ|
-    < mỗi dòng 1cmnd>
+cấu trúc file lưu chuyến bay theo 1 hàng được quy định như sau:
+
+mã_chuyến_bay1|giờ_khởi_hành|ngày_khởi_hành|sân_bay_đích|trạng_thái|số_hiệu_máy_bay|số_chỗ|
+< mỗi dòng 1cmnd>
+mã_chuyến_bay2|giờ_khởi_hành|ngày_khởi_hành|sân_bay_đích|trạng_thái|số_hiệu_máy_bay|số_chỗ|
+< mỗi dòng 1cmnd>
+.
+.
+.
+mã_chuyến_bayn|giờ_khởi_hành|ngày_khởi_hành|sân_bay_đích|trạng_thái|số_hiệu_máy_bay|số_chỗ|
+< mỗi dòng 1cmnd>
+
 Chú thích : mã chuyến bay: Gồm 1 chuỗi tối đa 15 chữ và số
             ngày khởi hành định dạng : số yy/mm/dd;dd<32;mm<12;1900<yy<2100
             giờ khởi hành: số hh:mm ;hh<24 và mm<60

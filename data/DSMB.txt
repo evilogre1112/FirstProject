@@ -1,3 +1,0 @@
-VN-A123|Airbus A321|150
-VN-A456|Boeing 787|300
-VJ-888|Embraer E190|90
