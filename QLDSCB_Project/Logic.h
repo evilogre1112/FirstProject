@@ -182,7 +182,7 @@ void Init_Tickets(CB* newCB, int soCho);
  * @param cmnd  Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
-HK* Find_HK_at_CB(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
+HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
 
 /**
  * @brief       Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
@@ -190,7 +190,7 @@ HK* Find_HK_at_CB(CB* const dsCB, HK* const dsHK,const char* maCB, const char* c
  * @param   cmnd    Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
-HK* Find_HK(HK* root, char* const cmnd);
+HK* Find_HK_At_List(HK* root, char* const cmnd);
 
 /**
  * @brief       Thêm một hành khách mới vào cây BST

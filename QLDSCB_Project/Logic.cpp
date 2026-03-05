@@ -331,15 +331,15 @@ void Init_Tickets(CB *newCB, int soCho) {
     }
 }
 
-HK* Find_HK_at_CB(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd) {
+HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd) {
     return NULL;
 }
 
-HK* Find_HK(HK* root, char* const cmnd) {
+HK* Find_HK_At_List(HK* root, char* const cmnd) {
     if (root == NULL) return NULL;
     if (ss_str(root->cmnd, cmnd) == 0) return root;
-    if (ss_str(root->cmnd, cmnd) == 1) return Find_HK(root->left, cmnd);
-    return Find_HK(root->right, cmnd);
+    if (ss_str(root->cmnd, cmnd) == 1) return Find_HK_At_List(root->left, cmnd);
+    return Find_HK_At_List(root->right, cmnd);
 }
 
 bool Add_HK(HK *&dsHK, const char* ho, const char* ten, const char* cmnd, const char* phai) {
