@@ -3,6 +3,8 @@
 
 #include "Global.h"
 #include <string>
+#include <algorithm> 
+#include <iomanip> 
 
 // Các biến sau là biến toàn cục(extern) trong "Global.h"
 /**
