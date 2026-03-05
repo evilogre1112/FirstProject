@@ -176,6 +176,15 @@ void Init_Tickets(CB* newCB, int soCho);
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)
 
 /**
+ * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
+ * @param dsCB  danh sách chuyến bay
+ * @param dsHK  Danh sách hành khách tổng quát (Cây BST)
+ * @param cmnd  Số chứng minh nhân dân của khách cần tìm
+ * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
+ */
+HK* Find_HK_at_CB(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
+
+/**
  * @brief       Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
  * @param   root    Gốc của dsHK
  * @param   cmnd    Số chứng minh nhân dân của khách cần tìm
@@ -263,23 +272,24 @@ int* Get_Empty_Seats(CB* const dsCB ,const char* maCB, int &sldsVT);
 
 // -- CÂU H: THỐNG KÊ LƯỢT BAY --
 
-// Tạo struct lưu trữ hai giá trị là Máy Bay và Số Lần Bay như sau.
-/*
-    struct MB_Stat {
-        char SHMB[15];  // Lấy từ cấu trúc Máy bay
-        int SLB;        // Biến đếm số lần xuất hiện trong DSCB
-    };
-*/
+// các tiện ích hỗ trợ cho get_Flight_Stactics (Merge_Sort)
+int ss_SLB(MB* a, MB* b);
+void Merge_SLB(listMB& dsMB, int l,int m, int r);
+
+/**
+ * @brief       sắp xếp danh sách máy bay theo mã SLB giảm dần và soHieuMB tăng dần, sử dụng merge_sort
+ * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
+ * @param l     vị trí bắt đầu trong mảng muốn sắp xếp
+ * @param r     vị trí kết thúc trong mảng muốn sắp xếp ( Sắp xếp từ vị trí l đên r )
+ */
+void Sort_SLB(listMB& dsMB, int l, int r);
 
 /**
  * @brief       Thống kê số lần thực hiện chuyến bay của từng máy bay có trong hệ thống
- * @param dsCB  Đầu danh sách liên kết đơn các chuyến bay
- * @param count Tham chiếu để Logic trả về số lượng máy bay tìm thấy (lượt bay > 0)
- * @return      Trả về mảng MB_Stat chứa Số hiệu máy bay và Số lượt bay
- * @note        Thứ tự mảng: Sắp xếp giảm dần theo số lượt thực hiện chuyến bay.
+ * @return      Trả về mảng MB chứa Số lượng máy bay giảm dần và Mã hiệu máy bay tăng dần
  * @note        UI có trách nhiệm delete[] mảng này sau khi in xong.
  */
-MB_Stat* Get_Flight_Statistics(CB* const dsCB, int& count);
+listMB get_Flight_Stactics (listMB &dsMB);
 
 
 #endif

@@ -1,0 +1,15 @@
+cấu trúc cảu file khách hàng:
+
+cmnd1|ho|ten
+cmnd2|ho|ten
+.
+.
+.
+cmndn|ho|ten
+
+chú thích: cmnd là chuỗi chứ 12 kí tự số
+           ho: là chuỗi lưu tên và tên đệm  55
+           ten :là chuỗi lưu tên max 14
+
+123456789234|Nguyen Van|An|0
+987654321234|Tran Thi|Binh|1

@@ -14,6 +14,8 @@
 #include <ctime>
 #include <iomanip>
 #include <fstream>
+#include <algorithm> 
+#include <iomanip>   
 
 using namespace std;
 
@@ -22,12 +24,21 @@ const int soHieuMB_max = 16;
 const int loaiMB_max = 41;
 const int maCB_max= 16;
 const int cmnd_max = 13;
+const int ho_max=55;
+const int ten_max=14;
+const int sbDich_max=50;
+const int socho_max=500;
+static const char* path_file_CB = "Data/DSCB.txt";
+static const char* path_file_MB = "Data/DSMB.txt";
+static const char* path_file_HK = "Data/DSHK.txt";
+
 
 // --- cấu trúc máy bay ---
 struct MB {
     char soHieuMB[soHieuMB_max];
     char loaiMB[loaiMB_max];
     int socho;
+    int SLB;
     MB();
 };
 
@@ -35,11 +46,6 @@ struct listMB {
     int slMB;
     MB* list[slMB_max];
     listMB();
-};
-
-struct MB_Stat {
-    char soHieuMB[soHieuMB_max];  // Lấy từ cấu trúc Máy bay
-    int SLB;                      // Biến đếm số lần xuất hiện trong DSCB
 };
 
 // --- cấu trúc chuyến bay ---
@@ -51,7 +57,7 @@ struct DateTime{
     int get_dd();
     int get_mt();
     int get_yy();
-    bool set_hh(int h);
+    bool set_hh(int h);           
     bool set_mm(int m);
     bool set_dd(int d);
     bool set_mt(int t);
@@ -65,10 +71,17 @@ struct CB{
     int trangThai;                    // 0 hủy chuyến, 1 còn vé, 2 hết vé, 3 hoàn tất
     char soHieuMB[soHieuMB_max];      // số hiệu máy bay
     int socho;                        // số chỗ trên máy bay
-    char **DSV;                       // mảng con trỏ chứa cmnd chảu khách hàng
+    char **DSV;                       // mảng cấp phát động chứa cmnd chảu khách hàng
     CB* next;                         // chứa địa chỉ contro tiếp theo
     CB();                             // ko tham số
     CB(int sc);
+    bool set_maCB(char ma[maCB_max]);
+    bool set_ngayHK(int h, int m, int y, int mmt, int d);   //nhập vào theo giờ, phút, năm, tháng, ngày.
+    bool set_sbDich(char *sbd);
+    bool set_trangThai(int i);
+    bool set_soHieuMB(char *shmb);
+    bool set_socho(int c);
+
     ~CB();
 };
 
@@ -80,19 +93,21 @@ struct listCB{
 
 // --- cấu trúc hành khách cây nhị phân ---
 struct HK{
-    char* ho;                           // họ và tên đệm chứa 40 kí tự
-    char* ten;                          // ten cho 15 ki tu
-    char* cmnd;                         // cmnd có 13 kí tự
-    bool gioi_tinh;                     // true = gái   ;false = trai
+    char *ho;                           // họ và tên đệm chứa 40 kí tự
+    char *ten;                          // ten cho 15 ki tu
+    char *cmnd;                         // cmnd có 13 kí tự
+    bool phai;                          // true = gái   ;false = trai
     HK *left, *right;                  
     HK();
     ~HK();                             
     bool set_ho(char *new_ho);          // true thì đã cập nhật tên họ mới 
     bool set_ten(char *new_ten);
-    char* get_ho();                   // trả về tên đệm vầ họ
-    bool set_cmnd();                  // nhâp cmnd
-    char* get_cmnd();                 // trả về cmnd
+    char* get_ho();                     // trả về tên đệm vầ họ
+    bool set_cmnd(char *new_cmnd);      // nhâp cmnd
+    char* get_cmnd();                   // trả về cmnd
     char* get_ten();
+    bool set_phai(bool gt);
+    bool get_phai();
 };  
 
 struct listHK{
@@ -100,6 +115,28 @@ struct listHK{
     int slHK;
     listHK();
 };
+
+/**
+ * @brief đọc file chuyến bay
+ * @param dsMB danh sách chuyến bay
+ * @param path_file_MB đường dẫn file chuyến bay
+ * @return true nếu lấy thành công
+ */
+
+bool Get_Data_CB(listCB &dsCB, const char *path_file_CB);
+/**
+ * @brief đọc file máy bay
+ * @param dsMB danh sách máy bay
+ * @param path_file_MB đường dẫn file máy bay
+ * @return true nếu lấy thành công
+ */
+bool Get_Data_MB(listMB &dsMB, const char *path_file_MB);
+/*
+    1.  ho 
+    2.  ten
+    3.   cmnd
+*/
+bool Get_Data_HK(listHK &dsHK, const char *path_file_HK);
 
 
 #endif

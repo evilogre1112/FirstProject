@@ -1,28 +1,25 @@
 {
+    "version": "2.0.0",
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: g++.exe build active file",
-            "command": "C:\\mingw64\\bin\\g++.exe",
+            "label": "Build All Files",
+            "command": "C:\\mingw64\\mingw64\\bin\\g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${workspaceFolder}\\QLDSCB_Project\\*.cpp",
+                "*.cpp",
                 "-o",
-                "${workspaceFolder}\\QLDSCB_Project\\app.exe"
+                "app.exe"
             ],
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${fileDirname}"
             },
-            "problemMatcher": [
-                "$gcc"
-            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Task generated for multiple .cpp compilation."
+            "detail": "Compiler: C:\\mingw64\\mingw64\\bin\\g++.exe"
         }
-    ],
-    "version": "2.0.0"
+    ]
 }
