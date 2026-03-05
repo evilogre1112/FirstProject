@@ -432,7 +432,7 @@ void Sort_SLB(listMB& dsMB, int l, int r) {
     Merge_SLB(dsMB, l, m, r);
 }
 
-listMB get_Flight_Stactics (listMB &dsMB) {
+listMB get_Flight_Stats (listMB &dsMB) {
     listMB flight_Statics;
     flight_Statics.slMB = dsMB.slMB;
     for (int i = 0; i < dsMB.slMB; i++) {
