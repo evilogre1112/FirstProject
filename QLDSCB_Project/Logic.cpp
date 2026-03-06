@@ -118,7 +118,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
     return true;
 }
 
-bool Del_MB(listMB& dsMB, char* const soHieuMB) {
+bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false;
     delete dsMB.list[index];
@@ -127,22 +127,57 @@ bool Del_MB(listMB& dsMB, char* const soHieuMB) {
     }
     dsMB.list[dsMB.slMB - 1] = NULL;
     dsMB.slMB--;
+    CB* temp = Find_Active_MB(dsCB, soHieuMB);
+    if (temp != NULL) Cancel_CB(dsCB, temp->maCB);
     return true;
 }
 
-bool Edit_MB(listMB& dsMB, char* const soHieuMB, MB *infoUpdate) {
+bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false;
+    if (infoUpdate->socho < dsMB.list[index]->socho) return false;
+    // Trường hợp cập nhật trùng mã máy bay
     if (ss_str(dsMB.list[index]->soHieuMB, infoUpdate->soHieuMB) == 0) {
+        int SLBcu = dsMB.list[index]->SLB;
         *dsMB.list[index] = *infoUpdate;
+        dsMB.list[index]->SLB = SLBcu;
+        CB* temp = Find_Active_MB(dsCB, soHieuMB);
+        if (temp != NULL) {
+            char **newDSV = new char* [infoUpdate->socho];
+            for (int i = 0; i < temp->socho; i++)
+                newDSV[i] = temp->DSV[i];
+            for (int i = temp->socho; i < infoUpdate->socho; i++) {
+                newDSV[i] = new char[cmnd_max];
+                newDSV[i][0] = '\0';
+            }
+            temp->socho = infoUpdate->socho;
+            strcpy(temp->soHieuMB, infoUpdate->soHieuMB);
+            delete[] temp->DSV;
+            temp->DSV = newDSV;
+        }
         return true;
     }
+    // Trường hợp cập nhật khác mã máy bay
     int exist = Find_MB(dsMB, infoUpdate->soHieuMB);
     if (exist != -1) return false;
-    MB* newMB = new MB();
-    *newMB = *infoUpdate;
-    Del_MB(dsMB, soHieuMB);
-    Add_MB(dsMB, newMB);
+    int SLBcu = dsMB.list[index]->SLB;
+    *dsMB.list[index] = *infoUpdate;
+    dsMB.list[index]->SLB = SLBcu;
+    CB* temp = Find_Active_MB(dsCB, soHieuMB);
+    if (temp != NULL) {
+        char **newDSV = new char* [infoUpdate->socho];
+        for (int i = 0; i < temp->socho; i++)
+            newDSV[i] = temp->DSV[i];
+        for (int i = temp->socho; i < infoUpdate->socho; i++) {
+            newDSV[i] = new char[cmnd_max];
+            newDSV[i][0] = '\0';
+        }
+        temp->socho = infoUpdate->socho;
+        strcpy(temp->soHieuMB, infoUpdate->soHieuMB);
+        delete[] temp->DSV;
+        temp->DSV = newDSV;
+    }
+    Sort_MB(dsMB, 0, dsMB.slMB - 1);
     return true;
 }
 
@@ -237,17 +272,20 @@ CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB) {
 
 bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
     if (Find_Active_MB(dsCB, newCB->soHieuMB) != NULL) return false;
-    if (Find_MB(dsMB, newCB->soHieuMB) == -1) return false;
+    int index = Find_MB(dsMB, newCB->soHieuMB);
+    if (index == -1) return false;
     CB* temp = find_insert_posCB(dsCB, newCB->maCB);
     if (temp == NULL && dsCB.head == NULL) {
         dsCB.head = newCB;
         dsCB.slCB++;
+        if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
         return true;
     }
     if (temp == NULL && dsCB.head != NULL) {
         newCB->next = dsCB.head;
         dsCB.head = newCB;
         dsCB.slCB++;
+        if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
         return true;
     }
     if (ss_str(temp->maCB, newCB->maCB) == 0) return false;
@@ -255,12 +293,14 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
     temp->next = newCB;
     newCB->next = temp2;
     dsCB.slCB++;
+    if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
     return true;
 }
 
 bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime &newTime) {
     CB* temp = Find_CB(dsCB, maCB);
     if (temp == NULL) return false;
+    if (temp->trangThai == 3 || temp->trangThai == 0) return false;
     temp->ngayKH = newTime;
     return true;
 }
@@ -268,7 +308,12 @@ bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime &newTime) {
 bool Cancel_CB(listCB &dsCB, char* const maCB) {
     CB* temp = Find_CB(dsCB, maCB);
     if (temp == NULL) return false;
+    if (temp->trangThai == 3 || temp->trangThai == 0) return false;
     temp->trangThai = 0;
+    for (int i = 0; i < temp->socho; i++)
+        delete[] temp->DSV[i];
+    delete[] temp->DSV;
+    temp->DSV = NULL;
     return true;
 }
 
@@ -280,16 +325,24 @@ int Status_CB(listCB &dsCB, char* const maCB) {
 
 void Init_Tickets(CB *newCB, int soCho) {
     newCB->DSV = new char*[soCho];
+    for (int i = 0; i < soCho; i++) {
+        newCB->DSV[i] = new char[cmnd_max];
+        newCB->DSV[i][0] = '\0';
+    }
 }
 
-
-HK *Find_HK(CB *const dsCB, HK *const dsHK, const char* maCB, const char* cmnd)
-{
-    return nullptr;
+HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd) {
+    return NULL;
 }
 
-bool Add_HK(HK *&dsHK, const char* ho, const char* ten, const char* cmnd, const char* phai)
-{
+HK* Find_HK_At_List(HK* root, char* const cmnd) {
+    if (root == NULL) return NULL;
+    if (ss_str(root->cmnd, cmnd) == 0) return root;
+    if (ss_str(root->cmnd, cmnd) == 1) return Find_HK_At_List(root->left, cmnd);
+    return Find_HK_At_List(root->right, cmnd);
+}
+
+bool Add_HK(HK *&dsHK, const char* ho, const char* ten, const char* cmnd, const char* phai) {
     return false;
 }
 
@@ -323,7 +376,69 @@ int *Get_Empty_Seats(CB *const dsCB, const char* maCB, int &sldsVT)
     return nullptr;
 }
 
-MB_Stat *Get_Flight_Statistics(CB *const dsCB, int &count)
-{
-    return nullptr;
+int ss_SLB(MB* a, MB* b) {
+    if (a->SLB > b->SLB) return 2;
+    if (a->SLB < b->SLB) return 1;
+    if (ss_str(a->soHieuMB, b->soHieuMB) == 1) return 1;
+    if (ss_str(a->soHieuMB, b->soHieuMB) == 2) return 2;
+    return 0;
+}
+
+void Merge_SLB(listMB& dsMB, int l,int m, int r) {
+    int x_size = m - l + 1; int y_size = r - m;
+    MB** x = new MB*[x_size]; MB** y = new MB*[y_size];
+    int nx = l; int ny = m + 1;
+    for (int i = 0; i < x_size; i++) {
+        x[i] = dsMB.list[nx];
+        nx++;
+    }
+    for (int j = 0; j < y_size; j++) {
+        y[j] = dsMB.list[ny];
+        ny++;
+    }
+    int i = 0; int j = 0;
+    while (i < x_size && j < y_size) {
+        if (ss_SLB(x[i], y[j]) != 1) {
+            dsMB.list[l] = x[i];
+            i++;
+        }
+        else {
+            dsMB.list[l] = y[j];
+            j++;
+        }
+        l++;
+    }
+    if (i == x_size) {
+        for (int s = j; s < y_size; s++) {
+            dsMB.list[l] = y[s];
+            l++;
+        }
+    }
+    else {
+        for (int s = i; s < x_size; s++) {
+            dsMB.list[l] = x[s];
+            l++;
+        }
+    }
+    delete[] x;
+    delete[] y;
+}
+
+void Sort_SLB(listMB& dsMB, int l, int r) {
+    if (l >= r) return;
+    int m = (r + l) / 2;
+    Sort_SLB(dsMB, l, m);
+    Sort_SLB(dsMB, m + 1, r);
+    Merge_SLB(dsMB, l, m, r);
+}
+
+listMB get_Flight_Stats (listMB &dsMB) {
+    listMB flight_Statics;
+    flight_Statics.slMB = dsMB.slMB;
+    for (int i = 0; i < dsMB.slMB; i++) {
+        flight_Statics.list[i] = new MB();
+        *flight_Statics.list[i] = *dsMB.list[i];
+    }
+    Sort_SLB(flight_Statics, 0, flight_Statics.slMB - 1);
+    return flight_Statics;
 }
