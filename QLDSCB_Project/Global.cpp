@@ -9,10 +9,11 @@
 using namespace std;
 
 // ---- cấu trúc máy bay ----//
- MB::MB() {
+MB::MB() {
     strcpy(soHieuMB,"");    // hàm này copy từ phía phải sang trái
     strcpy(loaiMB,"");      // có cáh tương đương đó là cho phần [0]='\0';
     socho = 0;
+    SLB = 0;
 }
 
 listMB::listMB() {
