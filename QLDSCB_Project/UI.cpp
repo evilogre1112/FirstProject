@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-
+#include "Logic.h"
 // Chỉ thêm windows.h nếu đang chạy trên Windows
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
@@ -10,7 +10,6 @@
     #include <sys/ioctl.h>
     #include <unistd.h>
     #include <termios.h>
-    #include <unistd.h>
     int _getch() {
         struct termios oldt, newt;
         int ch;
@@ -25,6 +24,7 @@
 #endif
 
 #include "UI.h"
+
 using namespace std ;
 
 int TotalWidth = 0;

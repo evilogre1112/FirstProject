@@ -1,5 +1,12 @@
 #include "Global.h"
+#include <fstream>
+#include <cstring>
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <conio.h>
 
+using namespace std;
 
 // ---- cấu trúc máy bay ----//
  MB::MB() {
