@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include "Logic.h"
 // Chỉ thêm windows.h nếu đang chạy trên Windows
 #ifdef _WIN32
@@ -110,19 +111,158 @@ void ClearScreen() {
     system("clear");
 #endif
 }
+void Gotoxy(int x, int y) {
+#ifdef _WIN32
+        HANDLE hConsoleOutput;
+        COORD Cursor_an_Pos = { (SHORT)x, (SHORT)y };
+        hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleCursorPosition(hConsoleOutput, Cursor_an_Pos);
+#else
+        printf("\033[%d;%dH", y + 1, x + 1); 
+#endif
+}
+
+#ifndef _WIN32
+void getCursorPosMac(int &x, int &y) {
+    struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    write(STDOUT_FILENO, "\033[6n", 4);
+    char buf[32];
+    int i = 0;
+    while (i < sizeof(buf) - 1) {
+        if (read(STDIN_FILENO, &buf[i], 1) != 1) break;
+        if (buf[i] == 'R') break;
+        i++;
+    }
+    buf[i] = '\0';
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    int rows, cols;
+    if (sscanf(buf, "\033[%d;%d", &rows, &cols) == 2) {
+        x = cols - 1; y = rows - 1;
+    }
+}
+#endif
+
+// Lấy tọa độ X hiện tại của con trỏ
+int whereX() {
+#ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    return csbi.dwCursorPosition.X;
+#else
+    int x, y;
+    getCursorPosMac(x, y);
+    return x;
+#endif
+}
+
+// Lấy tọa độ Y hiện tại của con trỏ
+int whereY() {
+#ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    return csbi.dwCursorPosition.Y;
+#else
+    int x, y;
+    getCursorPosMac(x, y);
+    return y;
+#endif
+}
 
 int visualLength(const string& s) {
-    string plain = "";
+    int length = 0;
     bool inCode = false;
     for (size_t i = 0; i < s.length(); i++) {
-        if (s[i] == '\033') inCode = true; // Bắt đầu mã ANSI
-        if (!inCode) {
-            // Kiểm tra ký tự UTF-8 (ký tự đa byte như ▶)
-            if ((s[i] & 0xc0) != 0x80) plain += s[i]; 
+        if (s[i] == '\033') {
+            inCode = true;
+            continue; 
         }
-        if (inCode && s[i] == 'm') inCode = false; // Kết thúc mã ANSI
+
+        if (inCode) {
+            if (isalpha((unsigned char)s[i])) {
+                inCode = false;
+            }
+            continue;
+        }
+        if ((unsigned char)(s[i] & 0xc0) != 0x80) {
+            length++;
+        }
     }
-    return plain.length();
+    return length;
+}
+
+// Hàm này trả về số byte và độ dài hiển thị của một dòng con trong chuỗi text bắt đầu từ startByte, với độ rộng tối đa maxWidth
+LineInfo getLineInfo(const string& text, int startByte, int maxWidth) {
+    int bytes = 0;
+    int visual = 0;
+    int lastSpaceByte = -1;
+    int lastSpaceVisual = -1;
+    int textLen = text.length();
+    bool inANSI = false;
+
+    int i = startByte;
+    while (i < textLen) {
+        // Kiểm tra bắt đầu mã ANSI
+        if (text[i] == '\033') {
+            inANSI = true;
+        }
+
+        if (inANSI) {
+            bytes++;
+            // Mã ANSI kết thúc bằng chữ cái (thường là 'm')
+            if (isalpha((unsigned char)text[i])) inANSI = false;
+            i++;
+            continue; // Không tăng visual khi đang ở trong mã ANSI
+        }
+
+        unsigned char c = (unsigned char)text[i];
+        int step = 1;
+        if (c >= 192) {
+            if (c >= 240) step = 4;
+            else if (c >= 224) step = 3;
+            else step = 2;
+        }
+
+        // Nếu thêm 1 ký tự visual mà vượt quá maxWidth
+        if (visual + 1 > maxWidth) {
+            if (lastSpaceByte != -1) {
+                return { lastSpaceByte - startByte, lastSpaceVisual };
+            }
+            return { bytes, visual };
+        }
+
+        if (c == ' ') {
+            lastSpaceByte = i + step; // Bao gồm cả khoảng trắng để substr cắt đúng
+            lastSpaceVisual = visual + 1;
+        }
+
+        bytes += step;
+        visual += 1;
+        i += step;
+    }
+    return { bytes, visual };
+}
+//Ham này đếm số dòng cần thiết để hiển thị toàn bộ text trong một hộp có độ rộng innerWidth, dựa trên việc gọi getLineInfo liên tục cho đến hết text
+// innerWidth là độ rộng thực tế bên trong hộp, đã trừ đi 2 ký tự viền
+int countLinesNeeded(const string& text, int innerWidth) {
+    if (innerWidth <= 0) return 0;
+    int count = 0;
+    int currentByte = 0;
+    int textLen = text.length();
+
+    while (currentByte < textLen) {
+        LineInfo info = getLineInfo(text, currentByte, innerWidth);
+        if (info.byteCount == 0) break;
+        currentByte += info.byteCount;
+        while (currentByte < textLen && text[currentByte] == ' ') currentByte++;
+        
+        count++;
+    }
+    return count;
 }
 
 void PrintBox(string text, bool ABOVE , bool UNDER ){
@@ -144,42 +284,69 @@ void PrintBox(string text, bool ABOVE , bool UNDER ){
     cout << under << endl ;
 }
 
-void SubMenu(string title, string options[], int numOptions){
-    // Tương tự MainScreen nhưng với các lựa chọn phụ
-    int selectedIdx = 0;
-    while(true){
-        ClearScreen();
-        PrintBox(title, true , false);
-        for(int i = 0 ; i < numOptions;i++){
-            string s = (selectedIdx == i) ? string(BG_BRIGHT_YELLOW) + string(TEXT_BLACK) + " ▶ " + options[i] + " ◀ " + string(RESET) : options[i];
-            if(i != numOptions -1){
-                PrintBox(s,false,false);
-            }else{
-                PrintBox(s,false,true);
-            }
-        }
-        int innerWidth = (TotalWidth > boxWidth) ? (TotalWidth - boxWidth)/2 : 0; // Đảm bảo không chia cho 0
-        cout << string(innerWidth, ' ') << string(GRAY) << "Dùng phím ↑/↓ để di chuyển || Enter để chọn || ESC để quay lại" << RESET << endl; 
-        int key = GetNavKey();
-        switch(key){
-            case NAV_UP:
-                if(selectedIdx > 0) selectedIdx--;
-                else selectedIdx = numOptions - 1; // Nhảy vòng xuống cuối
-                    break;
-                case NAV_DOWN: // Mũi tên Xuống
-                    if(selectedIdx < numOptions - 1) selectedIdx++;
-                    else selectedIdx = 0; // Nhảy vòng lên đầu
-                    break;
-            case NAV_ENTER: // Phím Enter
-                ClearScreen();
-                cout << "Bạn đã chọn: " << BOLDGREEN << options[selectedIdx] << RESET << endl;
-                cout << "\nNhấn phím bất kỳ để quay lại menu...";
-                _getch();
-                break;
-            case NAV_ESC: // Phím ESC để quay lại
-                return;
-        }
+// Hàm này dùng để vẽ một hộp nhỏ với nhiều tùy chọn hơn như có/không cạnh trên/dưới/trái/phải, chiều cao, chiều rộng và màu sắc của text
+void SmallBox(string text, bool ABOVE, bool UNDER, bool LEFT, bool RIGHT, int Height, int Width, string color ) {
+    int startX = whereX();
+    int startY = whereY();
+    int innerWidth = Width - 2;
+    if (innerWidth <= 0) return;
+
+    int totalLinesNeeded = countLinesNeeded(text, innerWidth);
+    int actualLinesToPrint = (totalLinesNeeded > Height) ? Height : totalLinesNeeded;
+    int startTextRow = (Height - actualLinesToPrint) / 2;
+
+    string lineBorder = "";
+    for (int i = 0; i < innerWidth; i++) lineBorder += HZ;
+
+    // --- 1. Vẽ cạnh trên ---
+    if (ABOVE) {
+        Gotoxy(startX, startY);
+        // Nếu không có LEFT/RIGHT thì dùng HZ để nối dài đường kẻ
+        cout << RESET << (LEFT ? TLC : HZ) << lineBorder << (RIGHT ? TRC : HZ);
     }
+
+    // --- 2. Vẽ phần thân ---
+    int bodyStartRow = startY + (ABOVE ? 1 : 0);
+
+    for (int i = 0; i < Height; i++) {
+        Gotoxy(startX, bodyStartRow + i);
+        
+        cout << RESET; 
+        if (LEFT) cout << VT; else cout << " "; // Nếu không có cạnh trái, để trống để không đè hộp bên cạnh
+
+        if (i >= startTextRow && i < startTextRow + actualLinesToPrint) {
+            int currentBytePos = 0; 
+            int tempPos = 0;
+            for(int j = 0; j < i - startTextRow; j++) {
+                tempPos += getLineInfo(text, tempPos, innerWidth).byteCount;
+                while (tempPos < text.length() && text[tempPos] == ' ') tempPos++;
+            }
+            
+            if (tempPos < text.length()) {
+                LineInfo info = getLineInfo(text, tempPos, innerWidth);
+                string currentLine = text.substr(tempPos, info.byteCount);
+                int padLeft = (innerWidth - info.visualWidth) / 2;
+                int padRight = innerWidth - info.visualWidth - padLeft;
+                cout << string(padLeft, ' ') << color << currentLine << RESET << string(padRight, ' ');
+            } else cout << string(innerWidth, ' ');
+            
+        } else {
+            cout << string(innerWidth, ' ');
+        }
+
+        cout << RESET;
+        if (RIGHT) cout << VT; else cout << " ";
+    }
+
+    // --- 3. Vẽ cạnh dưới ---
+    int footerRow = bodyStartRow + Height;
+    if (UNDER) {
+        Gotoxy(startX, footerRow);
+        cout << RESET << (LEFT ? BLC : HZ) << lineBorder << (RIGHT ? BRC : HZ);
+    }
+
+    // Đưa con trỏ về dòng cuối cùng đã vẽ để whereY() của hộp sau trả về đúng vị trí đó
+    Gotoxy(startX, footerRow); 
 }
 
 void MainScreen(){
@@ -192,16 +359,22 @@ void MainScreen(){
     int numOptions = sizeof(options) / sizeof(options[0]);
     while(true){
         ClearScreen();
-        PrintBox("QUẢN LÝ CHUYẾN BAY NỘI ĐỊA", true , false);
+        int marginLeft = (TotalWidth > boxWidth) ? (TotalWidth - boxWidth)/2 : 0;
+        Gotoxy(marginLeft, 0);
+        SmallBox("QUẢN LÝ CHUYẾN BAY NỘI ĐỊA", true , false, true, true, 3, boxWidth);
+        Gotoxy(marginLeft, whereY()); // Đặt con trỏ xuống dòng tiếp theo sau tiêu đề
         for(int i = 0 ; i < numOptions;i++){
-            string s = (selectedIdx == i) ? string(BG_BRIGHT_YELLOW) + string(TEXT_BLACK) + " ▶ " + options[i] + " ◀ " + string(RESET) : options[i];
+            string s = (selectedIdx == i) ?  " ▶ " + options[i] + " ◀ " : options[i];
+            string color = (selectedIdx == i) ? string(YELLOW) : string(RESET);
             if(i != numOptions -1){
-                PrintBox(s,false,false);
+                SmallBox(s, false, false, true, true, 3, boxWidth, color);
+                Gotoxy(marginLeft, whereY()); // Đặt con trỏ xuống dòng tiếp theo sau mỗi hộp
             }else{
-                PrintBox(s,false,true);
+                SmallBox(s, false, true, true, true, 3, boxWidth);
             }
         }
         int innerWidth = (TotalWidth - boxWidth > 0)? (TotalWidth - boxWidth)/2 : 0; // Bỏ đi 2 ký tự viền
+        Gotoxy(0, whereY() + 1);
         cout << string(innerWidth, ' ') << string(GRAY) << "Dùng phím ↑/↓ để di chuyển || Enter để chọn || ESC để thoát" << RESET << endl; 
         int key = GetNavKey();
         switch(key){
@@ -216,13 +389,10 @@ void MainScreen(){
             case NAV_ENTER:
                 switch (selectedIdx){
                     case 0:
-                        SubMenu("Quản Lý Hệ Thống", options_1, 3);
                         break;
                     case 1:
-                        SubMenu("Quản Lý Vé", options_2, 2);
                         break;
                     case 2:
-                        SubMenu("Tra Cứu & Thống Kê", options_3, 2);
                         break;
                     case 4:
                         return;

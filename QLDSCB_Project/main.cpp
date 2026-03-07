@@ -10,9 +10,13 @@ using namespace std ;
 
 int main(){
     TotalWidth = GetTerminalWidth();
-    listMB dsMB = Get_Data_MB(path_file_MB);
-    listCB dsCB = Get_Data_CB(path_file_CB); 
-    listHK dsHK = Get_Data_HK(path_file_HK);
-    
+    listMB dsMB ;
+    Get_Data_MB(dsMB,path_file_MB);
+    listCB dsCB ;
+    Get_Data_CB(dsCB,path_file_CB);
+    listHK dsHK ;
+    Get_Data_HK(dsHK,path_file_HK);
+    MainScreen();
+    cin.ignore();
     return 0;
 }

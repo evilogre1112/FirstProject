@@ -289,7 +289,7 @@ void Sort_SLB(listMB& dsMB, int l, int r);
  * @return      Trả về mảng MB chứa Số lượng máy bay giảm dần và Mã hiệu máy bay tăng dần
  * @note        UI có trách nhiệm delete[] mảng này sau khi in xong.
  */
-listMB get_Flight_Stats (listMB &dsMB);
+listMB Get_Flight_Stats (listMB &dsMB);
 
 
 #endif
