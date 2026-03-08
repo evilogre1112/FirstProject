@@ -8,9 +8,9 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "*.cpp",
+                "${fileDirname}\\*.cpp",
                 "-o",
-                "app.exe"
+                "${fileDirname}\\app.exe"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -19,7 +19,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Compiler: C:\\mingw64\\mingw64\\bin\\g++.exe"
+            "detail": "Compiler: g++"
         }
     ]
 }

@@ -23,7 +23,7 @@ const int slMB_max = 300;
 const int soHieuMB_max = 16;
 const int loaiMB_max = 41;
 const int maCB_max= 16;
-const int cmnd_max=13;
+const int cmnd_max = 13;
 const int ho_max=55;
 const int ten_max=14;
 const int sbDich_max=50;
@@ -38,6 +38,7 @@ struct MB {
     char soHieuMB[soHieuMB_max];
     char loaiMB[loaiMB_max];
     int socho;
+    int SLB;
     MB();
 };
 
@@ -45,11 +46,6 @@ struct listMB {
     int slMB;
     MB* list[slMB_max];
     listMB();
-};
-
-struct MB_Stat {
-    char soHieuMB[soHieuMB_max];  // Lấy từ cấu trúc Máy bay
-    int SLB;                      // Biến đếm số lần xuất hiện trong DSCB
 };
 
 // --- cấu trúc chuyến bay ---
