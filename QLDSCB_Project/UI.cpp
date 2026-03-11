@@ -265,6 +265,16 @@ int countLinesNeeded(const string& text, int innerWidth) {
     return count;
 }
 
+void ClearRegion(int x, int y, int width, int height) {
+    for (int i = 0; i < height; i++) {
+        Gotoxy(x, y + i);
+        for (int j = 0; j < width; j++) {
+            printf(" "); // In khoảng trắng để xóa nội dung cũ
+        }
+    }
+    Gotoxy(x,y);
+}
+
 void PrintBox(string text, bool ABOVE , bool UNDER ){
     //Tính khoảng trắng lề trái để đẩy toàn bộ khung ra giữa màn hình
     int marginLeft = (TotalWidth > boxWidth) ? (TotalWidth - boxWidth)/2 : 0;
@@ -284,8 +294,12 @@ void PrintBox(string text, bool ABOVE , bool UNDER ){
     cout << under << endl ;
 }
 
+void SmallBox(string text, int Width, int Height, string color) {
+    SmallBox(text, true, true, true, true, Width, Height, color); // Gọi hàm gốc với các giá trị mặc định
+}
+
 // Hàm này dùng để vẽ một hộp nhỏ với nhiều tùy chọn hơn như có/không cạnh trên/dưới/trái/phải, chiều cao, chiều rộng và màu sắc của text
-void SmallBox(string text, bool ABOVE, bool UNDER, bool LEFT, bool RIGHT, int Height, int Width, string color ) {
+void SmallBox(string text, bool ABOVE, bool UNDER, bool LEFT, bool RIGHT,int Width, int Height, string color ) {
     int startX = whereX();
     int startY = whereY();
     int innerWidth = Width - 2;
@@ -349,6 +363,214 @@ void SmallBox(string text, bool ABOVE, bool UNDER, bool LEFT, bool RIGHT, int He
     Gotoxy(startX, footerRow); 
 }
 
+void ViewQLHT(int mainMenuIdx) {
+    Gotoxy(71, 6); 
+    int startX = whereX();
+    int startY = whereY();
+
+    // 1. Xóa vùng cũ 
+    ClearRegion(startX, startY, 30, 20); 
+
+    // 2. Xác định nội dung cần hiện
+    string subOptions[5];
+    int count = 0;
+
+    if (mainMenuIdx == 0) { // Quản Lý Máy Bay
+        subOptions[0] = "Quản Lí Máy Báy";
+        subOptions[1] = "Quản Lí Chuyến Bay";
+        subOptions[2] = "Quản Lí Khách Hàng";
+        subOptions[3] = "Quay lại Main Menu";
+        count = 4;
+    } 
+    else if (mainMenuIdx == 1) { // Quản Lý Chuyến Bay
+        subOptions[0] = "Đặt Vé";
+        subOptions[1] = "Huỷ Vé";
+        subOptions[2] = "In danh sách vé trống";
+        subOptions[3] = "Quay Lại Main Menu";
+        count = 4;
+    }else if (mainMenuIdx == 2){
+        subOptions[0] = "Tra cứu chuyến bay";
+        subOptions[1] = "Thống kê lượt bay";
+        subOptions[2] = "In danh sách hành khách";
+        subOptions[3] = "Quay Lại Main Menu";
+        count = 4;
+    }
+    int space = (count != 0) ? 35/(count*3) : 0 ;
+    // 3. Vẽ nội dung ra
+    for(int i = 0 ; i < count ; i++) {
+        // con trỏ sẽ nhảy xuống dưới, nên vẫn cần Gotoxy để căn dòng
+        SmallBox(subOptions[i], true, true, true, true, 30, 1, WHITE);
+        Gotoxy(whereX(),whereY()+space);
+    }
+}
+
+void ThaoTacQLHT(int mainMenuIdx) {
+    int chossen = 0; // Vị trí lựa chọn trong menu con
+    int startX = 71;
+    int startY = 6;
+    
+    // 1. Xác định nội dung và số lượng tùy chọn dựa trên menu chính
+    string subOptions[5];
+    int count = 0;
+
+    if (mainMenuIdx == 0) {
+        subOptions[0] = "Quản Lí Máy Báy";
+        subOptions[1] = "Quản Lí Chuyến Bay";
+        subOptions[2] = "Quản Lí Khách Hàng";
+        subOptions[3] = "Quay lại Main Menu";
+        count = 4;
+    } 
+    else if (mainMenuIdx == 1) {
+        subOptions[0] = "Đặt Vé";
+        subOptions[1] = "Huỷ Vé";
+        subOptions[2] = "In danh sách vé trống";
+        subOptions[3] = "Quay Lại Main Menu";
+        count = 4;
+    } 
+    else if (mainMenuIdx == 2) {
+        subOptions[0] = "Tra cứu chuyến bay";
+        subOptions[1] = "Thống kê lượt bay";
+        subOptions[2] = "In danh sách hành khách";
+        subOptions[3] = "Quay Lại Main Menu";
+        count = 4;
+    }
+
+    if (count == 0) return ; // Phòng trường hợp không có dữ liệu
+
+    // Tính toán khoảng cách giữa các Box để dàn đều trong vùng 20 dòng
+    int space = 1; // Bạn có thể chỉnh space = 1 hoặc 2 để menu trông thoáng hơn
+
+    while (true) {
+        // Vẽ lại vùng SideBar
+        Gotoxy(startX, startY);
+        ClearRegion(startX, startY, 30, 20); 
+
+        // 2. Vẽ danh sách các tùy chọn
+        for (int i = 0; i < count; i++) {
+            string s = subOptions[i];
+            string color = WHITE;
+
+            if (i == chossen) {
+                color = YELLOW;
+                s = string(ARR) + " " + s + " " + ARL; // Thêm mũi tên khi chọn
+            }
+
+            // Di chuyển con trỏ đến đúng dòng để vẽ Box tiếp theo
+            // Mỗi SmallBox cao 3 dòng + khoảng cách space
+            Gotoxy(startX, startY + (i * (3 + space))); 
+
+            // Vẽ Box (Lưu ý: tham số là 30, 3 để hộp cân đối hơn là 30, 1)
+            SmallBox(s, true, true, true, true, 30, 1, color);
+            Gotoxy(whereX(),whereY() + 1);
+        }
+
+        // 3. Bắt phím điều khiển
+        NavKey key = GetNavKey();
+        switch (key) {
+            case NAV_UP:
+                chossen = (chossen - 1 >= 0) ? chossen - 1 : count - 1;
+                break;
+            case NAV_DOWN:
+                chossen = (chossen + 1 < count) ? chossen + 1 : 0;
+                break;
+            case NAV_ENTER:
+                return ; 
+            case NAV_ESC:
+                return ; // Thoát không chọn
+        }
+    }
+}
+
+int SubMenu(string options[], int length) {
+    int chossen = 0;
+    // Lưu lại vị trí bắt đầu để menu không bị "trôi"
+    int startX = whereX();
+    int startY = whereY();
+
+    while(true) {
+        ClearRegion(startX, startY, 70, (length * 3)); // (Mỗi box cao 3 dòng)
+
+        for(int i = 0 ; i < length ; i++) {
+            string s = options[i];
+            if (i == chossen) {
+                s = string(ARR) + " " + s + " " + ARL;
+            }
+
+            // Chọn màu trước
+            string color = (i == chossen) ? YELLOW : WHITE;
+
+            if (i == 0) {
+                SmallBox(s, true, false, true, true, 70, 3, color);
+            } else if (i < length - 1) {
+                SmallBox(s, false, false, true, true, 70, 3, color);
+            } else {
+                SmallBox(s, false, true, true, true, 70, 3, color);
+            }
+        }
+        ViewQLHT(chossen);
+
+        NavKey key = GetNavKey();
+        switch(key) {
+            case NAV_UP:
+                chossen = (chossen - 1 >= 0) ? chossen - 1 : length - 1;
+                break;
+            case NAV_DOWN:
+                chossen = (chossen + 1 < length) ? chossen + 1 : 0;
+                break;
+            case NAV_ENTER:
+                return chossen;
+            case NAV_ESC:
+                return -1;
+        }
+    }
+}
+
+int MainMenuOptionInBoard(string options[], int length) {
+    int chossen = 0;
+    // Lưu lại vị trí bắt đầu để menu không bị "trôi"
+    int startX = whereX();
+    int startY = whereY();
+
+    while(true) {
+        ClearRegion(startX, startY, 70, (length * 3)); // (Mỗi box cao 3 dòng)
+
+        for(int i = 0 ; i < length ; i++) {
+            string s = options[i];
+            if (i == chossen) {
+                s = string(ARR) + " " + s + " " + ARL;
+            }
+
+            // Chọn màu trước
+            string color = (i == chossen) ? YELLOW : WHITE;
+
+            if (i == 0) {
+                SmallBox(s, true, false, true, true, 70, 3, color);
+            } else if (i < length - 1) {
+                SmallBox(s, false, false, true, true, 70, 3, color);
+            } else {
+                SmallBox(s, false, true, true, true, 70, 3, color);
+            }
+        }
+        ViewQLHT(chossen);
+
+        NavKey key = GetNavKey();
+        switch(key) {
+            case NAV_UP:
+                chossen = (chossen - 1 >= 0) ? chossen - 1 : length - 1;
+                break;
+            case NAV_DOWN:
+                chossen = (chossen + 1 < length) ? chossen + 1 : 0;
+                break;
+            case NAV_ENTER:
+                ThaoTacQLHT(chossen);
+                break ;
+            case NAV_ESC:
+                return -1;
+        }
+    }
+}
+
+
 void MainScreen(){
     int selectedIdx = 0;
     string options[] = {"1. Quản Lý Hệ Thống", 
@@ -359,50 +581,9 @@ void MainScreen(){
     int numOptions = sizeof(options) / sizeof(options[0]);
     while(true){
         ClearScreen();
-        int marginLeft = (TotalWidth > boxWidth) ? (TotalWidth - boxWidth)/2 : 0;
-        Gotoxy(marginLeft, 0);
-        SmallBox("QUẢN LÝ CHUYẾN BAY NỘI ĐỊA", true , false, true, true, 3, boxWidth);
-        Gotoxy(marginLeft, whereY()); // Đặt con trỏ xuống dòng tiếp theo sau tiêu đề
-        for(int i = 0 ; i < numOptions;i++){
-            string s = (selectedIdx == i) ?  " ▶ " + options[i] + " ◀ " : options[i];
-            string color = (selectedIdx == i) ? string(YELLOW) : string(RESET);
-            if(i != numOptions -1){
-                SmallBox(s, false, false, true, true, 3, boxWidth, color);
-                Gotoxy(marginLeft, whereY()); // Đặt con trỏ xuống dòng tiếp theo sau mỗi hộp
-            }else{
-                SmallBox(s, false, true, true, true, 3, boxWidth);
-            }
-        }
-        int innerWidth = (TotalWidth - boxWidth > 0)? (TotalWidth - boxWidth)/2 : 0; // Bỏ đi 2 ký tự viền
-        Gotoxy(0, whereY() + 1);
-        cout << string(innerWidth, ' ') << string(GRAY) << "Dùng phím ↑/↓ để di chuyển || Enter để chọn || ESC để thoát" << RESET << endl; 
-        int key = GetNavKey();
-        switch(key){
-            case NAV_UP:
-                if(selectedIdx > 0) selectedIdx--;
-                else selectedIdx = numOptions - 1; // Nhảy vòng xuống cuối
-                break;
-            case NAV_DOWN:
-                if(selectedIdx < numOptions - 1) selectedIdx++;
-                else selectedIdx = 0; // Nhảy vòng lên đầu
-                break;
-            case NAV_ENTER:
-                switch (selectedIdx){
-                    case 0:
-                        break;
-                    case 1:
-                        break;
-                    case 2:
-                        break;
-                    case 4:
-                        return;
-                    default:
-                        break;
-                    }
-                break;
-            case NAV_ESC: // Phím ESC để thoát
-                return;
-        }
-
+        SmallBox("Quản lí chuyến Bay Nội Địa",true,true,true,true,120,3);
+        Gotoxy(whereX(),whereY()+1);
+        int chossen = MainMenuOptionInBoard(options,5);
+        cin.ignore();
     }
 }

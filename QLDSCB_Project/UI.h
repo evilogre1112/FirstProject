@@ -46,6 +46,8 @@ extern int TotalWidth;
 #define CR "╣"
 #define AP "▲"
 #define AD "▼"
+#define ARL "◄"  // Hoặc "◀"
+#define ARR "►"  // Hoặc "▶"
 #define SAP "↑"
 #define SAD "↓"
 #define SQ "■"
@@ -146,6 +148,12 @@ int whereY();
  */
 void PrintBox(string text,bool ABOVE , bool UNDER );
 
+void ClearRegion(int x, int y, int width, int height);
+
+/**
+ * @brief hàm SmallBox nhưng ít tham số hơn
+ */
+void SmallBox(string text, int Width = 5, int Height = 40, string color = WHITE) ;
 /**
  * @brief Hàm này dùng để vẽ một hộp nhỏ với tùy chọn có/không cạnh
  * @param text Nội dung sẽ được hiển thị trong hộp
@@ -157,8 +165,10 @@ void PrintBox(string text,bool ABOVE , bool UNDER );
  * @param Width Chiều rộng của hộp
  * @param color Màu sắc của hộp
  */
-void SmallBox(string text , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Height = 5, int Width = 15, string color = WHITE);
+void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Height = 5, int Width = 15, string color = WHITE);
 
+int SubMenu(string options[], int length);
+int MainMenuOptionInBoard(string options[], int length);
 // Menu chính
 void MainScreen();
 
