@@ -167,6 +167,7 @@ void SmallBox(string text, int Width = 5, int Height = 40, string color = WHITE)
  */
 void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Height = 5, int Width = 15, string color = WHITE);
 
+int GetKey(int chossen,int count);
 int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
 // Menu chính

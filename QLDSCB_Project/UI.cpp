@@ -293,6 +293,23 @@ void PrintBox(string text, bool ABOVE , bool UNDER ){
     cout << margin << "║" << string(padleft,' ') << text << string(padright,' ') << "║" << endl ;
     cout << under << endl ;
 }
+int GetKey(int chossen,int count){
+    while(true){
+        NavKey key = GetNavKey();
+        switch (key) {
+            case NAV_UP:
+                chossen = (chossen - 1 >= 0) ? chossen - 1 : count - 1;
+                return chossen;
+            case NAV_DOWN:
+                chossen = (chossen + 1 < count) ? chossen + 1 : 0;
+                return chossen;
+            case NAV_ENTER:
+                return 999; 
+            case NAV_ESC:
+                return 1000; // Thoát không chọn
+        }
+    }
+}
 
 void SmallBox(string text, int Width, int Height, string color) {
     SmallBox(text, true, true, true, true, Width, Height, color); // Gọi hàm gốc với các giá trị mặc định
@@ -465,19 +482,7 @@ void ThaoTacQLHT(int mainMenuIdx) {
         }
 
         // 3. Bắt phím điều khiển
-        NavKey key = GetNavKey();
-        switch (key) {
-            case NAV_UP:
-                chossen = (chossen - 1 >= 0) ? chossen - 1 : count - 1;
-                break;
-            case NAV_DOWN:
-                chossen = (chossen + 1 < count) ? chossen + 1 : 0;
-                break;
-            case NAV_ENTER:
-                return ; 
-            case NAV_ESC:
-                return ; // Thoát không chọn
-        }
+        chossen = GetKey(chossen,count);
     }
 }
 
@@ -552,21 +557,7 @@ int MainMenuOptionInBoard(string options[], int length) {
             }
         }
         ViewQLHT(chossen);
-
-        NavKey key = GetNavKey();
-        switch(key) {
-            case NAV_UP:
-                chossen = (chossen - 1 >= 0) ? chossen - 1 : length - 1;
-                break;
-            case NAV_DOWN:
-                chossen = (chossen + 1 < length) ? chossen + 1 : 0;
-                break;
-            case NAV_ENTER:
-                ThaoTacQLHT(chossen);
-                break ;
-            case NAV_ESC:
-                return -1;
-        }
+        chossen = GetKey(chossen,length);
     }
 }
 
