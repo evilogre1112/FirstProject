@@ -5,6 +5,8 @@
 #include <string>
 #include "Global.h"
 #include "Logic.h"
+#include <functional>
+
 using namespace std;
 extern int TotalWidth;
 
@@ -71,6 +73,8 @@ enum NavKey {
     NAV_ESC,
     NAV_UNKNOWN
 };
+
+
 
 struct LineInfo {
     int byteCount;   // Số byte để dùng trong substr()
@@ -167,8 +171,15 @@ void SmallBox(string text, int Width = 5, int Height = 40, string color = WHITE)
  */
 void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Height = 5, int Width = 15, string color = WHITE);
 
+int GetKey(int chosen,int count);
 int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
+
+
+void Router_Board(int mainMenuIdx, 
+                  function<void()> func_1, 
+                  function<void()> func_2, 
+                  function<void()> func_3);
 // Menu chính
 void MainScreen();
 
