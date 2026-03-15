@@ -8,7 +8,12 @@
 #include <functional>
 
 using namespace std;
+
 extern int TotalWidth;
+extern listMB dsMB ;
+extern listCB dsCB ;
+extern listHK dsHK ;
+
 
 #define boxWidth 60
 
@@ -33,9 +38,27 @@ extern int TotalWidth;
 #define BOLDWHITE   "\033[1;37m"
 #define BOLDUNDERLINE "\033[1;4m"
 
+// Màu Bg
 #define BG_YELLOW        "\033[43m"
 #define BG_BRIGHT_YELLOW "\033[103m"
 #define TEXT_BLACK       "\033[30m"
+
+// Các Lệnh "Ảo Thuật" =)))
+#define NEWTAB   "\033[?1049h" // Tạo màn hình phụ
+#define CLOSETAB "\033[?1049l" // Đóng màn hình phụ
+// "\033[%d;%dH" lệnh di chuyển con trỏ trên window
+// \033 : Đây là mã ASCII của phím ESC (Escape), hệ bát phân (octal) là 033 (hệ thập phân là 27).rong C++, 
+// khi bạn đặt nó trong dấu nháy đơn '', trình biên dịch hiểu đây là một ký tự duy nhất (char) có mã ASCII là 27.
+// [ : Ký tự bắt buộc luôn đi liền sau ESC để mở đầu một lệnh điều khiển (gọi là CSI - Control Sequence Introducer).
+// %d;%d : Đây là chỗ của hàm printf để bạn nhét hai con số vào. Theo chuẩn ANSI, số đầu tiên là Dòng (Tọa độ Y), số thứ hai là Cột (Tọa độ X).
+// H: Chữ cái chốt sổ. Nó là mã lệnh của hành động Cursor Position (Đặt vị trí con trỏ).
+// ?1049: Đây là mã ID của một tính năng cụ thể trong chuẩn Terminal. Mã 1049 đại diện cho hành động kép: Lưu lại vị trí con trỏ hiện tại + Mở ra một bộ đệm màn hình mới tinh.
+// h: Viết tắt của High (hoặc Set/Enable). Nghĩa là "Bật tính năng này lên".
+// l: Viết tắt của low (hoặc Reset/Disable). Nghĩa là "tắt tính năng này đi".
+// "\033[6n" là Device Status Report - Cursor Position Report (Yêu cầu báo cáo vị trí con trỏ).
+// 6: Mã hiệu cụ thể của câu hỏi: "Con trỏ hiện tại đang đứng ở dòng mấy, cột mấy?"
+// n: đại diện cho lệnh yêu cầu báo cáo trạng thái (Report).
+// sử dụng lệnh cout hoặc prinf để sử dụng những hàm này 
 
 // Ký tự vẽ khung
 #define AL "╔"
@@ -69,6 +92,8 @@ extern int TotalWidth;
 enum NavKey {
     NAV_UP,
     NAV_DOWN,
+    NAV_LEFT,
+    NAV_RIGHT,
     NAV_ENTER,
     NAV_ESC,
     NAV_UNKNOWN
@@ -174,12 +199,16 @@ void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LE
 int GetKey(int chosen,int count);
 int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
+bool InputString(string &result, int x, int y, int maxLength);
 
+void Router_B(int mainMenuIdx, function<void()> func_1 = [](){}, 
+                  function<void()> func_2 = [](){}, 
+                  function<void()> func_3 = [](){});
 
 void Router_Board(int mainMenuIdx, 
-                  function<void()> func_1, 
-                  function<void()> func_2, 
-                  function<void()> func_3);
+                  function<void()> func_1 = [](){}, 
+                  function<void()> func_2 = [](){}, 
+                  function<void()> func_3 = [](){});
 // Menu chính
 void MainScreen();
 
