@@ -86,7 +86,6 @@ extern listHK dsHK ;
 #define BRC "╯"
 #define BLC "╰"
 #define HZ "─" 
-#define BLC "╰"
 #define DM "◈"
 
 enum NavKey {
@@ -96,6 +95,7 @@ enum NavKey {
     NAV_RIGHT,
     NAV_ENTER,
     NAV_ESC,
+    NAV_BACK,
     NAV_UNKNOWN
 };
 
@@ -194,12 +194,28 @@ void SmallBox(string text, int Width = 5, int Height = 40, string color = WHITE)
  * @param Width Chiều rộng của hộp
  * @param color Màu sắc của hộp
  */
-void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Height = 5, int Width = 15, string color = WHITE);
+void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Width = 15, int Height = 5, string color = WHITE);
+
+// Hàm lấy Ngày (DD) - Cắt 2 ký tự từ vị trí 0
+int GetDayFromStr(const string &datetimeStr);
+// Hàm lấy Tháng (MM) - Cắt 2 ký tự từ vị trí 3
+int GetMonthFromStr(const string &datetimeStr);
+// Hàm lấy Năm (YYYY) - Cắt 4 ký tự từ vị trí 6
+int GetYearFromStr(const string &datetimeStr);
+// Hàm lấy Giờ (HH) - Cắt 2 ký tự từ vị trí 11
+int GetHourFromStr(const string &datetimeStr);
+// Hàm lấy Phút (MM) - Cắt 2 ký tự từ vị trí 14
+int GetMinuteFromStr(const string &datetimeStr);
+
+NavKey GetNavKey(int &ch);
+NavKey GetNavKey();
 
 int GetKey(int chosen,int count);
 int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
-bool InputString(string &result, int x, int y, int maxLength);
+void CustomerAddCB();
+void RunInNewTab(void (*func)());
+int InputString(string &result, int x, int y, int maxLength, char placeholder = '_', bool onlyNumbers = false);
 
 void Router_B(int mainMenuIdx, function<void()> func_1 = [](){}, 
                   function<void()> func_2 = [](){}, 
