@@ -283,6 +283,9 @@ bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime &newTime) {
     CB* temp = Find_CB(dsCB, maCB);
     if (temp == NULL) return false;
     if (temp->trangThai == 3 || temp->trangThai == 0) return false;
+    for (int i = 0; i < temp->socho; i++) {
+        if (temp->DSV[i][0] != '\0') return false; // khon cho phep thay doi thoi gian khoi hanh neu CB da co hanh khach dat
+    }
     temp->ngayKH = newTime;
     return true;
 }

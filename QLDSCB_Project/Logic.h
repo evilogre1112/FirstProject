@@ -32,7 +32,7 @@ int ss_str(char* const a, char* const b); // so sánh 2 chuỗi
  */
 bool Save_MB(ofstream& save, listMB& dsMB);
 
-void swap_MB(MB &a, MB &b); // tien ich swap noi dung cua 2 may bay
+void swap_MB(MB* &a, MB* &b); // tien ich swap noi dung cua 2 may bay
 
 /**
  * @brief       sắp xếp danh sách máy bay theo mã máy bay, sử dụng quick_sort
@@ -74,6 +74,7 @@ bool Add_MB(listMB& dsMB, MB* newMB);
  * @param soHieuMB  Chuỗi C15 chứa mã máy bay cần xóa
  * @return          true nếu tìm thấy và xóa thành công, false nếu không tìm thấy
  */
+// LUư Ý: Khi truyền soHieuMB khồng được truyền dạng con trỏ của dsMB, ví dụ dsMB.list[i]->soHieuMB
 bool Del_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB);
 
 /**
@@ -84,6 +85,7 @@ bool Del_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB);
  * @return              true nếu hiệu chỉnh thành công
  */
 // LUƯ Ý: infoUpdate SẼ KHÔNG TỰ ĐÔNG ĐƯỢC GIẢI PHÓNG BỘ NHỚ TRONG HÀM
+// LUư Ý: Khi truyền soHieuMB khồng được truyền dạng con trỏ của dsMB, ví dụ dsMB.list[i]->soHieuMB
 bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB* infoUpdate);
 
 // --- CÂU B: QUẢN LÝ CHUYẾN BAY ---
@@ -135,6 +137,7 @@ CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB);
  * @param newCB     Con trỏ trỏ đến node chuyến bay mới đã được cấp phát
  * @return          true nếu thêm thành công, false nếu trùng mã chuyến bay
  */
+// LƯU Ý: Hàm Add_CB không hề tự động khởi tạo DSV, hãy khởi tạo DSV bằng hàm Init_Tickets
 bool Add_CB(listCB &dsCB, listMB &dsMB, CB* newCB);
 
 /**
@@ -203,7 +206,7 @@ HK* Find_HK(listCB &dsCB, HK* root, char* const maCB, char* const cmnd);
  * @param phai  Phái Nam/Nu
  * @return      true nếu thêm thành công, false nếu trùng mã CMND
  */
-bool Add_HK(HK *root, char* const ho, char* const ten, char* const cmnd, bool phai);
+bool Add_HK(HK* &root, char* const ho, char* const ten, char* const cmnd, bool phai);
 
 /**
  * @brief       Kiểm tra hành khách đã mua vé trên chuyến bay này chưa (1 vé/chuyến)
