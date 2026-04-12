@@ -316,8 +316,8 @@ void Init_Tickets(CB *newCB, int soCho) {
     }
 }
 
-HK* Find_HK_At_List(HK* root, char* const cmnd) {
-    HK* temp = root;
+HK* Find_HK_At_List(listHK &dsHK, char* const cmnd) {
+    HK* temp = dsHK.goc;
     while(temp != NULL) {
         int result = ss_str(temp->cmnd, cmnd);
         if (result == 0) return temp;
@@ -327,11 +327,11 @@ HK* Find_HK_At_List(HK* root, char* const cmnd) {
     return NULL;
 }
 
-HK* Find_HK(listCB &dsCB, HK* root, char* const maCB, char* const cmnd) {
+HK* Find_HK(listCB &dsCB, listHK &dsHK, char* const maCB, char* const cmnd) {
     CB* cb = Find_CB(dsCB, maCB);
     if (cb == NULL) return NULL;
     if (cb->DSV == NULL) return NULL;
-    HK* hk = Find_HK_At_List(root, cmnd);
+    HK* hk = Find_HK_At_List(dsHK, cmnd);
     if (hk == NULL) return NULL;
     for (int i = 0; i < cb->socho; i++) {
         if (cb->DSV[i][0] == '\0') continue;
@@ -341,21 +341,21 @@ HK* Find_HK(listCB &dsCB, HK* root, char* const maCB, char* const cmnd) {
     return NULL;
 }
 
-bool Add_HK(HK* &root, char* const ho, char* const ten, char* const cmnd, bool phai) {
-    HK* temp = Find_HK_At_List(root, cmnd);
-    if (temp != NULL) return false;
-    
+bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai) {
     HK* newHK = new HK();
     newHK->set_ho(ho);
     newHK->set_ten(ten);
     newHK->set_cmnd(cmnd);
     newHK->set_phai(phai);
     
-    if (root == NULL) {
-        root = newHK;
+    if (dsHK.goc == NULL) {
+        dsHK.goc = newHK;
+        dsHK.slHK++;
         return true;
     }
-    temp = root;
+    
+    HK* temp = dsHK.goc;
+    
     while (temp != NULL) {
         int result = ss_str(newHK->cmnd, temp->cmnd);
         if (result == 1) {
@@ -365,14 +365,16 @@ bool Add_HK(HK* &root, char* const ho, char* const ten, char* const cmnd, bool p
             }
             else temp = temp->right;
         }
-        else {
+        else if (result == 2) {
             if (temp->left == NULL) {
                 temp->left = newHK;
                 break;
             }
             else temp = temp->left;
         }
+        else return false;
     }
+    dsHK.slHK++;
     return true;
 }
 

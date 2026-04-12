@@ -182,31 +182,31 @@ void Init_Tickets(CB* newCB, int soCho);
 
 /**
  * @brief       Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
- * @param   root    Gốc của dsHK
+ * @param   dsHK   danh sách hành khách (BST)
  * @param   cmnd    Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
-HK* Find_HK_At_List(HK* root, char* const cmnd);
+HK* Find_HK_At_List(listHK &dsHK, char* const cmnd);
 
 /**
  * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
  * @param dsCB  danh sách chuyến bay
- * @param root  Nút gốc của cây HK (Cây BST)
+ * @param dsHK   danh sách hành khách (BST)
  * @param cmnd  Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
-HK* Find_HK(listCB &dsCB, HK* root, char* const maCB, char* const cmnd);
+HK* Find_HK(listCB &dsCB, listHK &dsHK, char* const maCB, char* const cmnd);
 
 /**
  * @brief       Thêm một hành khách mới vào cây BST
- * @param root  Nút gốc ủa cây hành khách (cây BST)
+ * @param dsHK   danh sách hành khách (BST)
  * @param ho    Họ
  * @param ten   Tên
  * @param cmnd  Chứng minh nhân dân
  * @param phai  Phái Nam/Nu
  * @return      true nếu thêm thành công, false nếu trùng mã CMND
  */
-bool Add_HK(HK* &root, char* const ho, char* const ten, char* const cmnd, bool phai);
+bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai);
 
 /**
  * @brief       Kiểm tra hành khách đã mua vé trên chuyến bay này chưa (1 vé/chuyến)
