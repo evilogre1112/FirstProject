@@ -23,55 +23,36 @@ int ss_str(char* const a, char* const b) {
 // Hàm Đọc và Ghi file
 bool Save_MB(ofstream& save, listMB& dsMB);
 
-// Tiện ích sắp xếp
-void Merge_MB(listMB& dsMB, int l,int m, int r) {
-    int x_size = m - l + 1; int y_size = r - m;
-    MB** x = new MB*[x_size]; MB** y = new MB*[y_size];
-    int nx = l; int ny = m + 1;
-    for (int i = 0; i < x_size; i++) {
-        x[i] = dsMB.list[nx];
-        nx++;
-    }
-    for (int j = 0; j < y_size; j++) {
-        y[j] = dsMB.list[ny];
-        ny++;
-    }
-    int i = 0; int j = 0;
-    while (i < x_size && j < y_size) {
-        if (ss_str(x[i]->soHieuMB, y[j]->soHieuMB) != 1) {
-            dsMB.list[l] = x[i];
-            i++;
-        }
-        else {
-            dsMB.list[l] = y[j];
-            j++;
-        }
-        l++;
-    }
-    if (i == x_size) {
-        for (int s = j; s < y_size; s++) {
-            dsMB.list[l] = y[s];
-            l++;
-        }
-    }
-    else {
-        for (int s = i; s < x_size; s++) {
-            dsMB.list[l] = x[s];
-            l++;
-        }
-    }
-    delete[] x;
-    delete[] y;
+void swap_MB(MB* &a, MB* &b) {
+    MB temp = *a;
+    *a = *b;
+    *b = temp;
 }
-// Merge sort MB
+// Tiện ích sắp xếp
+
+int Hoare_Partion(listMB& dsMB, int l,int r) {
+    int i = l, j = r;
+    char pivot[soHieuMB_max];
+    strcpy(pivot, dsMB.list[l]->soHieuMB);
+    while (true) {
+        while (ss_str(dsMB.list[i]->soHieuMB, pivot) == 2) i++;
+        while (ss_str(dsMB.list[j]->soHieuMB, pivot) == 1) j--;
+        if (i < j) {
+            swap_MB(dsMB.list[i], dsMB.list[j]);
+            i++;
+            j--;
+        }
+        else return j;
+    }
+    return j;
+}
+// Quick sort MB
 void Sort_MB(listMB& dsMB, int l, int r) {
     if (l >= r) return;
-    int m = (r + l) / 2;
+    int m = Hoare_Partion(dsMB, l, r);
     Sort_MB(dsMB, l, m);
     Sort_MB(dsMB, m + 1, r);
-    Merge_MB(dsMB, l, m, r);
 }
-
 // Tìm vị trí chèn
 int find_insert_posMB(listMB& dsMB, char* const soHieuMB) {
     int l = 0, r = dsMB.slMB - 1;
@@ -342,7 +323,7 @@ HK* Find_HK_At_List(HK* root, char* const cmnd) {
     return Find_HK_At_List(root->right, cmnd);
 }
 
-bool Add_HK(HK *&dsHK, const char* ho, const char* ten, const char* cmnd, const char* phai) {
+bool Add_HK(listHK &dsHK, HK* newHK) {
     return false;
 }
 
