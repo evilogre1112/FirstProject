@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <conio.h>
+
 
 using namespace std;
 
@@ -75,7 +75,7 @@ bool DateTime::set_yy(int y){
 }
 bool DateTime::set_dd(int d){
     short thang[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    if (yy % 4==0 && yy % 100 != 0|| yy%400==0) thang[2]=29;
+    if (yy % 4==0 && yy % 100 != 0|| yy % 400==0) thang[2]=29;
     if (d >= 1 && d <= thang[mt]) {
         dd = d;
         return true;

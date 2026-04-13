@@ -1,3 +1,4 @@
+MB1|Test1|20
 VN-A321|Airbus A321|20
 VN-A350|Airbus A350-900|20
 VN-A586|Boeing 787-9|274

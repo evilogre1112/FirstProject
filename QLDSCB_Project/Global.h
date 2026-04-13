@@ -20,6 +20,7 @@
 using namespace std;
 
 const int slMB_max = 300;
+const int slCB_max = 300;
 const int soHieuMB_max = 15;
 const int loaiMB_max = 40;
 const int maCB_max= 16;

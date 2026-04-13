@@ -74,66 +74,64 @@ int MenusSize[] = {
 
 int TotalWidth = 0;
 
-NavKey GetNavKey() {
-
+NavKey GetNavKey(int &ch) {
 #ifdef _WIN32
-    int key = _getch();
-    if(key == 224 || key == 0) {
-        key = _getch();
-        if(key == 72) return NAV_UP;
-        if(key == 80) return NAV_DOWN;
-        if(key == 75) return NAV_LEFT;  // Thêm mũi tên trái
-        if(key == 77) return NAV_RIGHT; // Thêm mũi tên phải
-    } 
-    else if(key == 13) return NAV_ENTER;
-    else if(key == 27) return NAV_ESC;
-    // Thêm phím chữ cho Windows nếu muốn đồng bộ với Linux
-    else if(key == 'w' || key == 'W') return NAV_UP;
-    else if(key == 's' || key == 'S') return NAV_DOWN;
-    else if(key == 'a' || key == 'A') return NAV_LEFT;
-    else if(key == 'd' || key == 'D') return NAV_RIGHT;
-
+    ch = _getch();
+    if (ch == 224 || ch == 0) {
+        ch = _getch();
+        if (ch == 72) return NAV_UP;
+        if (ch == 80) return NAV_DOWN;
+        if (ch == 75) return NAV_LEFT;
+        if (ch == 77) return NAV_RIGHT;
+        return NAV_UNKNOWN;
+    }
+    if (ch == 13) return NAV_ENTER;
+    if (ch == 27) return NAV_ESC;
+    if (ch == 8) return NAV_BACK;
 #else
     struct termios oldt, newt;
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
     newt.c_lflag &= ~(ICANON | ECHO);
-    
-    newt.c_cc[VMIN] = 0; 
-    newt.c_cc[VTIME] = 1; 
-    
+    newt.c_cc[VMIN] = 0;
+    newt.c_cc[VTIME] = 1;
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
     char seq[3];
     int bytesRead = read(STDIN_FILENO, &seq[0], 1);
     NavKey result = NAV_UNKNOWN;
-
     if (bytesRead == 1) {
-        if (seq[0] == 27) { 
-            // Đọc thêm 2 byte nếu là phím mũi tên (ESC [ + A/B/C/D)
+        ch = (unsigned char)seq[0];
+        if (seq[0] == 27) {
             if (read(STDIN_FILENO, &seq[1], 1) == 1 && read(STDIN_FILENO, &seq[2], 1) == 1) {
                 if (seq[1] == 91) {
                     if (seq[2] == 65) result = NAV_UP;
                     else if (seq[2] == 66) result = NAV_DOWN;
-                    else if (seq[2] == 67) result = NAV_RIGHT; // Thêm mũi tên phải (ANSI 'C')
-                    else if (seq[2] == 68) result = NAV_LEFT;  // Thêm mũi tên trái (ANSI 'D')
+                    else if (seq[2] == 67) result = NAV_RIGHT;
+                    else if (seq[2] == 68) result = NAV_LEFT;
                 }
             } else {
-                result = NAV_ESC; 
+                result = NAV_ESC;
             }
-        } 
+        }
         else if (seq[0] == 10 || seq[0] == 13) result = NAV_ENTER;
-        else if (seq[0] == 'w' || seq[0] == 'W') result = NAV_UP;
-        else if (seq[0] == 's' || seq[0] == 'S') result = NAV_DOWN;
-        else if (seq[0] == 'a' || seq[0] == 'A') result = NAV_LEFT;  // Thêm phím A
-        else if (seq[0] == 'd' || seq[0] == 'D') result = NAV_RIGHT; // Thêm phím D
+        else if (seq[0] == 127 || seq[0] == 8) result = NAV_BACK;
     }
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt); 
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
     return result;
 #endif
-
     return NAV_UNKNOWN;
+}
+
+NavKey GetNavKey() {
+    int ch;
+    NavKey key = GetNavKey(ch);
+    if (key == NAV_UNKNOWN) {
+        if (ch == 'w' || ch == 'W') return NAV_UP;
+        if (ch == 's' || ch == 'S') return NAV_DOWN;
+        if (ch == 'a' || ch == 'A') return NAV_LEFT;
+        if (ch == 'd' || ch == 'D') return NAV_RIGHT;
+    }
+    return key;
 }
 
 int GetTerminalWidth(){
@@ -219,6 +217,43 @@ int whereY() {
     return y;
 #endif
 }
+void RunInNewTab(void (*func)()) {
+    cout << NEWTAB;
+    func();
+    cout << CLOSETAB;
+}
+// Hàm lấy Ngày (DD) - Cắt 2 ký tự từ vị trí 0
+int GetDayFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1; 
+    try { return stoi(datetimeStr.substr(0, 2)); } 
+    catch (...) { return -1; }
+}
+
+
+int GetMonthFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1;
+    try { return stoi(datetimeStr.substr(3, 2)); } 
+    catch (...) { return -1; }
+}
+
+
+int GetYearFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1;
+    try { return stoi(datetimeStr.substr(6, 4)); } 
+    catch (...) { return -1; }
+}
+
+int GetHourFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1;
+    try { return stoi(datetimeStr.substr(11, 2)); } 
+    catch (...) { return -1; }
+}
+
+int GetMinuteFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1;
+    try { return stoi(datetimeStr.substr(14, 2)); } 
+    catch (...) { return -1; }
+}
 
 int visualLength(const string& s) {
     int length = 0;
@@ -241,9 +276,34 @@ int visualLength(const string& s) {
     }
     return length;
 }
+int InputStatus(string &result, int x, int y, char placeholder = '_'){
+    Gotoxy(x, y);
+    cout << result;
+    while (true) {
+        int ch ;
+        NavKey key = GetNavKey(ch); 
 
+        if (key == NAV_UP) return NAV_UP;
+        if (key == NAV_DOWN) return NAV_DOWN;
+        if (key == NAV_ENTER) return NAV_ENTER;
+        if (key == NAV_ESC) return NAV_ESC;
+
+        if (key == NAV_BACK) { // Phím BACKSPACE
+            if (!result.empty()) {
+                result.pop_back();
+                cout << "\b" << placeholder << "\b";
+            }
+        } 
+        else if (result.length() < 1) {
+            if (result.empty() && ch == ' ') continue;
+            if(ch - '0' > 3 || ch -'0' < 0) continue ;
+            result += (char)ch;
+            cout << (char)ch;
+        }
+    }
+}
 // Trả về: 0 (ESC), 1 (ENTER), 2 (UP), 3 (DOWN)
-int InputString(string &result, int x, int y, int maxLength, char placeholder = '_', bool onlyNumbers = false) {
+int InputString(string &result, int x, int y, int maxLength, char placeholder , bool onlyNumbers ) {
     // Không reset 'result' về rỗng để giữ lại chữ cũ khi người dùng quay lại ô này
     Gotoxy(x, y);
     cout << string(maxLength, placeholder); 
@@ -251,36 +311,131 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder = 
     cout << result; // In đè chữ cũ lên trên hàng gạch
 
     while (true) {
-        if (_kbhit()) {
-            int ch = _getch();
+        int ch ;
+        NavKey key = GetNavKey(ch); 
 
-            // Xử lý phím mũi tên
-            if (ch == 224 || ch == 0) {
-                ch = _getch(); 
-                if (ch == 72) return 2; // Nhấn Mũi tên LÊN
-                if (ch == 80) return 3; // Nhấn Mũi tên XUỐNG
-                continue; 
+        if (key == NAV_UP) return NAV_UP;
+        if (key == NAV_DOWN) return NAV_DOWN;
+        if (key == NAV_ENTER) return NAV_ENTER;
+        if (key == NAV_ESC) return NAV_ESC;
+
+        if (key == NAV_BACK) { // Phím BACKSPACE
+            if (!result.empty()) {
+                result.pop_back();
+                cout << "\b" << placeholder << "\b";
             }
+        } 
+        else if (result.length() < maxLength) {
+            // CHẶN CHỮ NGAY TỪ LÚC GÕ
+            if (onlyNumbers && !isdigit(ch)) continue; 
+            
+            // Các ràng buộc khác
+            if (!onlyNumbers && !isprint(ch)) continue;
+            if (result.empty() && ch == ' ') continue;
 
-            if (ch == 13) return 1; // Phím ENTER
-            if (ch == 27) return 0; // Phím ESC
+            result += (char)ch;
+            cout << (char)ch;
+        }
+    }
+}
 
-            if (ch == 8) { // Phím BACKSPACE
+int InputDateTime(string &result, int x, int y, char placeholder = '_') {
+    int maxLength = 16; 
+    Gotoxy(x, y); cout << string(maxLength, placeholder);
+    Gotoxy(x, y); cout << result;
+
+    while (true) {
+        int ch ;
+        NavKey key = GetNavKey(ch); 
+
+        if (key == NAV_UP) return NAV_UP;
+        if (key == NAV_DOWN) return NAV_DOWN;
+        if (key == NAV_ENTER) return NAV_ENTER;
+        if (key == NAV_ESC) return NAV_ESC;
+
+        if (key == NAV_BACK) { // BACKSPACE
+            if (!result.empty()) {
+                char last = result.back();
+                if (last == '/' || last == ' ' || last == ':') {
+                    result.pop_back();
+                    cout << "\b" << placeholder << "\b";
+                }
                 if (!result.empty()) {
                     result.pop_back();
                     cout << "\b" << placeholder << "\b";
                 }
-            } 
-            else if (result.length() < maxLength) {
-                // CHẶN CHỮ NGAY TỪ LÚC GÕ
-                if (onlyNumbers && !isdigit(ch)) continue; 
-                
-                // Các ràng buộc khác
-                if (!onlyNumbers && !isprint(ch)) continue;
-                if (result.empty() && ch == ' ') continue;
+            }
+        } 
+        else if (result.length() < maxLength) {
+            if (!isdigit(ch)) continue; // Chỉ cho phép nhập số
 
-                result += (char)ch;
-                cout << (char)ch;
+            int len = result.length();
+            
+            // 1. Kiểm tra Ngày (01 - 31)
+            if (len == 0 && (ch < '0' || ch > '3')) continue; 
+            if (len == 1) {
+                if (result[0] == '3' && (ch < '0' || ch > '1')) continue; 
+                if (result[0] == '0' && ch == '0') continue; // Chặn ngày 00
+            }
+
+            // 2. Kiểm tra Tháng (01 - 12) và tương quan với Ngày
+            if (len == 3 && (ch < '0' || ch > '1')) continue; 
+            if (len == 4) {
+                if (result[3] == '1' && (ch < '0' || ch > '2')) continue; 
+                if (result[3] == '0' && ch == '0') continue; // Chặn tháng 00
+
+                int d = (result[0] - '0') * 10 + (result[1] - '0');
+                int m = (result[3] - '0') * 10 + (ch - '0');
+                if (d == 31 && (m == 2 || m == 4 || m == 6 || m == 9 || m == 11)) continue;
+                
+                // Chặn gõ tháng 2 nếu ngày đang là 30
+                if (d >= 30 && m == 2) continue; 
+            }
+
+            // 3. Kiểm tra Năm (Giới hạn chặt: 1900 - 2100)
+            if (len == 6) {
+                if (ch != '1' && ch != '2') continue; // Chỉ cho phép bắt đầu bằng 1 hoặc 2
+            }
+            if (len == 7) {
+                if (result[6] == '1' && ch != '9') continue; // 1 -> 19
+                if (result[6] == '2' && ch != '0' && ch != '1') continue; // 2 -> 20 hoặc 21
+            }
+            if (len == 8) {
+                if (result[6] == '2' && result[7] == '1' && ch != '0') continue; 
+            }
+            if (len == 9) {
+                if (result[6] == '2' && result[7] == '1' && result[8] == '0' && ch != '0') continue;
+
+                // Kiểm tra năm nhuận nếu người dùng đã gõ ngày 29/02 trước đó
+                int d = (result[0] - '0') * 10 + (result[1] - '0');
+                int m = (result[3] - '0') * 10 + (result[4] - '0');
+                if (d == 29 && m == 2) {
+                    int y = (result[6] - '0') * 1000 + (result[7] - '0') * 100 + (result[8] - '0') * 10 + (ch - '0');
+                    bool isLeap = (y % 400 == 0) || (y % 4 == 0 && y % 100 != 0);
+                    if (!isLeap) continue; // Chặn phím nếu năm tạo thành không phải năm nhuận
+                }
+            }
+
+            // 4. Kiểm tra Giờ (00 - 23)
+            if (len == 11 && (ch < '0' || ch > '2')) continue; 
+            if (len == 12) {
+                if (result[11] == '2' && (ch < '0' || ch > '3')) continue; 
+            }
+
+            // 5. Kiểm tra Phút (00 - 59)
+            if (len == 14 && (ch < '0' || ch > '5')) continue; 
+
+            result += (char)ch;
+            cout << (char)ch;
+
+            // Tự động chèn ký tự phân cách
+            len = result.length(); 
+            if ((len == 2 || len == 5) && len < maxLength) {
+                result += '/'; cout << '/';
+            } else if (len == 10 && len < maxLength) {
+                result += ' '; cout << ' ';
+            } else if (len == 13 && len < maxLength) {
+                result += ':'; cout << ':';
             }
         }
     }
@@ -548,23 +703,20 @@ void CustomerAddMB() {
         } else if (currentField == 1) {
             action = InputString(inputs[1], inputX, formY + 6, loaiMB_max, '_', false);
         } else if (currentField == 2) {
-            // Tham số TRUE cuối cùng sẽ chặn toàn bộ các ký tự không phải là số
             action = InputString(inputs[2], inputX, formY + 10, 3, '_', true); 
         }
 
-        // Xử lý sự kiện trả về từ InputString
-        if (action == 0){
+        if (action == NAV_ESC){
             ClearScreen();
-            return; // Nhấn ESC -> Hủy hoàn toàn form
+            return; 
         } 
-        
-        else if (action == 2) { // Nhấn LÊN
+        else if (action == NAV_UP) { 
             currentField = (currentField == 0) ? 2 : currentField - 1;
         } 
-        else if (action == 3) { // Nhấn XUỐNG
+        else if (action == NAV_DOWN) { 
             currentField = (currentField == 2) ? 0 : currentField + 1;
-        }else if (action == 1) { // Nhấn ENTER
-            // --- BƯỚC 1: KIỂM TRA ĐÃ ĐIỀN ĐỦ 3 MỤC CHƯA ---
+        }else if (action == NAV_ENTER) { 
+            // --- KIỂM TRA ĐÃ ĐIỀN ĐỦ 3 MỤC CHƯA ---
             if (!inputs[0].empty() && !inputs[1].empty() && !inputs[2].empty()) {
                 
                 // --- Đã điền đủ: Tiến hành kiểm tra logic và hỏi lưu ---
@@ -608,7 +760,7 @@ void CustomerAddMB() {
                 NewMB->socho = soCho;
 
                 if(Add_MB(dsMB, NewMB)) {
-                    Gotoxy(startX + 20, formY + 16);
+                    Gotoxy(startX + 20, formY + 18);
                     cout << YELLOW << "Đã lưu thành công! Nhấn phím bất kỳ để thoát." << RESET;
                     _getch();
                     ClearScreen();
@@ -625,7 +777,7 @@ void CustomerAddMB() {
                 }
 
             } else {
-                // --- BƯỚC 2: CHƯA ĐIỀN ĐỦ MỤC ---
+                // --- CHƯA ĐIỀN ĐỦ MỤC ---
                 if (currentField < 2) {
                     currentField++; // Nếu đang ở trên thì tự xuống dòng
                 } else {
@@ -634,7 +786,6 @@ void CustomerAddMB() {
                     cout << RED << "Lỗi: Không được để trống bất kỳ trường nào! Bấm phím bất kỳ..." << RESET;
                     _getch();
                     
-                    // Tính năng thông minh: Tự động nhảy con trỏ tìm ô trống đầu tiên
                     for (int i = 0; i < 3; i++) {
                         if (inputs[i].empty()) {
                             currentField = i;
@@ -646,6 +797,173 @@ void CustomerAddMB() {
         }
     }
 }
+
+void CustomerAddCB() {
+    int width = 80;
+    int startX = (GetTerminalWidth() - width) / 2;
+    int formY = 6;
+
+    if (dsCB.slCB >= slCB_max) {
+        ClearScreen();
+        Gotoxy(startX, 10);
+        cout << RED << "Lỗi: Danh sách chuyến bay đã đầy! Không thể thêm." << RESET;
+        _getch();
+        return; 
+    }
+
+    ClearScreen();
+    Gotoxy(startX, 1);
+    SmallBox("THÊM CHUYẾN BAY MỚI", (int)width, (int)3, (string)YELLOW);
+    
+    Gotoxy(startX, formY);
+    SmallBox("", true, true, true, true, width, 13, WHITE); // Giảm chiều cao box xuống 15
+
+    string labels[] = {"Mã Chuyến bay:", "Ngày giờ khởi hành:", "Sân bay đến:", "Số hiệu máy bay:","Trạng Thái:"};
+    int labelX = startX + 5;
+    int inputX = startX + 25;
+
+    // Đổi khoảng cách từ (i * 4) thành (i * 2)
+    for (int i = 0; i < 5; i++) {
+        Gotoxy(labelX, formY + 2 + (i * 2));
+        cout << labels[i];
+        Gotoxy(inputX, formY + 2 + (i * 2));
+        cout << string(50, '_'); 
+    }
+    
+    string text = "ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy";
+    Gotoxy(startX, formY + 15); // Đưa dòng hướng dẫn lên sát mép dưới form
+    SmallBox(text, (int)width, (int)3, (string)WHITE);
+    // --- LOGIC NHẬP LIỆU VÀ ĐIỀU HƯỚNG ---
+    string inputs[5] = {"", "", "","",""}; 
+    int currentField = 0; // 0: Mã_CB, 1: Ngày giờ khởi hành, 2: Sbd , 3: shMB, 4: status 
+
+    while (true) {
+        Gotoxy(startX + 5, formY + 12); cout << string(width - 10, ' ');
+
+        int action;
+        if (currentField == 0) {
+            action = InputString(inputs[0], inputX, formY + 2, maCB_max, '_', false);
+        } else if (currentField == 1) {
+            action = InputDateTime(inputs[1], inputX, formY + 4, '_');
+        } else if (currentField == 2) {
+            // Tham số TRUE cuối cùng sẽ chặn toàn bộ các ký tự không phải là số
+            action = InputString(inputs[2], inputX, formY + 6, sbDich_max, '_', false); 
+        }else if (currentField == 3){
+            action = InputString(inputs[3], inputX, formY + 8, soHieuMB_max , '_', false);
+        }else if(currentField == 4){
+            action = InputStatus(inputs[4], inputX, formY + 10, '_');
+        }
+
+        // Xử lý sự kiện trả về từ InputString
+        if (action == NAV_ESC){
+            ClearScreen();
+            return; 
+        } 
+        
+        else if (action == NAV_UP) { 
+            currentField = (currentField == 0) ? 4 : currentField - 1;
+        } 
+        else if (action == NAV_DOWN) { 
+            currentField = (currentField == 4) ? 0 : currentField + 1;
+        }else if (action == NAV_ENTER) { // Nhấn ENTER
+            if (!inputs[0].empty() && !inputs[1].empty() && !inputs[2].empty() && !inputs[3].empty() && !inputs[4].empty() ) {
+                if (GetDayFromStr(inputs[1]) == -1) {
+                    Gotoxy(startX + 5, formY + 12); 
+                    cout << RED << "Lỗi: Ngày giờ khởi hành chưa điền đủ định dạng! Bấm phím bất kỳ..." << RESET;
+                    _getch(); 
+                    currentField = 1; 
+                    continue;
+                }
+                Gotoxy(startX, formY + 15);
+                SmallBox("Xác nhận thêm chuyến bay này? (ENTER: Đồng ý - ESC: Quay lại sửa)", (int)width, (int)3, (string)YELLOW);
+                
+                bool isConfirm = false;
+                while (true) {
+                    NavKey confirmKey = GetNavKey();
+                    if (confirmKey == NAV_ENTER) {
+                        isConfirm = true;
+                        break;
+                    } else if (confirmKey == NAV_ESC) {
+                        isConfirm = false;
+                        break;
+                    }
+                }
+
+                if (!isConfirm) {
+                    Gotoxy(startX, formY + 15);
+                    SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
+                    continue; 
+                }
+
+                // --- TIẾN HÀNH LƯU ---
+                Gotoxy(startX, formY + 15);
+                SmallBox("ĐANG LƯU DỮ LIỆU...", (int)width, (int)3, (string)GREEN);
+
+                CB* NewCB = new CB; 
+                NewCB->set_maCB(const_cast<char*>(inputs[0].c_str()));
+                NewCB->ngayKH.set_dd(GetDayFromStr(inputs[1]));
+                NewCB->ngayKH.set_mm(GetMonthFromStr(inputs[1]));
+                NewCB->ngayKH.set_yy(GetYearFromStr(inputs[1]));
+                NewCB->ngayKH.set_hh(GetHourFromStr(inputs[1]));
+                NewCB->ngayKH.set_mt(GetMinuteFromStr(inputs[1]));
+                
+                NewCB->set_sbDich(const_cast<char*>(inputs[2].c_str()));
+                NewCB->set_soHieuMB(const_cast<char*>(inputs[3].c_str()));
+                NewCB->trangThai = stoi(inputs[4]);
+
+                int pos = Find_MB(dsMB, NewCB->soHieuMB) ; 
+                if (pos != -1) {
+                    NewCB->set_socho(dsMB.list[pos]->socho);
+                }
+
+                if(Add_CB(dsCB,dsMB, NewCB)) {
+                    Gotoxy(startX + 15, formY + 18);
+                    cout << YELLOW << "Đã lưu thành công! Nhấn phím bất kỳ để thoát." << RESET;
+                    _getch();
+                    ClearScreen();
+                    return; 
+                } else {
+                    Gotoxy(startX + 5, formY + 17); cout << string(width - 10, ' '); 
+                    Gotoxy(startX + 10, formY + 17);
+                    
+                    if(Find_MB(dsMB, NewCB->soHieuMB) == -1) {
+                        cout << RED << "Lỗi: Số hiệu [" << inputs[3] << "] không tồn tại trong bãi!" << RESET;
+                    }
+                    else if(Find_CB(dsCB, NewCB->maCB) != nullptr) {
+                        cout << RED << "Lỗi: Mã chuyến bay [" << inputs[0] << "] đã tồn tại!" << RESET;
+                    }
+                    else {
+                        cout << RED << "Lỗi: Máy bay đang bận bay chuyến khác!" << RESET;
+                    }
+                    
+                    delete NewCB; 
+                    _getch(); 
+                    
+                    Gotoxy(startX, formY + 15);
+                    SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
+                    currentField = 0; 
+                }
+
+            } else {
+                if (currentField < 4) {
+                    currentField++; 
+                } else {
+                    Gotoxy(startX + 5, formY + 12);
+                    cout << RED << "Lỗi: Không được để trống bất kỳ trường nào! Bấm phím bất kỳ..." << RESET;
+                    _getch();
+                    
+                    for (int i = 0; i < 5; i++) {
+                        if (inputs[i].empty()) {
+                            currentField = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 void Router_B(int mainIdx, function<void()> func_1, 
                   function<void()> func_2, 
@@ -838,6 +1156,25 @@ int MainMenuOptionInBoard(string options[], int length) {
     }
 }
 
+void Menu_QuanLyMayBay() {
+    Router_B(3, 
+        []() { RunInNewTab(CustomerAddMB); }, // Thêm
+        []() { /* Gọi hàm Sửa Máy Bay ở đây */ }, // Sửa
+        []() { /* Gọi hàm Xóa Máy Bay ở đây */ }  // Xóa
+    );
+}
+
+void Menu_QuanLyChuyenBay() {
+    Router_B(3, 
+        []() { RunInNewTab(CustomerAddCB); }, // Thêm
+        []() { /* Gọi hàm Sửa Chuyến Bay ở đây */ }, // Sửa
+        []() { /* Gọi hàm Xóa Chuyến Bay ở đây */ }  // Xóa
+    );
+}
+
+void Menu_QuanLyHanhKhach() {
+    Router_B(3); // Tạm thời để trống chờ code sau
+}
 
 void MainScreen(){
     string options[] = {"1. Quản Lý Hệ Thống", 
@@ -856,26 +1193,13 @@ void MainScreen(){
             switch (chosen)
             {
             case 0:
-                Router_Board(chosen, [](){ 
-                                        Router_B(3, []() { 
-                                            // Lệnh ảo thuật: Mở màn hình phụ
-                                            cout << NEWTAB; 
-                                            CustomerAddMB(); 
-                                            // Lệnh ảo thuật: Đóng màn hình phụ, khôi phục giao diện
-                                            cout << CLOSETAB; 
-                                        }, 
-                                        [](){ /* Hàm sửa */ }, 
-                                        [](){ /* Hàm hiệu chỉnh */ }
-                                        ); 
-                                    }, 
-                                    [](){ Router_B(3); }, 
-                                    [](){ Router_B(3); });
+                // Gọi Router_Board và truyền tên các hàm menu vào
+                Router_Board(chosen, Menu_QuanLyMayBay, Menu_QuanLyChuyenBay, Menu_QuanLyHanhKhach);
                 break;
             
             default:
                 break;
             }
-           
         }
         else if(chosen == 3)
         {
