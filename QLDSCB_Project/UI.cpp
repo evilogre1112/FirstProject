@@ -1121,14 +1121,12 @@ void CustomerAddHK() {
                 SmallBox("ĐANG LƯU DỮ LIỆU...", (int)width, (int)3, (string)GREEN);
 
                 HK* NewHK = new HK;
-                NewHK->set_cmnd(const_cast<char*>(inputs[0].c_str()));
-                NewHK->set_ho(const_cast<char*>(inputs[1].c_str()));
-                NewHK->set_ten(const_cast<char*>(inputs[2].c_str()));
-                NewHK->set_phai(gender);
-
+                char* cmnd = const_cast<char*>(inputs[0].c_str());
+                char* ho = const_cast<char*>(inputs[1].c_str());
+                char* ten = const_cast<char*>(inputs[2].c_str());
                 
 
-                if(Add_HK(dsHK, NewHK)) {
+                if(Add_HK(dsHK, ho, ten, cmnd, gender)) {
                     Gotoxy(startX + 20, formY + 18);
                     cout << YELLOW << "Đã lưu thành công! Nhấn phím bất kỳ để thoát." << RESET;
                     _getch();

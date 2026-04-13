@@ -32,13 +32,15 @@ int ss_str(char* const a, char* const b); // so sánh 2 chuỗi
  */
 bool Save_MB(ofstream& save, listMB& dsMB);
 
+void swap_MB(MB* &a, MB* &b); // tien ich swap noi dung cua 2 may bay
+
 /**
- * @brief       sắp xếp danh sách máy bay theo mã máy bay, sử dụng merge_sort
+ * @brief       sắp xếp danh sách máy bay theo mã máy bay, sử dụng quick_sort
  * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
  * @param l     vị trí bắt đầu trong mảng muốn sắp xếp
  * @param r     vị trí kết thúc trong mảng muốn sắp xếp ( Sắp xếp từ vị trí l đên r )
  */
-void Merge_MB(listMB& dsMB, int l, int m, int r); // Hàm tiện ích, phục vụ cho merge_sort
+int Hoare_Partion(listMB& dsMB, int l,int r); // Hàm tiện ích, phục vụ cho quick_sort
 void Sort_MB(listMB& dsMB, int l, int r);
 
 /**
@@ -72,6 +74,7 @@ bool Add_MB(listMB& dsMB, MB* newMB);
  * @param soHieuMB  Chuỗi C15 chứa mã máy bay cần xóa
  * @return          true nếu tìm thấy và xóa thành công, false nếu không tìm thấy
  */
+// LUư Ý: Khi truyền soHieuMB khồng được truyền dạng con trỏ của dsMB, ví dụ dsMB.list[i]->soHieuMB
 bool Del_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB);
 
 /**
@@ -82,6 +85,7 @@ bool Del_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB);
  * @return              true nếu hiệu chỉnh thành công
  */
 // LUƯ Ý: infoUpdate SẼ KHÔNG TỰ ĐÔNG ĐƯỢC GIẢI PHÓNG BỘ NHỚ TRONG HÀM
+// LUư Ý: Khi truyền soHieuMB khồng được truyền dạng con trỏ của dsMB, ví dụ dsMB.list[i]->soHieuMB
 bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB* infoUpdate);
 
 // --- CÂU B: QUẢN LÝ CHUYẾN BAY ---
@@ -133,6 +137,7 @@ CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB);
  * @param newCB     Con trỏ trỏ đến node chuyến bay mới đã được cấp phát
  * @return          true nếu thêm thành công, false nếu trùng mã chuyến bay
  */
+// LƯU Ý: Hàm Add_CB không hề tự động khởi tạo DSV, hãy khởi tạo DSV bằng hàm Init_Tickets
 bool Add_CB(listCB &dsCB, listMB &dsMB, CB* newCB);
 
 /**
@@ -176,28 +181,33 @@ void Init_Tickets(CB* newCB, int soCho);
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)
 
 /**
- * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
- * @param dsCB  danh sách chuyến bay
- * @param dsHK  Danh sách hành khách tổng quát (Cây BST)
- * @param cmnd  Số chứng minh nhân dân của khách cần tìm
- * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
- */
-HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd);
-
-/**
- * @brief           Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
- * @param   root    Gốc của dsHK
+ * @brief       Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
+ * @param   dsHK   danh sách hành khách (BST)
  * @param   cmnd    Số chứng minh nhân dân của khách cần tìm
  * @return          Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
-HK* Find_HK_At_List(HK* root, char* const cmnd);
+HK* Find_HK_At_List(listHK &dsHK, char* const cmnd);
+
+/**
+ * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
+ * @param dsCB  danh sách chuyến bay
+ * @param dsHK   danh sách hành khách (BST)
+ * @param cmnd  Số chứng minh nhân dân của khách cần tìm
+ * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
+ */
+HK* Find_HK(listCB &dsCB, listHK &dsHK, char* const maCB, char* const cmnd);
 
 /**
  * @brief       Thêm một hành khách mới vào cây BST
- * @param newHK Hành khách thêm vào cây
+ * @param dsHK   danh sách hành khách (BST)
+ * @param ho    Họ
+ * @param ten   Tên
+ * @param cmnd  Chứng minh nhân dân
+ * @param phai  Phái Nam/Nu
  * @return      true nếu thêm thành công, false nếu trùng mã CMND
  */
-bool Add_HK(listHK &dsHK, HK* newHK);
+bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai);
+
 /**
  * @brief       Kiểm tra hành khách đã mua vé trên chuyến bay này chưa (1 vé/chuyến)
  * @param dsCB  Danh sách chuyến bay

@@ -28,8 +28,8 @@ void swap_MB(MB* &a, MB* &b) {
     *a = *b;
     *b = temp;
 }
-// Tiện ích sắp xếp
 
+// Tiện ích sắp xếp
 int Hoare_Partion(listMB& dsMB, int l,int r) {
     int i = l, j = r;
     char pivot[soHieuMB_max];
@@ -282,6 +282,9 @@ bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime &newTime) {
     CB* temp = Find_CB(dsCB, maCB);
     if (temp == NULL) return false;
     if (temp->trangThai == 3 || temp->trangThai == 0) return false;
+    for (int i = 0; i < temp->socho; i++) {
+        if (temp->DSV[i][0] != '\0') return false; // khon cho phep thay doi thoi gian khoi hanh neu CB da co hanh khach dat
+    }
     temp->ngayKH = newTime;
     return true;
 }
@@ -312,19 +315,66 @@ void Init_Tickets(CB *newCB, int soCho) {
     }
 }
 
-HK* Find_HK(CB* const dsCB, HK* const dsHK,const char* maCB, const char* cmnd) {
+HK* Find_HK_At_List(listHK &dsHK, char* const cmnd) {
+    HK* temp = dsHK.goc;
+    while(temp != NULL) {
+        int result = ss_str(temp->cmnd, cmnd);
+        if (result == 0) return temp;
+        if (result == 1) temp = temp->left;
+        else temp = temp->right;
+    }
     return NULL;
 }
 
-HK* Find_HK_At_List(HK* root, char* const cmnd) {
-    if (root == NULL) return NULL;
-    if (ss_str(root->cmnd, cmnd) == 0) return root;
-    if (ss_str(root->cmnd, cmnd) == 1) return Find_HK_At_List(root->left, cmnd);
-    return Find_HK_At_List(root->right, cmnd);
+HK* Find_HK(listCB &dsCB, listHK &dsHK, char* const maCB, char* const cmnd) {
+    CB* cb = Find_CB(dsCB, maCB);
+    if (cb == NULL) return NULL;
+    if (cb->DSV == NULL) return NULL;
+    HK* hk = Find_HK_At_List(dsHK, cmnd);
+    if (hk == NULL) return NULL;
+    for (int i = 0; i < cb->socho; i++) {
+        if (cb->DSV[i][0] == '\0') continue;
+        int result = ss_str(cb->DSV[i], cmnd);
+        if (result == 0) return hk;
+    }
+    return NULL;
 }
 
-bool Add_HK(listHK &dsHK, HK* newHK) {
-    return false;
+bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai) {
+    HK* newHK = new HK();
+    newHK->set_ho(ho);
+    newHK->set_ten(ten);
+    newHK->set_cmnd(cmnd);
+    newHK->set_phai(phai);
+    
+    if (dsHK.goc == NULL) {
+        dsHK.goc = newHK;
+        dsHK.slHK++;
+        return true;
+    }
+    
+    HK* temp = dsHK.goc;
+    
+    while (temp != NULL) {
+        int result = ss_str(newHK->cmnd, temp->cmnd);
+        if (result == 1) {
+            if (temp->right == NULL) {
+                temp->right = newHK;
+                break;
+            }
+            else temp = temp->right;
+        }
+        else if (result == 2) {
+            if (temp->left == NULL) {
+                temp->left = newHK;
+                break;
+            }
+            else temp = temp->left;
+        }
+        else return false;
+    }
+    dsHK.slHK++;
+    return true;
 }
 
 bool Is_Ticket_Booked(CB *const dsCB, const char* maCB, const char* CMND)
