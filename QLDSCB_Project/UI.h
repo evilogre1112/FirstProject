@@ -215,6 +215,7 @@ int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
 void CustomerAddCB();
 void RunInNewTab(void (*func)());
+int InputStatus(int &result, int x, int y);
 int InputString(string &result, int x, int y, int maxLength, char placeholder = '_', bool onlyNumbers = false);
 
 void Router_B(int mainMenuIdx, function<void()> func_1 = [](){}, 

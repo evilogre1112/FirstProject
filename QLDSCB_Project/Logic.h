@@ -184,7 +184,7 @@ void Init_Tickets(CB* newCB, int soCho);
  * @brief       Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
  * @param   dsHK   danh sách hành khách (BST)
  * @param   cmnd    Số chứng minh nhân dân của khách cần tìm
- * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
+ * @return          Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
 HK* Find_HK_At_List(listHK &dsHK, char* const cmnd);
 

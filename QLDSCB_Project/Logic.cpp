@@ -53,7 +53,6 @@ void Sort_MB(listMB& dsMB, int l, int r) {
     Sort_MB(dsMB, l, m);
     Sort_MB(dsMB, m + 1, r);
 }
-
 // Tìm vị trí chèn
 int find_insert_posMB(listMB& dsMB, char* const soHieuMB) {
     int l = 0, r = dsMB.slMB - 1;
