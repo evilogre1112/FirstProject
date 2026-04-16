@@ -18,6 +18,44 @@ int ss_str(char* const a, char* const b) {
     return 0;
 } // a == b return 0, a > b return 1, a < b return 2
 
+// Tiện ích tính số phút chênh lệch của 2 ngày bất kì từ 1900 về sau
+bool isLeap(int y) {
+    return (y % 400 == 0) || (y % 4 == 0 && y % 100 != 0);
+}
+
+int daysInMonth(int m, int y) {
+    int days[] = {0,31,28,31,30,31,30,31,31,30,31,30,31};
+    if (m == 2 && isLeap(y)) return 29;
+    return days[m];
+}
+
+long long toMinutes(DateTime dt) {
+    long long totalDays = 0;
+
+    // năm
+    for (int y = 1900; y < dt.get_yy(); y++) {
+        totalDays += isLeap(y) ? 366 : 365;
+    }
+
+    // tháng
+    for (int m = 1; m < dt.get_mt(); m++) {
+        totalDays += daysInMonth(m, dt.get_yy());
+    }
+
+    // ngày
+    totalDays += (dt.get_dd() - 1);
+
+    // phút
+    long long totalMinutes = totalDays * 24 * 60;
+    totalMinutes += dt.get_hh() * 60 + dt.get_mm();
+
+    return totalMinutes;
+}
+
+long long ss_ngay(DateTime const &a, DateTime const &b) {
+    return llabs(toMinutes(a) - toMinutes(b));
+}
+
 
 // May Bay
 // Hàm Đọc và Ghi file
@@ -53,6 +91,7 @@ void Sort_MB(listMB& dsMB, int l, int r) {
     Sort_MB(dsMB, l, m);
     Sort_MB(dsMB, m + 1, r);
 }
+
 // Tìm vị trí chèn
 int find_insert_posMB(listMB& dsMB, char* const soHieuMB) {
     int l = 0, r = dsMB.slMB - 1;
@@ -100,16 +139,27 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
 }
 
 bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
+    CB* temp = Find_Active_MB(dsCB, soHieuMB);
+    bool check = false; // kiem tra xem co hanh khach tren chuyen bay do hay chua
+    if (temp != NULL) {
+        for (int i = 0; i < temp->socho; i++) {
+            if (temp->DSV[i][0] != '\0') {
+                check = true;
+                break;
+            }
+        }
+    }
+    if (check == true) return false; // Khong the xoa mot may bay ma da co chuyen bay dang su dung da co khach
     int index = Find_MB(dsMB, soHieuMB);
-    if (index == -1) return false;
+    if (index == -1) return false; // Khong the xoa mot may bay khong ton tai dang ton tai
     delete dsMB.list[index];
     for (int i = index; i < dsMB.slMB - 1; i++) {
         dsMB.list[i] = dsMB.list[i + 1];
     }
     dsMB.list[dsMB.slMB - 1] = NULL;
     dsMB.slMB--;
-    CB* temp = Find_Active_MB(dsCB, soHieuMB);
-    if (temp != NULL) Cancel_CB(dsCB, temp->maCB);
+    if (temp != NULL )
+        Cancel_CB(dsCB, temp->maCB);
     return true;
 }
 
@@ -289,10 +339,62 @@ bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime &newTime) {
     return true;
 }
 
+int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
+    CB* temp = Find_Active_MB(dsCB, infor->soHieuMB);
+    if (temp != NULL && ss_str(temp->maCB, maCB) != 0) return -2;
+    temp = Find_CB(dsCB, infor->maCB);
+    if (temp != NULL && ss_str(maCB, infor->maCB) != 0) return -1;
+    if (Find_MB(dsMB, infor->soHieuMB) == -1) return -3;
+    if (temp == NULL) temp = Find_CB(dsCB, maCB);
+    if (temp->socho > infor->socho) return -4;
+    bool check = false;
+    for (int i = 0; i < temp->socho; i++) {
+        if (temp->DSV[i][0] != '\0') {
+            check = true;
+            break;
+        }
+    }
+    // Trường hợp đã có khách
+    if (check) {
+        if (ss_str(temp->sbDich, infor->sbDich) != 0) return -5;
+        if (ss_ngay(temp->ngayKH, infor->ngayKH) != 0) return -5;
+        if (temp->trangThai != infor->trangThai) return -5;
+        
+    }
+    else {
+        strcpy(temp->sbDich, infor->sbDich);
+        temp->ngayKH = infor->ngayKH;
+        temp->trangThai = infor->trangThai;
+    }
+    strcpy(temp->maCB, infor->maCB);
+    // Cap nhat so cho moi cho CB
+    char **newDSV = new char* [infor->socho];
+    for (int i = 0; i < temp->socho; i++)
+        newDSV[i] = temp->DSV[i];
+    for (int i = temp->socho; i < infor->socho; i++) {
+        newDSV[i] = new char[cmnd_max];
+        newDSV[i][0] = '\0';
+    }
+    temp->socho = infor->socho;
+    strcpy(temp->soHieuMB, infor->soHieuMB);
+    delete[] temp->DSV;
+    temp->DSV = newDSV;
+    // Trường hợp chưa có khách
+    return true;
+}
+
 bool Cancel_CB(listCB &dsCB, char* const maCB) {
     CB* temp = Find_CB(dsCB, maCB);
     if (temp == NULL) return false;
     if (temp->trangThai == 3 || temp->trangThai == 0) return false;
+    bool check = false; // kiem tra xem co hanh khach dat chuyen bay do hay chua
+    for (int i = 0; i < temp->socho; i++) {
+        if (temp->DSV[i][0] != '\0') {
+            check = true;
+            break;
+        }
+    }
+    if (check == true) return false; // Khong the huy mot chuyen bay da co khach
     temp->trangThai = 0;
     for (int i = 0; i < temp->socho; i++)
         delete[] temp->DSV[i];
