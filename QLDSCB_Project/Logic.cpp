@@ -479,6 +479,11 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
     return true;
 }
 
+listMB Find_MB_OnRage(listMB& dsMB, char* const query){
+    listMB A ;
+    return A;
+}
+
 bool Is_Ticket_Booked(CB *const dsCB, const char* maCB, const char* CMND)
 {
     return false;

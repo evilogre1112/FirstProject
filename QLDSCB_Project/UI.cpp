@@ -218,11 +218,7 @@ int whereY() {
     return y;
 #endif
 }
-void RunInNewTab(void (*func)()) {
-    cout << NEWTAB;
-    func();
-    cout << CLOSETAB;
-}
+
 // Hàm lấy Ngày (DD) - Cắt 2 ký tự từ vị trí 0
 int GetDayFromStr(const string &datetimeStr) {
     if (datetimeStr.length() < 16) return -1; 
@@ -1166,6 +1162,127 @@ void CustomerAddHK() {
 }
 
 
+void It_list_MB(int mod){
+    Gotoxy(15,4);
+    int field = 5 ;
+    int Temp[] = {10,20,50,90,100};
+    int Temp2[] ={10,30,40,10,15};
+    cout << GRAY << "Tìm Kiếm" << RESET ;
+    Gotoxy(10,5);
+    SmallBox("STT",10,1);
+    Gotoxy(20,5);
+    SmallBox("Số Hiệu Máy Bay",30,1);
+    Gotoxy(50,5);
+    SmallBox("Loại Máy Bay",40,1);
+    Gotoxy(90,5);
+    SmallBox("Số Chỗ",10,1);
+    Gotoxy(100,5);
+    SmallBox("Số Lần Bay",15,1);
+    int currentPage = 0;
+    while(true){
+         // Thiết lập thông số phân trang
+        int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 máy bay
+        int startIndex = currentPage * itemsPerPage;
+        int endIndex = startIndex + itemsPerPage;
+        
+        // Đảm bảo không in lố số lượng máy bay thực tế
+        if (endIndex > dsMB.slMB) {
+            endIndex = dsMB.slMB;
+        }
+        int itemsOnThisPage = endIndex - startIndex;
+        int rowOnScreen = 0 ;
+        ClearRegion(10,8+itemsOnThisPage,110,16-itemsOnThisPage);
+        // Chỉ in từ startIndex đến endIndex
+        for(int i = startIndex; i < endIndex; i++){
+            rowOnScreen = i - startIndex; 
+            string s = to_string(i+1);
+            Gotoxy(10, 8 + rowOnScreen);
+            SmallBox(s,false, false,true, true, 10, 1);
+            Gotoxy(20, 8 + rowOnScreen);
+            s = dsMB.list[i]->soHieuMB;
+            SmallBox(s,false, false,true, true, 30, 1);
+            Gotoxy(50, 8 + rowOnScreen);
+            s = dsMB.list[i]->loaiMB ;
+            SmallBox(s,false, false,true, true, 40, 1);
+            Gotoxy(90,8 + rowOnScreen);
+            s = to_string(dsMB.list[i]->socho);
+            SmallBox(s,false, false,true, true, 10, 1);
+            Gotoxy(100,8 + rowOnScreen);
+            s = to_string(dsMB.list[i]->SLB);
+            SmallBox(s,false, false,true, true, 15, 1);
+        }
+        for(int i = 0 ; i < 5 ;i++){
+            Gotoxy(Temp[i],8 + rowOnScreen+1);
+            SmallBox("...",false, false,true, true, Temp2[i], 1,GRAY);
+        }
+        
+        
+        //In thông tin điều hướng ở cuối
+        Gotoxy(15, 8 + itemsPerPage + 2);
+        int totalPages = (dsMB.slMB + itemsPerPage - 1) / itemsPerPage; // Tính tổng số trang
+        cout << "Trang " << currentPage + 1 << "/" << totalPages;
+        cout << "  |  Dung phim Mui Ten de chuyen trang, ESC de thoat.";
+        rowOnScreen = 0 ;
+        while(true){
+            string s ;
+            int index = rowOnScreen + startIndex;// rowOnScreen + startIndex -1
+            for(int i = 0; i < 5 ;i++){
+                Gotoxy(Temp[i],8 + rowOnScreen);
+                if(i == 1){
+                    s = dsMB.list[index]->soHieuMB;
+                }else if (i == 2){
+                    s = dsMB.list[index]->loaiMB;
+                }else if (i == 3){
+                    s = to_string(dsMB.list[index]->socho);
+                }else{
+                    s = to_string(dsMB.list[index]->SLB);
+                }
+                if(i == 0) s = to_string(index+1);
+                SmallBox(s,false, false,true, true, Temp2[i],1, HIGHLIGHT);
+            }
+            NavKey ch = GetNavKey();
+            for(int i = 0; i < 5 ;i++){
+                Gotoxy(Temp[i],8 + rowOnScreen);
+                 if(i == 1){
+                    s = dsMB.list[index]->soHieuMB;
+                }else if (i == 2){
+                    s = dsMB.list[index]->loaiMB;
+                }else if (i == 3){
+                    s = to_string(dsMB.list[index]->socho);
+                }else{
+                    s = to_string(dsMB.list[index]->SLB);
+                }
+                if(i == 0) s = to_string(index+1);
+                SmallBox(s,false, false,true, true, Temp2[i],1);
+            }
+            if(ch == NAV_UP){
+                if(rowOnScreen -1 >= 0) rowOnScreen--;
+                else break ;
+            }
+            else if (ch == NAV_DOWN){
+                if(rowOnScreen +1 < itemsOnThisPage) rowOnScreen++;
+                else{
+                    if(currentPage+1 <totalPages ) currentPage++;
+                    else currentPage = 0 ;
+                    break ;
+                }
+            }else if (ch == NAV_RIGHT){
+                if(currentPage+1 <totalPages ) currentPage++;
+                else currentPage = 0 ;
+                break ;
+            }else if(ch == NAV_LEFT){
+                if(currentPage-1 >=0 ) currentPage--;
+                else currentPage = totalPages-1 ;
+                break ;
+            }else if (ch == NAV_ENTER){
+                if(mod == 0) break ;
+            }
+        }
+    }
+    
+}
+
+
 void Router_B(int mainIdx, function<void()> func_1, 
                   function<void()> func_2, 
                   function<void()> func_3){
@@ -1357,11 +1474,22 @@ int MainMenuOptionInBoard(string options[], int length) {
     }
 }
 
+void RunInNewTab(void (*func)()) {
+    cout << NEWTAB;
+    func();
+    cout << CLOSETAB;
+}
+
+// []() { func(<type> Name);}
+
 void Menu_QuanLyMayBay() {
     Router_B(3, 
-        []() { RunInNewTab(CustomerAddMB); }, // Thêm
-        []() { /* Gọi hàm Sửa Máy Bay ở đây */ }, // Sửa
-        []() { /* Gọi hàm Xóa Máy Bay ở đây */ }  // Xóa
+        []() { RunInNewTab(CustomerAddMB); }, 
+        []() { 
+            // Bọc hàm có tham số vào một lambda khác
+            RunInNewTab([]() { It_list_MB(0); }); 
+        }, 
+        []() { /* Gọi hàm Xóa Máy Bay ở đây */ } 
     );
 }
 

@@ -41,6 +41,7 @@ extern listHK dsHK ;
 // Màu Bg
 #define BG_YELLOW        "\033[43m"
 #define BG_BRIGHT_YELLOW "\033[103m"
+#define HIGHLIGHT        "\033[7m"
 #define TEXT_BLACK       "\033[30m"
 
 // Các Lệnh "Ảo Thuật" =)))
@@ -213,7 +214,13 @@ NavKey GetNavKey();
 int GetKey(int chosen,int count);
 int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
+
+void CustomerAddMB();
 void CustomerAddCB();
+void CustomerAddHK();
+
+void It_list_MB();
+
 void RunInNewTab(void (*func)());
 int InputStatus(int &result, int x, int y);
 int InputString(string &result, int x, int y, int maxLength, char placeholder = '_', bool onlyNumbers = false);
