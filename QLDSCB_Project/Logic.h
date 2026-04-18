@@ -16,7 +16,7 @@
 
 // Một số tiện ích
 int ss_str(char* const a, char* const b); // so sánh 2 chuỗi
-
+long long ss_ngay(DateTime const &a, DateTime const &b); // so sánh 2 ngày, trả về số phút chênh lệch
 
 
 // --- CÂU A: QUẢN LÝ MÁY BAY ---
@@ -60,6 +60,15 @@ int find_insert_posMB(listMB& dsMB, char* const soHieuMB);
 int Find_MB(listMB& dsMB, char* const soHieuMB);
 
 /**
+ * @brief           tìm máy bay có số hiệu gần giống với query trong danh sách máy bay
+ * @param dsMB      mảng các con trỏ
+ * @param soHieuMB  chuỗi C15 chứa mã máy bay cần tìm
+ * @return          trả về 1 danh sách máy bay tìm được 
+ * @note            UI có tránh nhiệm vụ delete mảng này khi sử dụng xong.
+ */
+listMB Find_MB_OnRage(listMB& dsMB, char* const query);
+
+/**
  * @brief       Thêm 1 máy bay mới vào mảng con trỏ
  * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
  * @param newMB Con trỏ trỏ đến máy bay mới đã được cấp phát vùng nhớ
@@ -95,7 +104,7 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB* infoUpdate);
 // LƯU Ý :: CÁC HÀM CHUYẾN BAY ĐÃ ĐƯỢC TỐI ƯU SẴN, HÃY ĐẢM BẢO KHI SỬ DỤNG, DANH SÁCH CHUYẾN BAY ĐÃ ĐƯỢC SẮP XẾP THEO maCB. DANH SÁCH CHUYẾN BAY CHƯA ĐƯỢC SẮP XẾP SẼ CHO RA KẾT QUẢ SAI Ở MỌI HÀM.
 
 /**
- * @brief         Swap data của 2 CB
+ * @brief      Swap data của 2 CB
  * @param CB1     CB thứ 1
  * @param CB2     CB thứ 2
 */
@@ -140,6 +149,8 @@ CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB);
 // LƯU Ý: Hàm Add_CB không hề tự động khởi tạo DSV, hãy khởi tạo DSV bằng hàm Init_Tickets
 bool Add_CB(listCB &dsCB, listMB &dsMB, CB* newCB);
 
+// ===================== Các gói thay đổi Thông Tin của một chuyến bay ===================
+
 /**
  * @brief           Hiệu chỉnh ngày giờ khởi hành của một chuyến bay
  * @param dsCB      danh sách chuyến bay
@@ -148,6 +159,20 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB* newCB);
  * @return          true nếu tìm thấy và sửa thành công
  */
 bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime& newTime);
+
+/**
+ * @brief           Hiệu chỉnh một chuyến bay
+ * @param dsCB      danh sách chuyến bay
+ * @param dsMB      dsnh sách máy bay
+ * @param maCB      Mã hiệu chuyến bay cần tìm để sửa
+ * @param infor    Nội dung càn được cập nhật
+ * @return       Nếu không thể thay đổi, trả về mã lỗi, còn nêu thành công thì trả về 1
+ */
+// LƯU Ý: infor truyền vào vào với soHieuMB nào thì socho cung phai theo đó
+int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor);
+
+
+// ========================================================================================
 
 /**
  * @brief       Huỷ 1 chuyến bay trong danh sách liên kết đơn
