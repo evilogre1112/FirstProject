@@ -4,6 +4,8 @@
 #include "Global.h"
 #include <string>
 
+
+
 // Các biến sau là biến toàn cục(extern) trong "Global.h"
 /**
  *  slMB số lượng máy bay
@@ -58,15 +60,6 @@ int find_insert_posMB(listMB& dsMB, char* const soHieuMB);
  * @return          vị trí máy bay trong danh sách, trar về -1 nếu không tìm thấy
  */
 int Find_MB(listMB& dsMB, char* const soHieuMB);
-
-/**
- * @brief           tìm máy bay có số hiệu gần giống với query trong danh sách máy bay
- * @param dsMB      mảng các con trỏ
- * @param soHieuMB  chuỗi C15 chứa mã máy bay cần tìm
- * @return          trả về 1 danh sách máy bay tìm được 
- * @note            UI có tránh nhiệm vụ delete mảng này khi sử dụng xong.
- */
-listMB Find_MB_OnRage(listMB& dsMB, char* const query);
 
 /**
  * @brief       Thêm 1 máy bay mới vào mảng con trỏ
@@ -320,6 +313,15 @@ void Sort_SLB(listMB& dsMB, int l, int r);
  * @note        UI có trách nhiệm delete[] mảng này sau khi in xong.
  */
 listMB Get_Flight_Stats (listMB &dsMB);
+
+/**
+ * @brief       Tìm kiếm các MB có sô hiệu chứa tiền tố Prefix
+ * @param       dsMB danh sách máy bay
+ * @param       query Tiền tố cần tìm
+ * @return      Trả về dsMB hợp lệ
+ * @note        UI có trách nhiệm delete[] mảng này sau khi in xong.
+ */
+listMB Find_MB_OnRage(listMB& dsMB, char* const query);
 
 
 #endif

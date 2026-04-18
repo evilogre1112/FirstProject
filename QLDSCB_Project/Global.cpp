@@ -8,6 +8,10 @@
 
 using namespace std;
 
+Tries SearchmaMB;
+Tries SearchmaCB;
+Tries Searchcmnd;
+
 // ---- cấu trúc máy bay ----//
 MB::MB() {
     strcpy(soHieuMB,"");    // hàm này copy từ phía phải sang trái
@@ -288,6 +292,8 @@ CB::CB(){
                 delete tmp;                                     // Xóa vùng nhớ vừa cấp phát vì không có dữ liệu để lưu
                 break;
             }
+            add_word(SearchmaCB, tmp->maCB);
+            
             //---doc ngay thang---
             f >> tmp->ngayKH.hh;f.ignore(1,':');
             f >> tmp->ngayKH.mm;f.ignore(1,'|');
@@ -347,6 +353,7 @@ CB::CB(){
                 delete tmp;
                 break;
             }
+            add_word(SearchmaMB, tmp->soHieuMB);
             //---loai mb----
             f.getline(tmp->loaiMB, loaiMB_max,'|');
             f>> tmp->socho;
@@ -365,7 +372,7 @@ CB::CB(){
     Điều này có nghĩa là mọi thay đổi đối với goc bên trong hàm sẽ
         thay đổi trực tiếp biến gốc ở ngoài hàm.
     */
-    bool Get_Data_KH_tree(HK* &goc, HK * moi){
+    bool Get_Data_KH_tree(HK* &goc, HK *moi){
         if(goc == NULL){
             goc = moi;
             return true;
@@ -412,6 +419,7 @@ CB::CB(){
             tmp->left = tmp->right = NULL;
             // nếu dữ liệu hợp lệ  thì chèn vào cây 
             if (ok && Get_Data_KH_tree(dsHK.goc,tmp)){
+                add_word(Searchcmnd, tmp->cmnd);
                 dsHK.slHK++;
             }else {
                 // nếu sai dữ liêu  thì xóa nó
@@ -422,3 +430,77 @@ CB::CB(){
         f.close();
         return true;
     }
+
+
+// ------- Cấu trúc Trie (Auto Complete) -------
+
+Node::Node() {
+    for (int i = 0; i < 64; i++) {
+        this->child[i] = NULL;
+    }
+    end = false;
+}
+
+Tries::Tries() {
+    root = new Node();
+}
+
+int char_to_index(char c) {
+    if (c >= 'a' && c <= 'z') return c - 'a';           // 0-25
+    if (c >= 'A' && c <= 'Z') return 26 + (c - 'A');    // 26-51
+    if (c >= '0' && c <= '9') return 52 + (c - '0');    // 52-61
+    if (c == ' ') return 62;
+    return 63;
+}
+
+void add_word(Tries &Search, char* const Word) {
+    Node* temp = Search.root;
+    int i = 0;
+    while (Word[i] != '\0') {
+        int index = char_to_index(Word[i]);
+        if (temp->child[index] == NULL) {
+            temp->child[index] = new Node();
+        }
+        temp = temp->child[index];
+        i++;
+    }
+    temp->end = true;
+}
+
+void del_word(Tries &Search, char* const Word) {
+    Node* temp = Search.root;
+    int i = 0;
+    while (Word[i] != '\0' && temp != NULL) {
+        int index = char_to_index(Word[i]);
+        temp = temp->child[index];
+        i++;
+    }
+    if (temp == NULL) return;
+    temp->end = false;
+}
+
+bool search_word(Tries &Search, char* const Word) {
+    Node* temp = Search.root;
+    int i = 0;
+    while (Word[i] != '\0') {
+        int index = char_to_index(Word[i]);
+        if (temp->child[index] == NULL) return false;
+        temp = temp->child[index];
+        i++;
+    }
+    if (temp->end == false) return false;
+    return true;
+}
+
+
+bool search_word(Tries &Search, char* const Prefix, char* const Word) {
+    int i = 0;
+    while (Prefix[i] != '\0' && Word[i] != '\0') {
+        if (Prefix[i] != Word[i]) return false;
+        i++;
+    }
+    if (Word[i] == '\0' && Prefix[i] != '\0') return false;
+    return search_word(Search, Word);
+}
+
+

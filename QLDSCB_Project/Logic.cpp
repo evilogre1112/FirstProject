@@ -4,6 +4,7 @@
 #include <fstream>
 
 
+
 // Một số tiện ích
 int ss_str(char* const a, char* const b) {
     unsigned long len_a = strlen(a);
@@ -127,6 +128,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
     if (index == dsMB.slMB) {
         dsMB.list[index] = newMB;
         dsMB.slMB++;
+        add_word(SearchmaMB, newMB->soHieuMB);
         return true;
     }
     if (ss_str(dsMB.list[index]->soHieuMB, newMB->soHieuMB) == 0) {
@@ -134,6 +136,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
     }
     for (int i = dsMB.slMB; i > index; i--) dsMB.list[i] = dsMB.list[i - 1];
     dsMB.list[index] = newMB;
+    add_word(SearchmaMB, newMB->soHieuMB);
     dsMB.slMB++;
     return true;
 }
@@ -151,7 +154,8 @@ bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
     }
     if (check == true) return false; // Khong the xoa mot may bay ma da co chuyen bay dang su dung da co khach
     int index = Find_MB(dsMB, soHieuMB);
-    if (index == -1) return false; // Khong the xoa mot may bay khong ton tai dang ton tai
+    if (index == -1) return false; // Khong the xoa mot may bay khong ton tai
+    del_word(SearchmaMB, dsMB.list[index]->soHieuMB);
     delete dsMB.list[index];
     for (int i = index; i < dsMB.slMB - 1; i++) {
         dsMB.list[i] = dsMB.list[i + 1];
@@ -192,6 +196,8 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
     int exist = Find_MB(dsMB, infoUpdate->soHieuMB);
     if (exist != -1) return false;
     int SLBcu = dsMB.list[index]->SLB;
+    del_word(SearchmaMB, soHieuMB);
+    add_word(SearchmaMB, infoUpdate->soHieuMB);
     *dsMB.list[index] = *infoUpdate;
     dsMB.list[index]->SLB = SLBcu;
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
@@ -310,6 +316,7 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
         dsCB.head = newCB;
         dsCB.slCB++;
         if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
+        add_word(SearchmaCB, newCB->maCB);
         return true;
     }
     if (temp == NULL && dsCB.head != NULL) {
@@ -317,6 +324,7 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
         dsCB.head = newCB;
         dsCB.slCB++;
         if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
+        add_word(SearchmaCB, newCB->maCB);
         return true;
     }
     if (ss_str(temp->maCB, newCB->maCB) == 0) return false;
@@ -325,6 +333,7 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
     newCB->next = temp2;
     dsCB.slCB++;
     if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
+    add_word(SearchmaCB, newCB->maCB);
     return true;
 }
 
@@ -354,19 +363,19 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
             break;
         }
     }
-    // Trường hợp đã có khách
-    if (check) {
+    if (check) { // Trường hợp đã có khách
         if (ss_str(temp->sbDich, infor->sbDich) != 0) return -5;
         if (ss_ngay(temp->ngayKH, infor->ngayKH) != 0) return -5;
         if (temp->trangThai != infor->trangThai) return -5;
-        
     }
-    else {
+    else {  // Trường hợp chưa có khách
         strcpy(temp->sbDich, infor->sbDich);
         temp->ngayKH = infor->ngayKH;
         temp->trangThai = infor->trangThai;
     }
+    del_word(SearchmaCB, maCB);
     strcpy(temp->maCB, infor->maCB);
+    add_word(SearchmaCB, infor->maCB);
     // Cap nhat so cho moi cho CB
     char **newDSV = new char* [infor->socho];
     for (int i = 0; i < temp->socho; i++)
@@ -379,7 +388,7 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
     strcpy(temp->soHieuMB, infor->soHieuMB);
     delete[] temp->DSV;
     temp->DSV = newDSV;
-    // Trường hợp chưa có khách
+    
     return true;
 }
 
@@ -452,6 +461,7 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
     if (dsHK.goc == NULL) {
         dsHK.goc = newHK;
         dsHK.slHK++;
+        add_word(Searchcmnd, cmnd);
         return true;
     }
     
@@ -473,15 +483,14 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
             }
             else temp = temp->left;
         }
-        else return false;
+        else {
+            delete newHK;
+            return false;
+        }
     }
     dsHK.slHK++;
+    add_word(Searchcmnd, cmnd);
     return true;
-}
-
-listMB Find_MB_OnRage(listMB& dsMB, char* const query){
-    listMB A ;
-    return A;
 }
 
 bool Is_Ticket_Booked(CB *const dsCB, const char* maCB, const char* CMND)
@@ -579,4 +588,9 @@ listMB Get_Flight_Stats (listMB &dsMB) {
     }
     Sort_SLB(flight_Statics, 0, flight_Statics.slMB - 1);
     return flight_Statics;
+}
+
+listMB Find_MB_OnRage(listMB& dsMB, char* const query){
+    listMB A;
+    return A;
 }

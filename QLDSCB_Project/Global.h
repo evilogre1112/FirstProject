@@ -34,7 +34,6 @@ static const char* path_file_CB = "Data/DSCB.txt";
 static const char* path_file_MB = "Data/DSMB.txt";
 static const char* path_file_HK = "Data/DSHK.txt";
 
-
 // --- cấu trúc máy bay ---
 struct MB {
     char soHieuMB[soHieuMB_max];
@@ -120,8 +119,8 @@ struct listHK{
 
 /**
  * @brief đọc file chuyến bay
- * @param dsMB danh sách chuyến bay
- * @param path_file_MB đường dẫn file chuyến bay
+ * @param dsCB danh sách chuyến bay
+ * @param path_file_CB đường dẫn file chuyến bay
  * @return true nếu lấy thành công
  */
 
@@ -140,5 +139,57 @@ bool Get_Data_MB(listMB &dsMB, const char *path_file_MB);
 */
 bool Get_Data_HK(listHK &dsHK, const char *path_file_HK);
 
+// ------- Cấu trúc Trie (Auto Complete) -------
+struct Node {
+    Node* child[64];
+    bool end;
+    Node();
+};
+
+struct Tries {
+    Node* root;
+    Tries();
+};
+
+/**
+ * @brief Chuyển chữ cái về sso nguyên để lưu vào Tries
+ * @param c Chữ cái
+ * @return Sô nguyên tương ứng
+ */
+int char_to_index(char c);
+
+/**
+ * @brief Thêm một từ mới vào Trie
+ * @param Search  Cây tiền tố
+ * @param Word Từ cần thêm
+ */
+void add_word(Tries &Search, char* const Word);
+
+/**
+ * @brief Xoá một từ khỏi Trie
+ * @param Search  Cây tiền tố
+ * @param Word Từ cần Xoá
+ */
+void del_word(Tries &Search, char* const Word);
+
+/**
+ * @brief Tìm kiếm một từ trong Tries (Tìm kiếm cả một từ hoàn chỉnh)
+ * @param Search  Cây tiền tố
+ * @param Word Từ cần tìm
+ * @return Trả về true nếu tìm thấy, nược lại trả về false
+ */
+bool search_word(Tries &Search, char* const Word);
+
+/**
+ * @brief Tìm kiếm một từ trong Tries (Tìm kiếm theo tiền tố)
+ * @param Search  Cây tiền tố
+ * @param Prefix Tiền tố
+ * @param Word Từ cần tìm theo tiền tố
+ */
+bool search_word(Tries &Search, char* const Prefix, char* const Word);
+
+extern Tries SearchmaMB;
+extern Tries SearchmaCB;
+extern Tries Searchcmnd;
 
 #endif
