@@ -33,18 +33,23 @@ DateTime::DateTime (){
 int DateTime::get_hh(){
         return hh;
 }
+
 int DateTime::get_mm(){
     return mm;
 }
+
 int DateTime::get_dd(){
         return dd;
 }
+
 int DateTime::get_mt(){
         return mt;
 }
+
 int DateTime::get_yy(){
         return yy;
 }
+
 bool DateTime::set_hh(int h){
     if (h >= 0 && h <= 23) {
         hh = h;
@@ -52,6 +57,7 @@ bool DateTime::set_hh(int h){
     }
     return false;
 }
+
 bool DateTime::set_mm(int m){
     if (m >= 0 && m <= 59) {
         mm = m;
@@ -136,7 +142,7 @@ CB::CB(){
         check &= this->ngayKH.set_dd(d);
         check &= this->ngayKH.set_hh(h);
         check &= this->ngayKH.set_mm(m);
-    return check; // Trả về true nếu tất cả các giá trị đều hợp lệ
+        return check; // Trả về true nếu tất cả các giá trị đều hợp lệ
 
     }
     bool CB::set_sbDich(char *sbd){
@@ -150,6 +156,7 @@ CB::CB(){
         this->sbDich[n] = '\0';
         return true;
     }
+
     bool CB::set_trangThai(int i){
         // Kiểm tra i có nằm trong phạm vi 0-3 không
         if (i >= 0 && i <= 3) {
@@ -158,6 +165,7 @@ CB::CB(){
         }
         return false;
     }
+
     bool CB::set_soHieuMB(char *shmb){
         int n=strlen(shmb);
         if(shmb==NULL|| n==0) return false;
@@ -166,6 +174,7 @@ CB::CB(){
         this->soHieuMB[n] = '\0';
         return true;
     }
+
     bool CB::set_socho(int c){
         if(c<=0) return false;
 
@@ -179,6 +188,7 @@ CB::CB(){
         return true;
         
     }
+
     listCB::listCB(){
         slCB = 0;
         head = NULL;
@@ -193,7 +203,6 @@ CB::CB(){
         left = right = NULL;
     }
 
-    
     bool HK::set_cmnd(char *new_cmnd){
         if(new_cmnd ==NULL) return false;
         int n = strlen(new_cmnd);
@@ -223,6 +232,7 @@ CB::CB(){
         this->ho[n]='\0';
         return true;
     }
+
     bool HK::set_ten(char *new_ten){
        if(new_ten ==NULL) return false;
         int n = strlen(new_ten);
@@ -255,6 +265,7 @@ CB::CB(){
         phai = gt;
         return true;
     }
+
     bool HK::get_phai(){
         return phai;
     }
@@ -272,8 +283,6 @@ CB::CB(){
     }
 
     // ---- đọc file ----
-
-
     bool Get_Data_CB(listCB &dsCB, const char *path_file_CB){
         ifstream f(path_file_CB);                               // mở file cb
         if( !f.is_open() ) return false;
