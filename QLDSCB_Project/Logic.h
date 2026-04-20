@@ -165,8 +165,8 @@ bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime& newTime);
  * @param dsCB      danh sách chuyến bay
  * @param dsMB      dsnh sách máy bay
  * @param maCB      Mã hiệu chuyến bay cần tìm để sửa
- * @param infor    Nội dung càn được cập nhật
- * @return       Nếu không thể thay đổi, trả về mã lỗi, còn nêu thành công thì trả về 1
+ * @param infor     Nội dung càn được cập nhật
+ * @return          Nếu không thể thay đổi, trả về mã lỗi, còn nêu thành công thì trả về 1
  */
 // LƯU Ý: infor truyền vào vào với soHieuMB nào thì socho cung phai theo đó
 int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor);
@@ -206,17 +206,17 @@ void Init_Tickets(CB* newCB, int soCho);
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)
 
 /**
- * @brief       Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
- * @param   dsHK   danh sách hành khách (BST)
+ * @brief           Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
+ * @param   dsHK    danh sách hành khách (BST)
  * @param   cmnd    Số chứng minh nhân dân của khách cần tìm
- * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
+ * @return          Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
 HK* Find_HK_At_List(listHK &dsHK, char* const cmnd);
 
 /**
  * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
  * @param dsCB  danh sách chuyến bay
- * @param dsHK   danh sách hành khách (BST)
+ * @param dsHK  danh sách hành khách (BST)
  * @param cmnd  Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
@@ -224,7 +224,7 @@ HK* Find_HK(listCB &dsCB, listHK &dsHK, char* const maCB, char* const cmnd);
 
 /**
  * @brief       Thêm một hành khách mới vào cây BST
- * @param dsHK   danh sách hành khách (BST)
+ * @param dsHK  danh sách hành khách (BST)
  * @param ho    Họ
  * @param ten   Tên
  * @param cmnd  Chứng minh nhân dân

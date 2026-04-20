@@ -225,9 +225,16 @@ void CustomerAddHK();
 void It_list_MB(int mode);
 void It_list_CB(int mod);
 
-void RunInNewTab(void (*func)());
+void RunInNewTab(void (*func)() = [](){});
 int InputStatus(int &result, int x, int y);
 int InputString(string &result, int x, int y, int maxLength, char placeholder = '_', bool onlyNumbers = false);
+
+void Menu_QuanLyMayBay();
+void Menu_QuanLyChuyenBay();
+void Menu_QuanLyHanhKhach();
+void Menu_TraCuuChuyenBay();
+void Menu_ThongKeLuotBay();
+void Menu_InDanhSachHanhKhach();
 
 void Router_B(int mainMenuIdx, function<void()> func_1 = [](){}, 
                   function<void()> func_2 = [](){}, 
