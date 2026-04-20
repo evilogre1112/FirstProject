@@ -16,7 +16,11 @@
 
 // Một số tiện ích
 int ss_str(char* const a, char* const b); // so sánh 2 chuỗi
+<<<<<<< HEAD
 void to_lower(char* str); // đổi một chuỗi có chữ hoa về chữ thường
+=======
+void to_lower(char* &str); // đổi một chuỗi có chữ hoa về chữ thường
+>>>>>>> f7ad027 (Them va sua logic)
 bool cmp_prefix(char* str, char* prefix); // so sánh một chuỗi với tiền tố prefix, trả về true nếu prefix tương ứng
 long long ss_ngay(DateTime const &a, DateTime const &b); // so sánh 2 ngày, trả về số phút chênh lệch
 
