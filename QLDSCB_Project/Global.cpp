@@ -1,4 +1,5 @@
 #include "Global.h"
+#include "Logic.h"
 #include <fstream>
 #include <cstring>
 #include <iostream>
@@ -15,6 +16,27 @@ MB::MB() {
     socho = 0;
     SLB = 0;
 }
+
+bool MB::set_soHieuMB(char *shmb) {
+    if (shmb == NULL || strlen(shmb) == 0) return false;
+    strncpy(this->soHieuMB, shmb, soHieuMB_max);
+    this->soHieuMB[soHieuMB_max - 1] = '\0';
+    return true;
+}
+
+bool MB::set_loaiMB(char *loai) {
+    if (loai == NULL || strlen(loai) == 0) return false;
+    strncpy(this->loaiMB, loai, loaiMB_max);
+    this->loaiMB[loaiMB_max - 1] = '\0';
+    return true;
+}
+
+bool MB::set_socho(int c) {
+    if (c <= 0) return false;
+    this->socho = c;
+    return true;
+}
+
 
 listMB::listMB() {
     slMB = 0;
@@ -33,18 +55,23 @@ DateTime::DateTime (){
 int DateTime::get_hh(){
         return hh;
 }
+
 int DateTime::get_mm(){
     return mm;
 }
+
 int DateTime::get_dd(){
         return dd;
 }
+
 int DateTime::get_mt(){
         return mt;
 }
+
 int DateTime::get_yy(){
         return yy;
 }
+
 bool DateTime::set_hh(int h){
     if (h >= 0 && h <= 23) {
         hh = h;
@@ -52,6 +79,7 @@ bool DateTime::set_hh(int h){
     }
     return false;
 }
+
 bool DateTime::set_mm(int m){
     if (m >= 0 && m <= 59) {
         mm = m;
@@ -59,6 +87,7 @@ bool DateTime::set_mm(int m){
     }
     return false;
 }
+
 bool DateTime::set_mt(int t){
     if (t >= 1 && t <= 12) {
         mt = t;
@@ -66,6 +95,7 @@ bool DateTime::set_mt(int t){
     }
     return false;
 }
+
 bool DateTime::set_yy(int y){
     if (y >= 1900 && y <= 2100) { // Giới hạn năm hợp lý
         yy = y;
@@ -73,6 +103,7 @@ bool DateTime::set_yy(int y){
     }
     return false;
 }
+
 bool DateTime::set_dd(int d){
     short thang[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if (yy % 4==0 && yy % 100 != 0|| yy % 400==0) thang[2]=29;
@@ -101,6 +132,7 @@ CB::CB(int sc) {                      // truyền tham số socho
             }
         } else { DSV = NULL;}
     }
+
 CB::CB(){
     maCB[0] = '\0';
     trangThai = 1;
@@ -121,6 +153,7 @@ CB::CB(){
             delete[] DSV;
         }
     }
+    
     bool CB::set_maCB(char ma[maCB_max])
     {
         if(ma==NULL || strlen(ma)==0) return false; //kiểm tra rỗng
@@ -129,6 +162,7 @@ CB::CB(){
         //bảo đảm chuỗi luôn có điểm kết thuc
         return true;
     }
+
     bool CB::set_ngayHK(int h, int m, int y, int mmt, int d){
         bool check = true;  
         check &= this->ngayKH.set_yy(y);
@@ -139,6 +173,7 @@ CB::CB(){
     return check; // Trả về true nếu tất cả các giá trị đều hợp lệ
 
     }
+
     bool CB::set_sbDich(char *sbd){
         int n=strlen(sbd);
         if(sbd==NULL|| n==0) return false;
@@ -150,6 +185,7 @@ CB::CB(){
         this->sbDich[n] = '\0';
         return true;
     }
+
     bool CB::set_trangThai(int i){
         // Kiểm tra i có nằm trong phạm vi 0-3 không
         if (i >= 0 && i <= 3) {
@@ -158,6 +194,7 @@ CB::CB(){
         }
         return false;
     }
+
     bool CB::set_soHieuMB(char *shmb){
         int n=strlen(shmb);
         if(shmb==NULL|| n==0) return false;
@@ -166,19 +203,29 @@ CB::CB(){
         this->soHieuMB[n] = '\0';
         return true;
     }
-    bool CB::set_socho(int c){
-        if(c<=0) return false;
 
-        this->socho = c;
-        // có số chỗ rồi ta tạo mảng danh sách vé<cmnd>
-        this->DSV =new char*[c];
-        for(int i=0;i<c;i++){
-            this->DSV[i] = new char[cmnd_max];
-            strcpy(this->DSV[i],"0");
+    bool CB::set_socho(int c) {
+    if (c <= 0) return false;
+
+    // 1. Giải phóng bộ nhớ cũ (nếu có) để tránh memory leak
+    if (this->DSV != nullptr) {
+        for (int i = 0; i < this->socho; i++) {
+            delete[] this->DSV[i]; // Giải phóng từng chuỗi cmnd
         }
-        return true;
-        
+        delete[] this->DSV; // Giải phóng mảng con trỏ
     }
+
+    // 2. Cập nhật số chỗ và cấp phát mới
+    this->socho = c;
+    this->DSV = new char*[c];
+    for (int i = 0; i < c; i++) {
+        this->DSV[i] = new char[cmnd_max];
+        strcpy(this->DSV[i], "0");
+    }
+
+    return true;
+
+}
     listCB::listCB(){
         slCB = 0;
         head = NULL;
@@ -274,12 +321,11 @@ CB::CB(){
     // ---- đọc file ----
 
 
-    bool Get_Data_CB(listCB &dsCB, const char *path_file_CB){
+    bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB){
         ifstream f(path_file_CB);                               // mở file cb
         if( !f.is_open() ) return false;
         dsCB.slCB=0;
         dsCB.head = NULL;
-        CB* last = NULL;                                        // con trỏ lưu trữ địa chỉ cuối trước đó
     
         while(true){
             CB* tmp =new CB();
@@ -291,50 +337,68 @@ CB::CB(){
             //---doc ngay thang---
             f >> tmp->ngayKH.hh;f.ignore(1,':');
             f >> tmp->ngayKH.mm;f.ignore(1,'|');
-            f >> tmp->ngayKH.yy;f.ignore(1,'/');
+            f >> tmp->ngayKH.dd;f.ignore(1,'/');
             f >> tmp->ngayKH.mt;f.ignore(1,'/');
-            f >> tmp->ngayKH.dd;f.ignore(1,'|');
+            f >> tmp->ngayKH.yy;f.ignore(1,'|');
             //---sân bay đích---
             tmp->sbDich = new char[sbDich_max];
             f.getline(tmp->sbDich, sbDich_max ,'|');
             //---trang thai---
-            f>>tmp->trangThai;
-            f.ignore(1,'|');
+            f>>tmp->trangThai;f.ignore(1,'|');
             //---số hiệu máy bay---
             f.getline(tmp->soHieuMB, soHieuMB_max,'|');
-            //---số chỗ ----
-            if(!(f >> tmp->socho)){
-                delete tmp; // Xóa vùng nhớ vừa cấp phát vì không có dữ liệu để lưu
-                break;
-            }
-            f.ignore(100,'\n');
+            //---số chỗ---
+            f>>tmp->socho;            
+            f.ignore(100,'\n');// nhảy xuống dòng mới sau khi đọc số chỗ
             //---mảng danh sách cmnd----
-            if(tmp->socho > 0&& tmp->socho <= socho_max) {
+            // 2. Cấp phát mảng DSV dựa trên SỐ CHỖ TỐI ĐA (Khung máy bay)
+            if (tmp->socho > 0 && tmp->socho <= socho_max) {
                 tmp->DSV = new char*[tmp->socho];
-                for(int i=0;i< tmp->socho;i++){
+                for (int i = 0; i < tmp->socho; i++) {
                     tmp->DSV[i] = new char[cmnd_max];
-                    f.getline(tmp->DSV[i],cmnd_max);
+                    strcpy(tmp->DSV[i], "0"); // Khởi tạo tất cả ghế là trống
+                }
+                // 3. Đọc danh sách CMND đã bán dựa trên SỐ CHỖ ĐÃ BÁN
+                char line[50];
+            while (true) {
+                streampos pos_truoc = f.tellg(); // Lưu vị trí hiện tại
+                
+                if (!f.getline(line, 50)) break;
+                if (strlen(line) == 0) continue;
+
+                // Đếm số dấu '|' để phân biệt dòng khách và dòng CB mới
+                int countSep = 0;
+                for (int i = 0; line[i] != '\0'; i++) {
+                    if (line[i] == '|') countSep++;
+                }
+
+                if (countSep == 1) {
+                    // Tách CMND và Số vé bằng hàm tìm ký tự strchr
+                    char *ptr = strchr(line, '|'); 
+                    if (ptr != NULL) {
+                        *ptr = '\0'; // Tạm thời cắt chuỗi tại dấu '|'
+                        char *s_cmnd = line;       // Phần trước '|'
+                        int vi_tri = atoi(ptr + 1); // Phần sau '|' chuyển thành số
+
+                        if (vi_tri >= 1 && vi_tri <= tmp->socho) {
+                            strncpy(tmp->DSV[vi_tri - 1], s_cmnd, cmnd_max - 1);
+                            tmp->DSV[vi_tri - 1][cmnd_max - 1] = '\0';
+                        }
+                    }
+                } else {
+                    // Nếu là mã CB mới (nhiều dấu |), quay lại vị trí cũ và dừng đọc vé
+                    f.seekg(pos_truoc);
+                    break;
+                }
                 }
             }
-            f >> ws;
-            //---con tro next---
-            tmp->next=NULL;
-            if(dsCB.head == NULL)
-            {
-                dsCB.head=tmp;
-                //nút dầu tiên
-            }else {
-                last->next=tmp;
-                // last này là nút trước đó đang nối với nút mới
-            }
-            last=tmp;
-            dsCB.slCB++;
-            // cập nhật nut nới
-        }
-        f.close();
-        return true;
-    }
+            Add_CB(dsCB, dsMB, tmp);
 
+        f >> ws; // Bỏ qua khoảng trắng thừa cuối file
+    }
+    f.close();
+    return true;
+}
     bool Get_Data_MB(listMB &dsMB, const char *path_file_MB){
         ifstream f(path_file_MB);
         if(!f.is_open()) return false;
@@ -349,76 +413,64 @@ CB::CB(){
             }
             //---loai mb----
             f.getline(tmp->loaiMB, loaiMB_max,'|');
-            f>> tmp->socho;
+            //---so cho---
+            if(!(f>> tmp->socho)) {
+                delete tmp;
+                break;
+            }f.ignore(1, '|'); // Bỏ qua dấu gạch đứng sau số chỗ
+
+            // 4. Đọc Số lần bay (SLB)
+            if (!(f >> tmp->SLB)) {
+            // Nếu không đọc được SLB, có thể để mặc định là 0
+            tmp->SLB = 0;}
             // xóa dáu cách còn lại dấu chống dòng
-            f.ignore();
-           
-            dsMB.list[dsMB.slMB]=tmp;
-            dsMB.slMB++;
+            f.ignore(100,'\n');
+            //dùng hàm Add_MB để thêm vào danh sách máy bay
+           if (!Add_MB(dsMB, tmp)) {
+            // Nếu Add_MB trả về false (do trùng mã hoặc danh sách đầy 300)
+            delete tmp; 
+            // Không cần break ở đây nếu bạn muốn tiếp tục đọc các máy bay khác hợp lệ
         }
-        f.close();
-        return true;
+
+        if (f.eof()) break;
     }
+
+    f.close();
+    return true;
+}
     // chèn  vào cây nhị phân so sánh cmnd
     /*HK*: Khai báo rằng goc là một con trỏ, nó lưu trữ địa chỉ của một đối tượng HK.
         &: Khai báo rằng goc được truyền vào theo dạng tham chiếu. 
     Điều này có nghĩa là mọi thay đổi đối với goc bên trong hàm sẽ
         thay đổi trực tiếp biến gốc ở ngoài hàm.
     */
-    bool Get_Data_KH_tree(HK* &goc, HK * moi){
-        if(goc == NULL){
-            goc = moi;
-            return true;
-        }
-        // so sánh cmnd
-        int res= strcmp(moi->cmnd, goc->cmnd);
-        if( res<0){
-            return Get_Data_KH_tree(goc->left,moi);
-        } else if ( res>0){
-            return Get_Data_KH_tree(goc->right,moi);
-        }
-        //nhập bị trùng
-        return false;
+    bool Get_Data_HK(listHK &dsHK, const char *path_file_HK) {
+    ifstream f(path_file_HK);
+    if (!f.is_open()) return false;
+
+    // Khởi tạo cây rỗng
+    dsHK.goc = NULL;
+    dsHK.slHK = 0;
+
+    // Biến tạm để đọc dữ liệu từ file
+    char b_cmnd[cmnd_max], b_ten[ten_max], b_ho[ho_max];
+    bool b_phai;
+
+    while (f.getline(b_cmnd, cmnd_max, '|')) {
+        // Nếu dòng rỗng thì bỏ qua
+        if (strlen(b_cmnd) == 0) continue;
+
+        // Đọc tiếp Họ, Tên, Phái
+        f.getline(b_ho, ho_max, '|');
+        f.getline(b_ten, ten_max, '|');
+        f >> b_phai;
+        f.ignore(1000, '\n'); // Nhảy xuống dòng tiếp theo
+
+        // TẬN DỤNG HÀM CỦA BẠN MÌNH
+        // Hàm này đã dùng vòng lặp while để chèn vào cây nên ko sợ đệ quy
+        Add_HK(dsHK, b_ho, b_ten, b_cmnd, b_phai);
     }
-   
-    bool Get_Data_HK(listHK &dsHK, const char *path_file_HK){
-        ifstream f(path_file_HK);
-        
-        if(!f.is_open()) return false; // Sai ở đây
-        dsHK.goc =NULL;         // cây rỗng
-        dsHK.slHK=0;
-        // biến rỗng chứa dũ liệu đầu vào để tránh tạo new thừa
-        char b_cmnd[cmnd_max], b_ten[ten_max], b_ho[ho_max];
-        bool b_phai;
-        
-        //đọc thử CMND đâu tiên để bắt dầu vòng lặp
-        while(f.getline(b_cmnd,cmnd_max,'|')){
-            
-            // kt hết file chưa 
-            if(strlen(b_cmnd)==0) break;
-            //  nhập dũ liệu vào
-            f.getline(b_ho,ho_max,'|');
-            f.getline(b_ten,ten_max,'|');
-            f>>b_phai;
-            f.ignore(1000,'\n');
-            HK* tmp = new HK();
-            //cập nhật dữ liệu
-            bool ok=true;   
-            // lưu trạng thái nhập xem có bị sai định dạng không
-            ok &= tmp->set_cmnd(b_cmnd);
-            ok &= tmp->set_ho(b_ho);
-            ok &= tmp->set_ten(b_ten);
-            tmp->phai = b_phai;
-            tmp->left = tmp->right = NULL;
-            // nếu dữ liệu hợp lệ  thì chèn vào cây 
-            if (ok && Get_Data_KH_tree(dsHK.goc,tmp)){
-                dsHK.slHK++;
-            }else {
-                // nếu sai dữ liêu  thì xóa nó
-                delete tmp;
-            }
-            
-        }
-        f.close();
-        return true;
-    }
+
+    f.close();
+    return true;
+}

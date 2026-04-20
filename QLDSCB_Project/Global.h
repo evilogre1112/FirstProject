@@ -25,7 +25,7 @@ const int slHK_max = 100000;
 const int soHieuMB_max = 15;
 const int loaiMB_max = 40;
 const int maCB_max= 16;
-const int cmnd_max = 13;
+const int cmnd_max = 17;    // 12 kí tự + 1 kí tự để lưu| vị trí chỗ ngồi +1 null
 const int ho_max=50;
 const int ten_max=14;
 const int sbDich_max=50;
@@ -35,6 +35,38 @@ static const char* path_file_MB = "Data/DSMB.txt";
 static const char* path_file_HK = "Data/DSHK.txt";
 
 
+//---- cấu trúc stack cho mọi data dùng danh sách liên kết ----//
+template <typename T>
+struct Stack {
+    T data;
+    Stack* next;
+    Stack* top;
+    Stack(){
+        top = NULL;
+    }
+    Stack(T val){
+        data = val;
+        next = NULL;
+        top = NULL;
+    }
+    bool isEmpty() {
+        return top == NULL;
+    }
+    void push(T val){
+        Stack* new1 =new Stack(val);
+        new1->next = top;
+        top = new1;
+    }
+    T pop(){
+        Stack*tmp =top;
+        top = top->next;
+        T val = tmp->data;
+        delete tmp;
+        return val;
+    }
+};
+
+
 // --- cấu trúc máy bay ---
 struct MB {
     char soHieuMB[soHieuMB_max];
@@ -42,6 +74,9 @@ struct MB {
     int socho;
     int SLB;
     MB();
+    bool set_soHieuMB(char *shmb);
+    bool set_loaiMB(char *loai);
+    bool set_socho(int c);
 };
 
 struct listMB {
@@ -73,7 +108,7 @@ struct CB{
     int trangThai;                    // 0 hủy chuyến, 1 còn vé, 2 hết vé, 3 hoàn tất
     char soHieuMB[soHieuMB_max];      // số hiệu máy bay
     int socho;                        // số chỗ trên máy bay
-    char **DSV;                       // mảng cấp phát động chứa cmnd chảu khách hàng
+    char **DSV;                       // mảng cấp phát động chứa cmnd chảu khách hàng 3 kí tự cuối chứa vị trí vé
     CB* next;                         // chứa địa chỉ contro tiếp theo
     CB();                             // ko tham số
     CB(int sc);
@@ -125,7 +160,7 @@ struct listHK{
  * @return true nếu lấy thành công
  */
 
-bool Get_Data_CB(listCB &dsCB, const char *path_file_CB);
+bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB);
 /**
  * @brief đọc file máy bay
  * @param dsMB danh sách máy bay
@@ -136,7 +171,8 @@ bool Get_Data_MB(listMB &dsMB, const char *path_file_MB);
 /*
     1.  ho 
     2.  ten
-    3.   cmnd
+    3.  cmnd
+    4.  phai
 */
 bool Get_Data_HK(listHK &dsHK, const char *path_file_HK);
 
