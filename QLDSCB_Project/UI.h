@@ -208,6 +208,9 @@ int GetHourFromStr(const string &datetimeStr);
 // Hàm lấy Phút (MM) - Cắt 2 ký tự từ vị trí 14
 int GetMinuteFromStr(const string &datetimeStr);
 
+string ToStringDate(DateTime dt);
+string TranFormSatus(int st);
+
 NavKey GetNavKey(int &ch);
 NavKey GetNavKey();
 
@@ -219,7 +222,8 @@ void CustomerAddMB();
 void CustomerAddCB();
 void CustomerAddHK();
 
-void It_list_MB();
+void It_list_MB(int mode);
+void It_list_CB(int mod);
 
 void RunInNewTab(void (*func)());
 int InputStatus(int &result, int x, int y);
@@ -227,7 +231,8 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder = 
 
 void Router_B(int mainMenuIdx, function<void()> func_1 = [](){}, 
                   function<void()> func_2 = [](){}, 
-                  function<void()> func_3 = [](){});
+                  function<void()> func_3 = [](){},
+                  function<void()> func_4 = [](){});
 
 void Router_Board(int mainMenuIdx, 
                   function<void()> func_1 = [](){}, 
