@@ -252,6 +252,24 @@ int GetMinuteFromStr(const string &datetimeStr) {
     catch (...) { return -1; }
 }
 
+string ToStringDate(DateTime dt) {
+    stringstream ss;
+    
+    // Sử dụng setw(2) và setfill('0') để đảm bảo luôn có 2 chữ số (vd: 09 thay vì 9)
+    ss << setfill('0') << setw(2) << dt.get_dd() << "/"
+       << setfill('0') << setw(2) << dt.get_mt() << "/"
+       << setw(4) << dt.get_yy() << " "
+       << setfill('0') << setw(2) << dt.get_hh() << ":"
+       << setfill('0') << setw(2) << dt.get_mm();
+       
+    return ss.str();
+}
+
+string TranFormSatus(int st){
+     string SelectedColors[] = {RED, GREEN, YELLOW, CYAN};
+     return SelectedColors[st];
+}
+
 int visualLength(const string& s) {
     int length = 0;
     bool inCode = false;
@@ -1163,11 +1181,16 @@ void CustomerAddHK() {
 
 
 void It_list_MB(int mod){
-    Gotoxy(15,4);
+    Gotoxy(50,2);
+    cout << "Danh Sách Máy Bay";
+    Gotoxy(10,4);
     int field = 5 ;
     int Temp[] = {10,20,50,90,100};
     int Temp2[] ={10,30,40,10,15};
     cout << GRAY << "Tìm Kiếm" << RESET ;
+    string typemode[] = {"In danh sách","Hiệu Chỉnh", "Xoá"};
+    Gotoxy(90,4) ;
+    cout << GRAY <<"MODE: "<< typemode[mod] << RESET ;
     Gotoxy(10,5);
     SmallBox("STT",10,1);
     Gotoxy(20,5);
@@ -1218,10 +1241,11 @@ void It_list_MB(int mod){
         
         
         //In thông tin điều hướng ở cuối
-        Gotoxy(15, 8 + itemsPerPage + 2);
+        Gotoxy(35, 8 + itemsPerPage + 1);
         int totalPages = (dsMB.slMB + itemsPerPage - 1) / itemsPerPage; // Tính tổng số trang
-        cout << "Trang " << currentPage + 1 << "/" << totalPages;
-        cout << "  |  Dung phim Mui Ten de chuyen trang, ESC de thoat.";
+        string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát." ;
+      
+        SmallBox(m,50,4,string(GRAY));
         rowOnScreen = 0 ;
         while(true){
             string s ;
@@ -1276,16 +1300,323 @@ void It_list_MB(int mod){
                 break ;
             }else if (ch == NAV_ENTER){
                 if(mod == 0) break ;
+            }else if (ch == NAV_ESC){
+                return ;
             }
         }
     }
     
 }
 
+void It_list_CB(int mod){
+    Gotoxy(50,2);
+    cout << "Danh Sách Chuyến Bay";
+    Gotoxy(10,4);
+    int field = 5 ;
+    int size = 6 ;
+    int Temp[] = {10,20,50,80,90,105};
+    int Temp2[] ={10,30,30,10,15,10};
+    cout << GRAY << "Tìm Kiếm" << RESET ;
+    string typemode[] = {"In danh sách","Hiệu Chỉnh", "Huỷ Chuyến"};
+    Gotoxy(90,4) ;
+    cout << GRAY <<"MODE: "<< typemode[mod] << RESET ;
+    Gotoxy(10,5);
+    SmallBox("STT",10,1);
+    Gotoxy(20,5);
+    SmallBox("Mã Chuyến Bay",30,1);
+    Gotoxy(50,5);
+    SmallBox("Ngày Khởi Hành",30,1);
+    Gotoxy(80,5);
+    SmallBox("Số Vé",10,1);
+    Gotoxy(90,5);
+    SmallBox("Sân bay đích",15,1);
+    Gotoxy(105,5);
+    SmallBox("Status",10,1);
+    string q[] = {"","","",""};
+    string Type[] = {RED, GREEN, YELLOW, CYAN};
+    q[0] = Type[0] + SQ + RESET + ": Chuyến bay bị huỷ " ;
+    q[1] = Type[1] + SQ + RESET + ": Chuyến bay còn vé " ;
+    q[2] = Type[2] + SQ + RESET + ": Chuyến bay hết vé " ;
+    q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất " ;
+    Gotoxy(70,24);
+    string u = "  " + q[0] + q[1] +"    " +q[2] + q[3];
+    SmallBox(u,50,4);
+    int currentPage = 0;
+    while(true){
+         // Thiết lập thông số phân trang
+        int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 CB
+        int startIndex = currentPage * itemsPerPage;
+        int endIndex = startIndex + itemsPerPage;
+        
+        // Đảm bảo không in lố số lượng CB thực tế
+        if (endIndex > dsCB.slCB) {
+            endIndex = dsCB.slCB;
+        }
+        int itemsOnThisPage = endIndex - startIndex;
+        int rowOnScreen = 0 ;
+        ClearRegion(10,8+itemsOnThisPage,110,16-itemsOnThisPage);
+        CB* current = dsCB.head;
+        for (int k = 0; k < startIndex && current != NULL; k++) {
+            current = current->next; // Nhảy qua các phần tử của trang trước
+        }
+        // Chỉ in từ startIndex đến endIndex
+        for(int i = startIndex; i < endIndex; i++){
+            rowOnScreen = i - startIndex; 
+            string s = to_string(i+1);
+            Gotoxy(10, 8 + rowOnScreen);
+            SmallBox(s,false, false,true, true, 10, 1);
+            Gotoxy(20, 8 + rowOnScreen);
+            s = current->maCB;
+            SmallBox(s,false, false,true, true, 30, 1);
+            Gotoxy(50, 8 + rowOnScreen);
+            s = ToStringDate(current->ngayKH) ;
+            SmallBox(s,false, false,true, true, 30, 1);
+            Gotoxy(80,8 + rowOnScreen);
+            s = to_string(current->socho);
+            SmallBox(s,false, false,true, true, 10, 1);
+            Gotoxy(90,8 + rowOnScreen);
+            s = current->sbDich;
+            SmallBox(s,false, false,true, true, 15, 1);
+            Gotoxy(105,8 + rowOnScreen);
+            s = TranFormSatus(current->trangThai);
+            SmallBox(SQ,false, false,true, true, 10, 1,s);
+            current = current->next;
+        }
+        for(int i = 0 ; i < size ;i++){
+            Gotoxy(Temp[i],8 + rowOnScreen+1);
+            SmallBox("...",false, false,true, true, Temp2[i], 1,GRAY);
+        }
+        
+        //In thông tin điều hướng ở cuối
+        Gotoxy(5, 8 + itemsPerPage + 1);
+        int totalPages = (dsCB.slCB + itemsPerPage - 1) / itemsPerPage; // Tính tổng số trang
+        string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát." ;
+        SmallBox(m,50,4,string(GRAY));
+        Gotoxy(59, 8 + itemsPerPage + 2);
+        cout << " /\\_/\\";
+        Gotoxy(59, 8 + itemsPerPage + 3);
+        cout <<"( o.o )";
+        Gotoxy(59, 8 + itemsPerPage + 4);
+        cout << " > ^ <";
+
+        current = dsCB.head;
+        for (int k = 0; k < startIndex && current != NULL; k++) {
+            current = current->next; // Nhảy qua các phần tử của trang trước
+        }
+        // 2. LƯU CÁC NODE CỦA TRANG NÀY VÀO MẢNG TẠM
+        CB* pageNodes[itemsPerPage]; 
+        int nodeCount = 0;
+        CB* temp = current;
+        for (int k = 0; k < itemsOnThisPage && temp != NULL; k++) {
+            pageNodes[nodeCount] = temp;
+            nodeCount++;
+            temp = temp->next;
+        }
+
+        rowOnScreen = 0 ;
+        while(true){
+            string s ;
+            int index = rowOnScreen + startIndex;// rowOnScreen + startIndex
+            CB* SelectedNode = pageNodes[rowOnScreen];
+            for(int i = 0; i < size ;i++){
+                Gotoxy(Temp[i],8 + rowOnScreen);
+                if(i == 0) s = to_string(index+1);
+                else if(i == 1){
+                    s = SelectedNode->maCB;
+                }else if (i == 2){
+                    s = ToStringDate(SelectedNode->ngayKH);
+                }else if (i == 3){
+                    s = to_string(SelectedNode->socho);
+                }else if (i == 4){
+                    s = SelectedNode->sbDich;
+                }else{
+                    s = TranFormSatus(SelectedNode->trangThai);
+                    SmallBox(SQ,false, false,true, true, Temp2[i],1,s);
+                }
+                if(i!= 5)SmallBox(s,false, false,true, true, Temp2[i],1,HIGHLIGHT);
+            }
+            NavKey ch = GetNavKey();
+            for(int i = 0; i < size ;i++){
+                Gotoxy(Temp[i],8 + rowOnScreen);
+                if(i == 0) s = to_string(index+1);
+                else if(i == 1){
+                    s = SelectedNode->maCB;
+                }else if (i == 2){
+                    s = ToStringDate(SelectedNode->ngayKH);
+                }else if (i == 3){
+                    s = to_string(SelectedNode->socho);
+                }else if (i == 4){
+                    s = SelectedNode->sbDich;
+                }else{
+                    s = TranFormSatus(SelectedNode->trangThai);
+                    SmallBox(SQ,false, false,true, true, Temp2[i],1,s);
+                }
+                if(i != 5)SmallBox(s,false, false,true, true, Temp2[i],1);
+            }
+            if(ch == NAV_UP){
+                if(rowOnScreen -1 >= 0) rowOnScreen--;
+                else break ;
+            }
+            else if (ch == NAV_DOWN){
+                if(rowOnScreen +1 < itemsOnThisPage) rowOnScreen++;
+                else{
+                    if(currentPage+1 <totalPages ) currentPage++;
+                    else currentPage = 0 ;
+                    break ;
+                }
+            }else if (ch == NAV_RIGHT){
+                if(currentPage+1 <totalPages ) currentPage++;
+                else currentPage = 0 ;
+                break ;
+            }else if(ch == NAV_LEFT){
+                if(currentPage-1 >=0 ) currentPage--;
+                else currentPage = totalPages-1 ;
+                break ;
+            }else if (ch == NAV_ENTER){
+                if(mod == 0) break ;
+            }else if (ch == NAV_ESC){
+                return ;
+            }
+        }
+    }
+    
+}
+
+void StatiscalMB(){
+    listMB dsMB_Stat = Get_Flight_Stats(dsMB);
+    Gotoxy(50,2);
+    cout << "Danh Sách Máy Bay";
+    Gotoxy(10,4);
+    int field = 5 ;
+    int Temp[] = {10,20,50,90,100};
+    int Temp2[] ={10,30,40,10,15};
+    cout << GRAY << "Tìm Kiếm" << RESET ;
+    string typemode[] = {"In danh sách","Hiệu Chỉnh", "Xoá"};
+    Gotoxy(90,4) ;
+    Gotoxy(10,5);
+    SmallBox("STT",10,1);
+    Gotoxy(20,5);
+    SmallBox("Số Hiệu Máy Bay",30,1);
+    Gotoxy(50,5);
+    SmallBox("Loại Máy Bay",40,1);
+    Gotoxy(90,5);
+    SmallBox("Số Chỗ",10,1);
+    Gotoxy(100,5);
+    SmallBox("Số Lần Bay",15,1);
+    int currentPage = 0;
+    while(true){
+         // Thiết lập thông số phân trang
+        int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 máy bay
+        int startIndex = currentPage * itemsPerPage;
+        int endIndex = startIndex + itemsPerPage;
+        
+        // Đảm bảo không in lố số lượng máy bay thực tế
+        if (endIndex > dsMB_Stat.slMB) {
+            endIndex = dsMB_Stat.slMB;
+        }
+        int itemsOnThisPage = endIndex - startIndex;
+        int rowOnScreen = 0 ;
+        ClearRegion(10,8+itemsOnThisPage,110,16-itemsOnThisPage);
+        // Chỉ in từ startIndex đến endIndex
+        for(int i = startIndex; i < endIndex; i++){
+            rowOnScreen = i - startIndex; 
+            string s = to_string(i+1);
+            Gotoxy(10, 8 + rowOnScreen);
+            SmallBox(s,false, false,true, true, 10, 1);
+            Gotoxy(20, 8 + rowOnScreen);
+            s = dsMB_Stat.list[i]->soHieuMB;
+            SmallBox(s,false, false,true, true, 30, 1);
+            Gotoxy(50, 8 + rowOnScreen);
+            s = dsMB_Stat.list[i]->loaiMB ;
+            SmallBox(s,false, false,true, true, 40, 1);
+            Gotoxy(90,8 + rowOnScreen);
+            s = to_string(dsMB_Stat.list[i]->socho);
+            SmallBox(s,false, false,true, true, 10, 1);
+            Gotoxy(100,8 + rowOnScreen);
+            s = to_string(dsMB_Stat.list[i]->SLB);
+            SmallBox(s,false, false,true, true, 15, 1);
+        }
+        for(int i = 0 ; i < 5 ;i++){
+            Gotoxy(Temp[i],8 + rowOnScreen+1);
+            SmallBox("...",false, false,true, true, Temp2[i], 1,GRAY);
+        }
+        
+        
+        //In thông tin điều hướng ở cuối
+        Gotoxy(35, 8 + itemsPerPage + 1);
+        int totalPages = (dsMB_Stat.slMB + itemsPerPage - 1) / itemsPerPage; // Tính tổng số trang
+        string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát." ;
+      
+        SmallBox(m,50,4,string(GRAY));
+        rowOnScreen = 0 ;
+        while(true){
+            string s ;
+            int index = rowOnScreen + startIndex;// rowOnScreen + startIndex -1
+            for(int i = 0; i < 5 ;i++){
+                Gotoxy(Temp[i],8 + rowOnScreen);
+                if(i == 1){
+                    s = dsMB_Stat.list[index]->soHieuMB;
+                }else if (i == 2){
+                    s = dsMB_Stat.list[index]->loaiMB;
+                }else if (i == 3){
+                    s = to_string(dsMB_Stat.list[index]->socho);
+                }else{
+                    s = to_string(dsMB_Stat.list[index]->SLB);
+                }
+                if(i == 0) s = to_string(index+1);
+                SmallBox(s,false, false,true, true, Temp2[i],1, HIGHLIGHT);
+            }
+            NavKey ch = GetNavKey();
+            for(int i = 0; i < 5 ;i++){
+                Gotoxy(Temp[i],8 + rowOnScreen);
+                 if(i == 1){
+                    s = dsMB_Stat.list[index]->soHieuMB;
+                }else if (i == 2){
+                    s = dsMB_Stat.list[index]->loaiMB;
+                }else if (i == 3){
+                    s = to_string(dsMB_Stat.list[index]->socho);
+                }else{
+                    s = to_string(dsMB_Stat.list[index]->SLB);
+                }
+                if(i == 0) s = to_string(index+1);
+                SmallBox(s,false, false,true, true, Temp2[i],1);
+            }
+            if(ch == NAV_UP){
+                if(rowOnScreen -1 >= 0) rowOnScreen--;
+                else break ;
+            }
+            else if (ch == NAV_DOWN){
+                if(rowOnScreen +1 < itemsOnThisPage) rowOnScreen++;
+                else{
+                    if(currentPage+1 <totalPages ) currentPage++;
+                    else currentPage = 0 ;
+                    break ;
+                }
+            }else if (ch == NAV_RIGHT){
+                if(currentPage+1 <totalPages ) currentPage++;
+                else currentPage = 0 ;
+                break ;
+            }else if(ch == NAV_LEFT){
+                if(currentPage-1 >=0 ) currentPage--;
+                else currentPage = totalPages-1 ;
+                break ;
+            }else if (ch == NAV_ENTER){
+                break ;
+            }else if (ch == NAV_ESC){
+                for (int i = 0; i < dsMB_Stat.slMB; i++) {
+                    delete dsMB_Stat.list[i]; 
+                }
+                return ;
+            }
+        }
+    }
+
+}
 
 void Router_B(int mainIdx, function<void()> func_1, 
                   function<void()> func_2, 
-                  function<void()> func_3){
+                  function<void()> func_3,
+                  function<void()> func_4){
     int chosen = 0; // Vị trí lựa chọn trong menu con
     int startX, startY ;
     int space = 1;
@@ -1333,7 +1664,11 @@ void Router_B(int mainIdx, function<void()> func_1,
                         func_3();
                         break;
                     case 3 :
+                        func_4();
+                        break;
+                    case 4:
                         return;
+
                 }
                 break; 
             case NAV_ESC:
@@ -1485,11 +1820,9 @@ void RunInNewTab(void (*func)()) {
 void Menu_QuanLyMayBay() {
     Router_B(3, 
         []() { RunInNewTab(CustomerAddMB); }, 
-        []() { 
-            // Bọc hàm có tham số vào một lambda khác
-            RunInNewTab([]() { It_list_MB(0); }); 
-        }, 
-        []() { /* Gọi hàm Xóa Máy Bay ở đây */ } 
+        []() { /* Bọc hàm có tham số vào một lambda khác*/ }, 
+        []() { /* Gọi hàm Xóa Máy Bay ở đây */ },
+        [](){ RunInNewTab([]() { It_list_MB(0); });} 
     );
 }
 
@@ -1497,7 +1830,8 @@ void Menu_QuanLyChuyenBay() {
     Router_B(3, 
         []() { RunInNewTab(CustomerAddCB); }, // Thêm
         []() { /* Gọi hàm Sửa Chuyến Bay ở đây */ }, // Sửa
-        []() { /* Gọi hàm Xóa Chuyến Bay ở đây */ }  // Xóa
+        []() { /* Gọi hàm Xóa Chuyến Bay ở đây */ }, // Xóa
+        [](){ RunInNewTab([]() { It_list_CB(0); });} 
     );
 }
 
@@ -1507,6 +1841,18 @@ void Menu_QuanLyHanhKhach() {
         []() { /* Gọi hàm Sửa HK ở đây */ }, // Sửa
         []() { /* Gọi hàm Xóa HK ở đây */ }  // Xóa
     );
+}
+
+void Menu_TraCuuChuyenBay() {
+     RunInNewTab();
+}
+
+void Menu_ThongKeLuotBay() {
+     RunInNewTab(StatiscalMB);
+}
+
+void Menu_InDanhSachHanhKhach() {
+     RunInNewTab();
 }
 
 void MainScreen(){
@@ -1529,7 +1875,11 @@ void MainScreen(){
                 // Gọi Router_Board và truyền tên các hàm menu vào
                 Router_Board(chosen, Menu_QuanLyMayBay, Menu_QuanLyChuyenBay, Menu_QuanLyHanhKhach);
                 break;
-            
+            case 1:
+                break;
+            case 2:
+                Router_Board(chosen, Menu_TraCuuChuyenBay, Menu_ThongKeLuotBay, Menu_InDanhSachHanhKhach);
+                break;
             default:
                 break;
             }

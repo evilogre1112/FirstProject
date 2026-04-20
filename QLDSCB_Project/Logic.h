@@ -16,6 +16,8 @@
 
 // Một số tiện ích
 int ss_str(char* const a, char* const b); // so sánh 2 chuỗi
+void to_lower(char* &str); // đổi một chuỗi có chữ hoa về chữ thường
+bool cmp_prefix(char* str, char* prefix); // so sánh một chuỗi với tiền tố prefix, trả về true nếu prefix tương ứng
 long long ss_ngay(DateTime const &a, DateTime const &b); // so sánh 2 ngày, trả về số phút chênh lệch
 
 
@@ -60,15 +62,6 @@ int find_insert_posMB(listMB& dsMB, char* const soHieuMB);
 int Find_MB(listMB& dsMB, char* const soHieuMB);
 
 /**
- * @brief           tìm máy bay có số hiệu gần giống với query trong danh sách máy bay
- * @param dsMB      mảng các con trỏ
- * @param soHieuMB  chuỗi C15 chứa mã máy bay cần tìm
- * @return          trả về 1 danh sách máy bay tìm được 
- * @note            UI có tránh nhiệm vụ delete mảng này khi sử dụng xong.
- */
-listMB Find_MB_OnRage(listMB& dsMB, char* const query);
-
-/**
  * @brief       Thêm 1 máy bay mới vào mảng con trỏ
  * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
  * @param newMB Con trỏ trỏ đến máy bay mới đã được cấp phát vùng nhớ
@@ -102,6 +95,13 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB* infoUpdate);
 // CB = type của 1 chuyến bay
 
 // LƯU Ý :: CÁC HÀM CHUYẾN BAY ĐÃ ĐƯỢC TỐI ƯU SẴN, HÃY ĐẢM BẢO KHI SỬ DỤNG, DANH SÁCH CHUYẾN BAY ĐÃ ĐƯỢC SẮP XẾP THEO maCB. DANH SÁCH CHUYẾN BAY CHƯA ĐƯỢC SẮP XẾP SẼ CHO RA KẾT QUẢ SAI Ở MỌI HÀM.
+
+/**
+ * @brief      copy data của CB2 vào CB1
+ * @param CB1     CB thứ 1
+ * @param CB2     CB thứ 2
+*/
+void copy_CB(CB* CB1, CB* CB2);
 
 /**
  * @brief      Swap data của 2 CB
@@ -165,8 +165,8 @@ bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime& newTime);
  * @param dsCB      danh sách chuyến bay
  * @param dsMB      dsnh sách máy bay
  * @param maCB      Mã hiệu chuyến bay cần tìm để sửa
- * @param infor    Nội dung càn được cập nhật
- * @return       Nếu không thể thay đổi, trả về mã lỗi, còn nêu thành công thì trả về 1
+ * @param infor     Nội dung càn được cập nhật
+ * @return          Nếu không thể thay đổi, trả về mã lỗi, còn nêu thành công thì trả về 1
  */
 // LƯU Ý: infor truyền vào vào với soHieuMB nào thì socho cung phai theo đó
 int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor);
@@ -206,17 +206,17 @@ void Init_Tickets(CB* newCB, int soCho);
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)
 
 /**
- * @brief       Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
- * @param   dsHK   danh sách hành khách (BST)
+ * @brief           Tìm kiếm và lấy thông tin hành khách trong dsHK dựa trên CMND
+ * @param   dsHK    danh sách hành khách (BST)
  * @param   cmnd    Số chứng minh nhân dân của khách cần tìm
- * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
+ * @return          Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
 HK* Find_HK_At_List(listHK &dsHK, char* const cmnd);
 
 /**
  * @brief       Tìm kiếm và lấy thông tin hành khách trên một chuyến bay cụ thể dựa trên CMND
  * @param dsCB  danh sách chuyến bay
- * @param dsHK   danh sách hành khách (BST)
+ * @param dsHK  danh sách hành khách (BST)
  * @param cmnd  Số chứng minh nhân dân của khách cần tìm
  * @return      Địa chỉ của hành khách trong BST nếu họ có đặt vé trên chuyến này, ngược lại NULL
  */
@@ -224,7 +224,7 @@ HK* Find_HK(listCB &dsCB, listHK &dsHK, char* const maCB, char* const cmnd);
 
 /**
  * @brief       Thêm một hành khách mới vào cây BST
- * @param dsHK   danh sách hành khách (BST)
+ * @param dsHK  danh sách hành khách (BST)
  * @param ho    Họ
  * @param ten   Tên
  * @param cmnd  Chứng minh nhân dân
@@ -302,12 +302,12 @@ int* Get_Empty_Seats(CB* const dsCB ,const char* maCB, int &sldsVT);
 
 // -- CÂU H: THỐNG KÊ LƯỢT BAY --
 
-// các tiện ích hỗ trợ cho get_Flight_Stactics (Merge_Sort)
+// các tiện ích hỗ trợ cho get_Flight_Stactics (Quick_Sort)
 int ss_SLB(MB* a, MB* b);
-void Merge_SLB(listMB& dsMB, int l,int m, int r);
+int HP_SLB(listMB& dsMB, int l, int r);
 
 /**
- * @brief       sắp xếp danh sách máy bay theo mã SLB giảm dần và soHieuMB tăng dần, sử dụng merge_sort
+ * @brief       sắp xếp danh sách máy bay theo mã SLB giảm dần và soHieuMB tăng dần, sử dụng quick_sort
  * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
  * @param l     vị trí bắt đầu trong mảng muốn sắp xếp
  * @param r     vị trí kết thúc trong mảng muốn sắp xếp ( Sắp xếp từ vị trí l đên r )
@@ -321,5 +321,15 @@ void Sort_SLB(listMB& dsMB, int l, int r);
  */
 listMB Get_Flight_Stats (listMB &dsMB);
 
+// -- Gói Tìm kiếm theo tiền tố query --
+/**
+ * @brief           Tìm mã tương ứng cho từng dữ liệu theo tiền tố
+ * @param query           tiền tố
+ * @return          trả về 1 danh sách tương ứng tìm được
+ * @note            UI có tránh nhiệm vụ delete mảng này khi sử dụng xong.
+ */
+listMB Find_MB_OnRage(listMB &dsMB, char* const query);
+listCB Find_CB_OnRage(listCB &dsCB, char* const query);
+listHK Find_HK_OnRage(listHK &dsHK, char* const query);
 
 #endif

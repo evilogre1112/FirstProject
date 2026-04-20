@@ -170,7 +170,7 @@ CB::CB(){
         check &= this->ngayKH.set_dd(d);
         check &= this->ngayKH.set_hh(h);
         check &= this->ngayKH.set_mm(m);
-    return check; // Trả về true nếu tất cả các giá trị đều hợp lệ
+        return check; // Trả về true nếu tất cả các giá trị đều hợp lệ
 
     }
 
@@ -240,7 +240,6 @@ CB::CB(){
         left = right = NULL;
     }
 
-    
     bool HK::set_cmnd(char *new_cmnd){
         if(new_cmnd ==NULL) return false;
         int n = strlen(new_cmnd);
@@ -270,6 +269,7 @@ CB::CB(){
         this->ho[n]='\0';
         return true;
     }
+
     bool HK::set_ten(char *new_ten){
        if(new_ten ==NULL) return false;
         int n = strlen(new_ten);
@@ -302,6 +302,7 @@ CB::CB(){
         phai = gt;
         return true;
     }
+
     bool HK::get_phai(){
         return phai;
     }
