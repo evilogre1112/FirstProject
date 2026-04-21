@@ -18,6 +18,23 @@ int ss_str(char* const a, char* const b) {
     return 0;
 } // a == b return 0, a > b return 1, a < b return 2
 
+void to_lower(char* str) {
+    int i = 0;
+    while (str[i] != '\0') {
+        if (str[i] >= 'A' && str[i] <= 'Z') str[i] = tolower(str[i]);
+        i++;
+    }
+}
+
+bool cmp_prefix(char* str, char* prefix) {
+    int i = 0;
+    while (str[i] != '\0' && prefix[i] != '\0') {
+        if (str[i] != prefix[i]) return false;
+        i++;
+    }
+    if (str[i] == '\0' && prefix[i] != '\0') return false;
+    return true;
+}
 // Tiện ích tính số phút chênh lệch của 2 ngày bất kì từ 1900 về sau
 bool isLeap(int y) {
     return (y % 400 == 0) || (y % 4 == 0 && y % 100 != 0);
@@ -151,7 +168,7 @@ bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
     }
     if (check == true) return false; // Khong the xoa mot may bay ma da co chuyen bay dang su dung da co khach
     int index = Find_MB(dsMB, soHieuMB);
-    if (index == -1) return false; // Khong the xoa mot may bay khong ton tai dang ton tai
+    if (index == -1) return false; // Khong the xoa mot may bay khong ton tai
     delete dsMB.list[index];
     for (int i = index; i < dsMB.slMB - 1; i++) {
         dsMB.list[i] = dsMB.list[i + 1];
@@ -213,6 +230,39 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
 }
 
 // Chuyen Bay
+void copy_CB(CB* CB1, CB* CB2) {
+    
+    strcpy(CB1->maCB, CB2->maCB);
+
+    CB1->ngayKH = CB2->ngayKH;
+   
+    if (CB1->sbDich == NULL) {
+        char* newsb = new char[sbDich_max];
+        strcpy(newsb, CB2->sbDich);
+        CB1->sbDich = newsb;
+    }
+    else {
+        strcpy(CB1->sbDich, CB2->sbDich);
+    }
+  
+    CB1->trangThai = CB2->trangThai;
+   
+    strcpy(CB1->soHieuMB, CB2->soHieuMB);
+    
+    for (int i = 0; i < CB1->socho; i++) {
+        delete CB1->DSV[i];
+    }
+  
+    CB1->socho = CB2->socho;
+    
+    char** newDSV = new char* [CB2->socho];
+    for (int i = 0; i < CB2->socho; i++) {
+        newDSV[i] = new char[cmnd_max];
+        strcpy(newDSV[i], CB2->DSV[i]);
+    }
+    delete[] CB1->DSV;
+    CB1->DSV = newDSV;
+}
 
 void Swap_CB(CB* &CB1, CB* &CB2) {
     
@@ -345,8 +395,9 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
     temp = Find_CB(dsCB, infor->maCB);
     if (temp != NULL && ss_str(maCB, infor->maCB) != 0) return -1;
     if (Find_MB(dsMB, infor->soHieuMB) == -1) return -3;
-    if (temp == NULL) temp = Find_CB(dsCB, maCB);
-    if (temp->socho > infor->socho) return -4;
+    temp = Find_CB(dsCB, maCB);
+    if (temp == NULL) return -4;
+    if (temp->socho > infor->socho) return -5;
     bool check = false;
     for (int i = 0; i < temp->socho; i++) {
         if (temp->DSV[i][0] != '\0') {
@@ -354,14 +405,14 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
             break;
         }
     }
-    // Trường hợp đã có khách
-    if (check) {
-        if (ss_str(temp->sbDich, infor->sbDich) != 0) return -5;
-        if (ss_ngay(temp->ngayKH, infor->ngayKH) != 0) return -5;
-        if (temp->trangThai != infor->trangThai) return -5;
+    
+    if (check) { // Trường hợp đã có khách
+        if (ss_str(temp->sbDich, infor->sbDich) != 0) return -6;
+        if (ss_ngay(temp->ngayKH, infor->ngayKH) != 0) return -6;
+        if (temp->trangThai != infor->trangThai) return -6;
         
     }
-    else {
+    else { // Trường hợp chưa có khách
         strcpy(temp->sbDich, infor->sbDich);
         temp->ngayKH = infor->ngayKH;
         temp->trangThai = infor->trangThai;
@@ -379,7 +430,7 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
     strcpy(temp->soHieuMB, infor->soHieuMB);
     delete[] temp->DSV;
     temp->DSV = newDSV;
-    // Trường hợp chưa có khách
+    Sort_CB(dsCB);
     return true;
 }
 
@@ -473,15 +524,13 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
             }
             else temp = temp->left;
         }
-        else return false;
+        else {
+            delete newHK;
+            return false;
+        }
     }
     dsHK.slHK++;
     return true;
-}
-
-listMB Find_MB_OnRage(listMB& dsMB, char* const query){
-    listMB A ;
-    return A;
 }
 
 bool Is_Ticket_Booked(CB *const dsCB, const char* maCB, const char* CMND)
@@ -522,52 +571,31 @@ int ss_SLB(MB* a, MB* b) {
     return 0;
 }
 
-void Merge_SLB(listMB& dsMB, int l,int m, int r) {
-    int x_size = m - l + 1; int y_size = r - m;
-    MB** x = new MB*[x_size]; MB** y = new MB*[y_size];
-    int nx = l; int ny = m + 1;
-    for (int i = 0; i < x_size; i++) {
-        x[i] = dsMB.list[nx];
-        nx++;
-    }
-    for (int j = 0; j < y_size; j++) {
-        y[j] = dsMB.list[ny];
-        ny++;
-    }
-    int i = 0; int j = 0;
-    while (i < x_size && j < y_size) {
-        if (ss_SLB(x[i], y[j]) != 1) {
-            dsMB.list[l] = x[i];
+int HP_SLB(listMB& dsMB, int l, int r) {
+    MB* pivot = new MB();
+    *pivot = *dsMB.list[l];
+    int i = l;
+    int j = r;
+    while (true) {
+        while (ss_SLB(pivot, dsMB.list[i]) == 1) i++;
+        while (ss_SLB(pivot, dsMB.list[j]) == 2) j++;
+        if (i < j) {
+            swap_MB(dsMB.list[i], dsMB.list[j]);
             i++;
+            j--;
         }
         else {
-            dsMB.list[l] = y[j];
-            j++;
-        }
-        l++;
-    }
-    if (i == x_size) {
-        for (int s = j; s < y_size; s++) {
-            dsMB.list[l] = y[s];
-            l++;
+            delete pivot;
+            return j;
         }
     }
-    else {
-        for (int s = i; s < x_size; s++) {
-            dsMB.list[l] = x[s];
-            l++;
-        }
-    }
-    delete[] x;
-    delete[] y;
 }
 
 void Sort_SLB(listMB& dsMB, int l, int r) {
     if (l >= r) return;
-    int m = (r + l) / 2;
+    int m = HP_SLB(dsMB, l, r);
     Sort_SLB(dsMB, l, m);
     Sort_SLB(dsMB, m + 1, r);
-    Merge_SLB(dsMB, l, m, r);
 }
 
 listMB Get_Flight_Stats (listMB &dsMB) {
@@ -580,3 +608,56 @@ listMB Get_Flight_Stats (listMB &dsMB) {
     Sort_SLB(flight_Statics, 0, flight_Statics.slMB - 1);
     return flight_Statics;
 }
+
+listMB Find_MB_OnRage(listMB& dsMB, char* const query) {
+    listMB A;
+    A.slMB = 0;
+    char temp[soHieuMB_max];
+    char prefix[soHieuMB_max];
+    strcpy(prefix, query);
+    to_lower(prefix);
+    for (int i = 0; i < dsMB.slMB; i++) {
+        strcpy(temp, dsMB.list[i]->soHieuMB);
+        to_lower(temp);
+        if (cmp_prefix(temp, prefix)) {
+            A.list[A.slMB] = new MB();
+            *A.list[A.slMB] = *dsMB.list[i];
+            A.slMB++;
+        }
+    }
+    return A;
+}
+
+listCB Find_CB_OnRage(listCB &dsCB, char* const query) {
+    listCB A;
+    A.slCB = 0;
+    A.head = NULL;
+    CB* atemp = A.head;
+    char temp[maCB_max];
+    char prefix[maCB_max];
+    strcpy(prefix, query);
+    to_lower(prefix);
+    CB* tnode = dsCB.head;
+    while (tnode != NULL) {
+        strcpy(temp, tnode->maCB);
+        to_lower(temp);
+        if (cmp_prefix(temp, prefix)) {
+            if (A.head == NULL) {
+                A.head = new CB();
+                copy_CB(A.head, tnode);
+                atemp = A.head;
+                A.slCB++;
+            }
+            else {
+                CB* newCB = new CB();
+                copy_CB(newCB, tnode);
+                atemp->next = newCB;
+                atemp = atemp->next;
+                A.slCB++;
+            }
+        }
+        tnode = tnode->next;
+    }
+    return A;
+}
+listHK Find_HK_OnRage(listHK &dsHK, char* const query);
