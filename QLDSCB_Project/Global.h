@@ -22,10 +22,10 @@ using namespace std;
 const int slMB_max = 300;
 const int slCB_max = 300;
 const int slHK_max = 100000;
-const int soHieuMB_max = 15;
+const int soHieuMB_max = 40;
 const int loaiMB_max = 40;
 const int maCB_max= 16;
-const int cmnd_max = 17;    // 12 kí tự + 1 kí tự để lưu| vị trí chỗ ngồi +1 null
+const int cmnd_max = 13;    
 const int ho_max=50;
 const int ten_max=14;
 const int sbDich_max=50;

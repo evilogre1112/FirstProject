@@ -1,20 +1,19 @@
 cấu trúc của file lưu máy bay theo 1 hàng được quy định như sau:
 
-số_hiệu_máy_bay_so_1|loại_máy_bay|số_chỗ|slb
-số_hiệu_máy_bay_so_2|loại_máy_bay|số_chỗ|slb
+số_hiệu_máy_bay_so_1|loại_máy_bay|số_chỗ
+số_hiệu_máy_bay_so_2|loại_máy_bay|số_chỗ
 .
 .
 .
-số_hiệu_máy_bay_so_n|loại_máy_bay|số_chỗ|slb
+số_hiệu_máy_bay_so_n|loại_máy_bay|số_chỗ
 
 
 chú thích : số hiệu máy bay là chuỗi kí tự tối đa 15
             loại máy bay:chỗikys tự tối đa 40
             số chỗ tối đa 500 ghế
-            slb là số lần máy bay hoàn thành công việc
 
 ví dụ: 
 
-VN-A123|Airbus A321|150|10
-VN-A456|Boeing 787|300|22
-VJ-888|Embraer E190|90|10
+VN-A123|Airbus A321|150
+VN-A456|Boeing 787|300
+VJ-888|Embraer E190|90

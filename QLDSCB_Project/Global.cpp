@@ -322,81 +322,101 @@ CB::CB(){
     // ---- đọc file ----
 
 
-    bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB){
-        ifstream f(path_file_CB);                               // mở file cb
-        if( !f.is_open() ) return false;
-        dsCB.slCB=0;
-        dsCB.head = NULL;
-    
-        while(true){
-            CB* tmp =new CB();
-
-            if (!(f.getline(tmp->maCB, maCB_max, '|'))) {
-                delete tmp;                                     // Xóa vùng nhớ vừa cấp phát vì không có dữ liệu để lưu
-                break;
-            }
-            //---doc ngay thang---
-            f >> tmp->ngayKH.hh;f.ignore(1,':');
-            f >> tmp->ngayKH.mm;f.ignore(1,'|');
-            f >> tmp->ngayKH.dd;f.ignore(1,'/');
-            f >> tmp->ngayKH.mt;f.ignore(1,'/');
-            f >> tmp->ngayKH.yy;f.ignore(1,'|');
-            //---sân bay đích---
-            tmp->sbDich = new char[sbDich_max];
-            f.getline(tmp->sbDich, sbDich_max ,'|');
-            //---trang thai---
-            f>>tmp->trangThai;f.ignore(1,'|');
-            //---số hiệu máy bay---
-            f.getline(tmp->soHieuMB, soHieuMB_max,'|');
-            //---số chỗ---
-            f>>tmp->socho;            
-            f.ignore(100,'\n');// nhảy xuống dòng mới sau khi đọc số chỗ
-            //---mảng danh sách cmnd----
-            // 2. Cấp phát mảng DSV dựa trên SỐ CHỖ TỐI ĐA (Khung máy bay)
-            if (tmp->socho > 0 && tmp->socho <= socho_max) {
-                tmp->DSV = new char*[tmp->socho];
-                for (int i = 0; i < tmp->socho; i++) {
-                    tmp->DSV[i] = new char[cmnd_max];
-                    strcpy(tmp->DSV[i], "0"); // Khởi tạo tất cả ghế là trống
-                }
-                // 3. Đọc danh sách CMND đã bán dựa trên SỐ CHỖ ĐÃ BÁN
-                char line[50];
-            while (true) {
-                streampos pos_truoc = f.tellg(); // Lưu vị trí hiện tại
-                
-                if (!f.getline(line, 50)) break;
-                if (strlen(line) == 0) continue;
-
-                // Đếm số dấu '|' để phân biệt dòng khách và dòng CB mới
-                int countSep = 0;
-                for (int i = 0; line[i] != '\0'; i++) {
-                    if (line[i] == '|') countSep++;
-                }
-
-                if (countSep == 1) {
-                    // Tách CMND và Số vé bằng hàm tìm ký tự strchr
-                    char *ptr = strchr(line, '|'); 
-                    if (ptr != NULL) {
-                        *ptr = '\0'; // Tạm thời cắt chuỗi tại dấu '|'
-                        char *s_cmnd = line;       // Phần trước '|'
-                        int vi_tri = atoi(ptr + 1); // Phần sau '|' chuyển thành số
-
-                        if (vi_tri >= 1 && vi_tri <= tmp->socho) {
-                            strncpy(tmp->DSV[vi_tri - 1], s_cmnd, cmnd_max - 1);
-                            tmp->DSV[vi_tri - 1][cmnd_max - 1] = '\0';
-                        }
-                    }
-                } else {
-                    // Nếu là mã CB mới (nhiều dấu |), quay lại vị trí cũ và dừng đọc vé
-                    f.seekg(pos_truoc);
-                    break;
-                }
-                }
-            }
-            Add_CB(dsCB, dsMB, tmp);
-
-        f >> ws; // Bỏ qua khoảng trắng thừa cuối file
+    bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB) {
+    // Mở file ở chế độ binary để tránh triệt để lỗi dư ký tự \r trên Windows
+    ifstream f(path_file_CB);
+    if (!f.is_open()) {
+        return false;
     }
+
+    dsCB.slCB = 0;
+    dsCB.head = NULL;
+
+    char ma[maCB_max];
+    
+    // Vòng lặp lớn: Đọc từng chuyến bay
+    while (f.getline(ma, maCB_max, '|')) {
+        // Dọn dẹp ký tự xuống dòng bị dính từ vòng lặp trước (nếu có)
+        int len_ma = strlen(ma);
+        if (len_ma > 0 && ma[0] == '\n') { 
+            memmove(ma, ma + 1, len_ma); 
+            len_ma--; 
+        }
+        if (len_ma > 0 && ma[len_ma - 1] == '\r') {
+            ma[len_ma - 1] = '\0'; 
+        }
+
+        if (strlen(ma) < 2) continue;
+
+        CB* tmp = new CB();
+        strcpy(tmp->maCB, ma);
+        tmp->next = NULL;
+
+        // --- 1. Đọc thông tin cơ bản ---
+        f >> tmp->ngayKH.hh; f.ignore(); // bỏ qua ':'
+        f >> tmp->ngayKH.mm; f.ignore(); // bỏ qua '|'
+        f >> tmp->ngayKH.dd; f.ignore(); // bỏ qua '/'
+        f >> tmp->ngayKH.mt; f.ignore(); // bỏ qua '/'
+        f >> tmp->ngayKH.yy; f.ignore(); // bỏ qua '|'
+
+        tmp->sbDich = new char[sbDich_max];
+        f.getline(tmp->sbDich, sbDich_max, '|');
+
+        f >> tmp->trangThai; f.ignore(); // bỏ qua '|'
+        f.getline(tmp->soHieuMB, soHieuMB_max, '|');
+         
+         
+        // --- 2. Lấy Số Chỗ từ Danh Sách Máy Bay ---
+        int indexMB = Find_MB(dsMB, tmp->soHieuMB);
+        
+        if (indexMB == -1) {
+            tmp->socho = 0 ; // Không tìm thấy máy bay thì cho số chỗ = 0
+        } else {
+            // Lấy trực tiếp số chỗ thực tế của chiếc máy bay đó
+            tmp->socho = dsMB.list[indexMB]->socho;
+        }
+
+        // --- 3. Cấp phát mảng vé ---
+        tmp->DSV = new char*[tmp->socho];
+        for (int i = 0; i < tmp->socho; i++) {
+            tmp->DSV[i] = new char[cmnd_max];
+            strcpy(tmp->DSV[i], "0"); // Mặc định tất cả ghế đều trống ("0")
+        }
+
+        // --- 4. Đọc Số lượng vé đã bán ---
+        int soVeDaBan = 0;
+        if (f >> soVeDaBan) {
+            f.ignore(100, '\n'); // Xóa bộ đệm sau khi đọc xong con số
+        }
+        // --- 5. Đọc danh sách vé bằng vòng FOR (Vị trí | CMND) ---
+        int vt;
+        char cmnd[cmnd_max];
+        for (int i = 0; i < soVeDaBan; i++) {
+                             // Đọc chuỗi CMND
+            if (!(f >> vt)) break; // Kiểm tra nếu không đọc được số vị trí
+            f.ignore(1, '|');      // Bỏ qua đúng 1 ký tự '|'
+    
+    // Đọc CMND cho đến khi gặp dấu '|' hoặc xuống dòng
+            f >> cmnd;
+            // Kiểm tra vị trí hợp lệ rồi mới gán CMND vào ghế
+            if (vt >= 1 && vt <= tmp->socho) {
+                strcpy(tmp->DSV[vt - 1], cmnd);
+            }
+        }
+        // --- 6. Thêm vào Danh sách liên kết ---
+        if (!Add_CB(dsCB, dsMB, tmp)) {
+            // Nếu hàm Add_CB từ chối (trả về false), phải dọn dẹp RAM ngay
+            delete[] tmp->sbDich;
+            for (int i = 0; i < tmp->socho; i++) {
+                delete[] tmp->DSV[i];
+            }
+            delete[] tmp->DSV;
+            delete tmp; 
+        }
+        // Xóa sạch khoảng trắng dư thừa để vòng lặp quay lại đọc mã CB tiếp theo chuẩn xác
+        f >> ws; 
+    }
+
     f.close();
     return true;
 }
@@ -404,11 +424,14 @@ CB::CB(){
         ifstream f(path_file_MB);
         if(!f.is_open()) return false;
         dsMB.slMB=0;
-        while(dsMB.slMB < slMB_max&& !f.eof() ){        //đọc đến cuối file
-            MB* tmp =new MB();                          //tạo ô nhớ chưaas MB
-            f.getline(tmp->soHieuMB,soHieuMB_max,'|');
+        char tempSoHieu[soHieuMB_max];
+        while(dsMB.slMB < slMB_max&&  f.getline(tempSoHieu, soHieuMB_max, '|')){        //đọc đến cuối file
+            if (strlen(tempSoHieu) == 0) continue;
+             // Nếu dòng rỗng, bỏ qua
+            MB* tmp =new MB();                          //tạo ô nhớ chứa MB
+            strcpy(tmp->soHieuMB, tempSoHieu);
             // --- số hiệu máy bay----
-            if(strlen(tmp->soHieuMB)== 0||f.eof()){
+            if(strlen(tmp->soHieuMB)== 0){
                 delete tmp;
                 break;
             }
@@ -418,22 +441,16 @@ CB::CB(){
             if(!(f>> tmp->socho)) {
                 delete tmp;
                 break;
-            }f.ignore(1, '|'); // Bỏ qua dấu gạch đứng sau số chỗ
-
-            // 4. Đọc Số lần bay (SLB)
-            if (!(f >> tmp->SLB)) {
-            // Nếu không đọc được SLB, có thể để mặc định là 0
-            tmp->SLB = 0;}
+            }
+            tmp->SLB = 0;
             // xóa dáu cách còn lại dấu chống dòng
             f.ignore(100,'\n');
             //dùng hàm Add_MB để thêm vào danh sách máy bay
            if (!Add_MB(dsMB, tmp)) {
             // Nếu Add_MB trả về false (do trùng mã hoặc danh sách đầy 300)
             delete tmp; 
-            // Không cần break ở đây nếu bạn muốn tiếp tục đọc các máy bay khác hợp lệ
+            // Không cần break ở đây tiếp tục đọc các máy bay khác hợp lệ
         }
-
-        if (f.eof()) break;
     }
 
     f.close();
@@ -467,8 +484,6 @@ CB::CB(){
         f >> b_phai;
         f.ignore(1000, '\n'); // Nhảy xuống dòng tiếp theo
 
-        // TẬN DỤNG HÀM CỦA BẠN MÌNH
-        // Hàm này đã dùng vòng lặp while để chèn vào cây nên ko sợ đệ quy
         Add_HK(dsHK, b_ho, b_ten, b_cmnd, b_phai);
     }
 

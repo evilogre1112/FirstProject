@@ -5,7 +5,7 @@ cmnd2|ho|ten|gt
 .
 .
 .
-cmndn|ho|ten
+cmndn|ho|ten|gt
 
 chú thích: cmnd là chuỗi chứ 12 kí tự số
            ho: là chuỗi lưu tên và tên đệm  55
