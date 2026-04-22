@@ -210,6 +210,7 @@ int GetMinuteFromStr(const string &datetimeStr);
 
 string ToStringDate(DateTime dt);
 string TranFormSatus(int st);
+string TranFormGender(int st);
 
 NavKey GetNavKey(int &ch);
 NavKey GetNavKey();

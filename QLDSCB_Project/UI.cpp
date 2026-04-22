@@ -270,6 +270,12 @@ string TranFormSatus(int st){
      return SelectedColors[st];
 }
 
+string TranFormGender(int st){
+     string SelectedColors[] = {"Nam","Nữ"};
+     return SelectedColors[st];
+}
+
+
 int visualLength(const string& s) {
     int length = 0;
     bool inCode = false;
@@ -1482,6 +1488,7 @@ void It_list_CB(int mod){
     
 }
 
+
 void StatiscalMB(){
     listMB dsMB_Stat = Get_Flight_Stats(dsMB);
     Gotoxy(50,2);
@@ -1820,18 +1827,18 @@ void RunInNewTab(void (*func)()) {
 void Menu_QuanLyMayBay() {
     Router_B(3, 
         []() { RunInNewTab(CustomerAddMB); }, 
-        []() { /* Bọc hàm có tham số vào một lambda khác*/ }, 
-        []() { /* Gọi hàm Xóa Máy Bay ở đây */ },
-        [](){ RunInNewTab([]() { It_list_MB(0); });} 
+        []() { RunInNewTab([]() { It_list_CB(1); });}, 
+        []() { RunInNewTab([]() { It_list_MB(2); });},
+        []() { RunInNewTab([]() { It_list_MB(0); });} 
     );
 }
 
 void Menu_QuanLyChuyenBay() {
     Router_B(3, 
         []() { RunInNewTab(CustomerAddCB); }, // Thêm
-        []() { /* Gọi hàm Sửa Chuyến Bay ở đây */ }, // Sửa
-        []() { /* Gọi hàm Xóa Chuyến Bay ở đây */ }, // Xóa
-        [](){ RunInNewTab([]() { It_list_CB(0); });} 
+        []() { RunInNewTab([]() { It_list_CB(1); });}, // Sửa
+        []() { RunInNewTab([]() { It_list_CB(2); }); }, // Xóa
+        []() { RunInNewTab([]() { It_list_CB(0); });} 
     );
 }
 
