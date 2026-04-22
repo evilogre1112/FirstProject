@@ -392,7 +392,6 @@ CB::CB(){
         int vt;
         char cmnd[cmnd_max];
         for (int i = 0; i < soVeDaBan; i++) {
-                             // Đọc chuỗi CMND
             if (!(f >> vt)) break; // Kiểm tra nếu không đọc được số vị trí
             f.ignore(1, '|');      // Bỏ qua đúng 1 ký tự '|'
     
@@ -413,7 +412,6 @@ CB::CB(){
             delete[] tmp->DSV;
             delete tmp; 
         }
-        // Xóa sạch khoảng trắng dư thừa để vòng lặp quay lại đọc mã CB tiếp theo chuẩn xác
         f >> ws; 
     }
 
