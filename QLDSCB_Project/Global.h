@@ -66,6 +66,39 @@ struct Stack {
     }
 };
 
+//---- Cáu trúc thời gian -----
+
+struct DateTime{
+    int hh, mm, dd, mt, yy;
+    DateTime();
+    int get_hh();
+    int get_mm();
+    int get_dd();
+    int get_mt();
+    int get_yy();
+    bool set_hh(int h);
+    bool set_mm(int m);
+    bool set_dd(int d);
+    bool set_mt(int t);
+    bool set_yy(int y);
+};
+
+// --- Cấu trúc đánh dấu ngày khởi hành và maCB cho MB và HK (linked list)---
+
+struct markNode {
+    char maCB[maCB_max];
+    DateTime NgayKH;
+    markNode* next;
+    markNode();
+};
+
+struct listMark {
+    markNode* head;
+    listMark();
+};
+
+bool add_mark(listMark &dsHD, markNode* node); // Đưa một node đánh dấu mới vào danh sách
+bool del_mark(listMark &dsHD, char* const maCB); // Xoá một node đánh dấu trong danh sách theo maCB
 
 // --- cấu trúc máy bay ---
 struct MB {
@@ -73,6 +106,7 @@ struct MB {
     char loaiMB[loaiMB_max];
     int socho;
     int SLB;
+    listMark dsHD;
     MB();
     bool set_soHieuMB(char *shmb);
     bool set_loaiMB(char *loai);
@@ -86,20 +120,6 @@ struct listMB {
 };
 
 // --- cấu trúc chuyến bay ---
-struct DateTime{
-    int hh, mm, dd, mt, yy;
-    DateTime();
-    int get_hh();
-    int get_mm();
-    int get_dd();
-    int get_mt();
-    int get_yy();
-    bool set_hh(int h);           
-    bool set_mm(int m);
-    bool set_dd(int d);
-    bool set_mt(int t);
-    bool set_yy(int y);
-};
 
 struct CB{
     char maCB[maCB_max];              // mã chuyến bay
@@ -134,7 +154,8 @@ struct HK{
     char *ten;                          // ten cho 15 ki tu
     char *cmnd;                         // cmnd có 13 kí tự
     bool phai;                          // true = gái   ;false = trai
-    HK *left, *right;                  
+    HK *left, *right;
+    listMark dsDatVe;
     HK();
     ~HK();                             
     bool set_ho(char *new_ho);          // true thì đã cập nhật tên họ mới 
