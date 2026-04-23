@@ -9,12 +9,61 @@
 
 using namespace std;
 
+// --- Cấu trúc đánh dấu ngày khởi hành và maCB cho MB và HK (linked list)---
+
+markNode::markNode() {
+    strcpy(maCB,"");
+    NgayKH = DateTime();
+    next = NULL;
+}
+
+listMark::listMark() {
+    head = NULL;
+}
+
+bool add_mark(listMark &dsHD, markNode* node) {
+    if (node == NULL) return false;
+    if (dsHD.head == NULL) {
+        dsHD.head = node;
+        return true;
+    }
+    markNode* temp = dsHD.head;
+    while (temp->next != NULL) {
+        if (ss_ngay(node->NgayKH, temp->NgayKH) <= 1440) return false;
+        temp = temp->next;
+    }
+    if (ss_ngay(node->NgayKH, temp->NgayKH) <= 1440) return false;
+    temp->next = node;
+    return true;
+}
+
+bool del_mark(listMark &dsHD, char* const maCB) {
+    if (dsHD.head == NULL) return false;
+    if (ss_str(dsHD.head->maCB, maCB) == 0) {
+        delete dsHD.head;
+        dsHD.head = NULL;
+        return true;
+    }
+    markNode* temp1 = dsHD.head;
+    while (temp1->next != NULL) {
+        if (ss_str(temp1->next->maCB, maCB) == 0) {
+            markNode* temp2 = temp1->next;
+            temp1->next = temp2->next;
+            delete temp2;
+            return true;
+        }
+        temp1 = temp1->next;
+    }
+    return false;
+}
+
 // ---- cấu trúc máy bay ----//
 MB::MB() {
     strcpy(soHieuMB,"");    // hàm này copy từ phía phải sang trái
     strcpy(loaiMB,"");      // có cáh tương đương đó là cho phần [0]='\0';
     socho = 0;
     SLB = 0;
+    dsHD.head = NULL;
 }
 
 bool MB::set_soHieuMB(char *shmb) {
@@ -36,7 +85,6 @@ bool MB::set_socho(int c) {
     this->socho = c;
     return true;
 }
-
 
 listMB::listMB() {
     slMB = 0;

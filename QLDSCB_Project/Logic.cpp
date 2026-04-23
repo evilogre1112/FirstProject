@@ -578,7 +578,7 @@ int HP_SLB(listMB& dsMB, int l, int r) {
     int j = r;
     while (true) {
         while (ss_SLB(pivot, dsMB.list[i]) == 1) i++;
-        while (ss_SLB(pivot, dsMB.list[j]) == 2) j++;
+        while (ss_SLB(pivot, dsMB.list[j]) == 2) j--;
         if (i < j) {
             swap_MB(dsMB.list[i], dsMB.list[j]);
             i++;
@@ -660,4 +660,7 @@ listCB Find_CB_OnRage(listCB &dsCB, char* const query) {
     }
     return A;
 }
-listHK Find_HK_OnRage(listHK &dsHK, char* const query);
+listHK Find_HK_OnRage(listHK &dsHK, char* const query) {
+    listHK A;
+    return A;
+}
