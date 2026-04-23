@@ -250,7 +250,7 @@ void copy_CB(CB* CB1, CB* CB2) {
     strcpy(CB1->soHieuMB, CB2->soHieuMB);
     
     for (int i = 0; i < CB1->socho; i++) {
-        delete CB1->DSV[i];
+        delete[] CB1->DSV[i];
     }
   
     CB1->socho = CB2->socho;
