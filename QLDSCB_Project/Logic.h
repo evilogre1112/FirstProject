@@ -260,7 +260,7 @@ bool Book_Ticket(CB* dsCB,const char* maCB,const char* CMND, int seatNumber);
  * @param seatNumber    Số thứ tự ghế cần hủy (tính từ 1 đến n)
  * @return              True nếu hủy thành công, false nếu ghế đó vốn dĩ đang trống hoặc chuyến bay không còn cho phép hủy
  */
-bool Cancel_Ticket(CB* &dsCB, const char* maCB , int seatNumber);
+bool Cancel_Ticket(CB* &dsCB, const char* maCB , int seatNumber);  
 
 // -- CÂU E: IN DANH SÁCH HÀNH KHÁCH THEO MÃ CB --
 
