@@ -332,4 +332,16 @@ listMB Find_MB_OnRage(listMB &dsMB, char* const query);
 listCB Find_CB_OnRage(listCB &dsCB, char* const query);
 listHK Find_HK_OnRage(listHK &dsHK, char* const query);
 
+/**
+ * @brief Kiểm tra xem có xoá được không
+ * @return nếu xoá được trả về true , ngược lại false 
+ */
+bool Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB);
+/**
+ *  @brief Xoá 1 máy bay trong 1 danh sách con không cần quan tâm dsCB
+ *  @param SubDsMB danh sách con trả về khi tìm kiếm từ hàm findOnRange
+ *  @note Danh sách truyền vào sẽ không bao giờ là rỗng , mặc định là luôn xoá được
+ */
+void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB);
+
 #endif

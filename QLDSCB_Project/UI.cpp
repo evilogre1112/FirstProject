@@ -1248,18 +1248,19 @@ void OnlyPrint_List_MB(listMB& dsMB){
     
 }
 
- NavKey It_Sub_List_MB(listMB& dsMB,int mod){
+ NavKey It_Sub_List_MB(listMB& SubList,int mod){
         int Temp[] = {10,20,50,90,100};
         int Temp2[] ={10,30,40,10,15};
         int currentPage = 0 ;
+        int current_Row = 0;
         while(true){
             // Thiết lập thông số phân trang
             int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 máy bay
             int startIndex = currentPage * itemsPerPage;
             int endIndex = startIndex + itemsPerPage;
               // Đảm bảo không in lố số lượng máy bay thực tế
-            if (endIndex > dsMB.slMB) {
-                endIndex = dsMB.slMB;
+            if (endIndex > SubList.slMB) {
+                endIndex = SubList.slMB;
             }
             int itemsOnThisPage = endIndex - startIndex;
             int rowOnScreen = 0 ;
@@ -1271,16 +1272,16 @@ void OnlyPrint_List_MB(listMB& dsMB){
                 Gotoxy(10, 8 + rowOnScreen);
                 SmallBox(s,false, false,true, true, 10, 1);
                 Gotoxy(20, 8 + rowOnScreen);
-                s = dsMB.list[i]->soHieuMB;
+                s = SubList.list[i]->soHieuMB;
                 SmallBox(s,false, false,true, true, 30, 1);
                 Gotoxy(50, 8 + rowOnScreen);
-                s = dsMB.list[i]->loaiMB ;
+                s = SubList.list[i]->loaiMB ;
                 SmallBox(s,false, false,true, true, 40, 1);
                 Gotoxy(90,8 + rowOnScreen);
-                s = to_string(dsMB.list[i]->socho);
+                s = to_string(SubList.list[i]->socho);
                 SmallBox(s,false, false,true, true, 10, 1);
                 Gotoxy(100,8 + rowOnScreen);
-                s = to_string(dsMB.list[i]->SLB);
+                s = to_string(SubList.list[i]->SLB);
                 SmallBox(s,false, false,true, true, 15, 1);
             }
             for(int i = 0 ; i < 5 ;i++){
@@ -1288,37 +1289,39 @@ void OnlyPrint_List_MB(listMB& dsMB){
                 SmallBox("...",false, false,true, true, Temp2[i], 1,GRAY);
             }
             
-            int totalPages = (dsMB.slMB + itemsPerPage - 1) / itemsPerPage; // Tính tổng số trang
-       
-            rowOnScreen = 0 ;
+            int totalPages = (SubList.slMB + itemsPerPage - 1) / itemsPerPage; // Tính tổng số trang
+            string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát." ;
+            rowOnScreen = current_Row ;
             while(true){
                 string s ;
                 int index = rowOnScreen + startIndex;// rowOnScreen + startIndex -1
                 for(int i = 0; i < 5 ;i++){
                     Gotoxy(Temp[i],8 + rowOnScreen);
                     if(i == 1){
-                        s = dsMB.list[index]->soHieuMB;
+                        s = SubList.list[index]->soHieuMB;
                     }else if (i == 2){
-                        s = dsMB.list[index]->loaiMB;
+                        s = SubList.list[index]->loaiMB;
                     }else if (i == 3){
-                        s = to_string(dsMB.list[index]->socho);
+                        s = to_string(SubList.list[index]->socho);
                     }else{
-                        s = to_string(dsMB.list[index]->SLB);
+                        s = to_string(SubList.list[index]->SLB);
                     }
                     if(i == 0) s = to_string(index+1);
                     SmallBox(s,false, false,true, true, Temp2[i],1, HIGHLIGHT);
                 }
                 NavKey ch = GetNavKey();
+                Gotoxy(35, 8 + itemsPerPage + 1);
+                SmallBox(m,50,4,string(GRAY));
                 for(int i = 0; i < 5 ;i++){
                     Gotoxy(Temp[i],8 + rowOnScreen);
                     if(i == 1){
-                        s = dsMB.list[index]->soHieuMB;
+                        s = SubList.list[index]->soHieuMB;
                     }else if (i == 2){
-                        s = dsMB.list[index]->loaiMB;
+                        s = SubList.list[index]->loaiMB;
                     }else if (i == 3){
-                        s = to_string(dsMB.list[index]->socho);
+                        s = to_string(SubList.list[index]->socho);
                     }else{
-                        s = to_string(dsMB.list[index]->SLB);
+                        s = to_string(SubList.list[index]->SLB);
                     }
                     if(i == 0) s = to_string(index+1);
                     SmallBox(s,false, false,true, true, Temp2[i],1);
@@ -1345,7 +1348,67 @@ void OnlyPrint_List_MB(listMB& dsMB){
                     else currentPage = totalPages-1 ;
                     break ;
                 }else if (ch == NAV_ENTER){
-                    if(mod == 0) break ;
+                    if(mod == 0){
+                        Gotoxy(35, 8 + itemsPerPage + 1);
+                        SmallBox("Đây Là Chế Độ In Danh Sách, Bạn Chỉ Có Quyền Xem Ở Chế Độ Này",50,4,string(RED));
+                    }if(mod == 2){
+                        s = SubList.list[index]->soHieuMB;
+                        if(!Can_DeL_MB(dsMB,dsCB,const_cast<char*>(s.c_str()))){
+                            Gotoxy(35, 8 + itemsPerPage + 1);
+                            SmallBox("Máy Bay Không Thể Xoá Vì Đang Có Khách",50,4,string(RED));
+                        }else{
+                            Gotoxy(35, 8 + itemsPerPage + 1);
+                            SmallBox("Bạn Có Muốn Xoá Máy Bay Này Không? ENTER/Đồng Ý Hoặc Phím Bất Kỳ Để Huỷ",50,4,string(RED));
+                            for(int i = 0; i < 5 ;i++){
+                                Gotoxy(Temp[i],8 + rowOnScreen);
+                                if(i == 1){
+                                    s = SubList.list[index]->soHieuMB;
+                                }else if (i == 2){
+                                    s = SubList.list[index]->loaiMB;
+                                }else if (i == 3){
+                                    s = to_string(SubList.list[index]->socho);
+                                }else{
+                                    s = to_string(SubList.list[index]->SLB);
+                                }
+                                if(i == 0) s = to_string(index+1);
+                                SmallBox(s,false, false,true, true, Temp2[i],1, HIGHLIGHT);
+                            }
+                            s = SubList.list[index]->soHieuMB;
+                            NavKey k = GetNavKey();
+                            if(k == NAV_ENTER){
+                                Del_MB(dsMB,dsCB, const_cast<char*>(s.c_str()));
+                                Del_SubDsMB(SubList,const_cast<char*>(s.c_str()));
+                                Gotoxy(35, 8 + itemsPerPage + 1);
+                                SmallBox("Đã Xoá Thành Công",50,4,string(GREEN));
+                                GetNavKey();
+
+                                // Tính toán lại số lượng phần tử của trang hiện tại SAU KHI XÓA
+                                int new_itemsOnThisPage = SubList.slMB - (currentPage * itemsPerPage);
+                                if (new_itemsOnThisPage > itemsPerPage) new_itemsOnThisPage = itemsPerPage;
+
+                                // Xử lý các trường hợp ngoại lệ
+                                if (new_itemsOnThisPage <= 0 && currentPage > 0) {
+                                    // Trường hợp: Xóa máy bay DUY NHẤT của trang cuối cùng
+                                    // Phải lùi về trang trước đó và đặt con trỏ ở dòng cuối cùng của trang đó
+                                    currentPage--;
+                                    current_Row = itemsPerPage - 1; 
+                                } 
+                                else if (rowOnScreen >= new_itemsOnThisPage && new_itemsOnThisPage > 0) {
+                                    // Trường hợp: Xóa máy bay ở DÒNG CUỐI CÙNG của trang hiện tại
+                                    // Lùi con trỏ lên 1 dòng để không bị trỏ vào dòng trống
+                                    current_Row = new_itemsOnThisPage - 1;
+                                } 
+                                else {
+                                    // Trường hợp bình thường: Xóa ở giữa danh sách
+                                    current_Row = rowOnScreen; 
+                                }
+                                break; // Thoát ra vòng ngoài để vẽ lại danh sách mới
+                            }else{
+                                Gotoxy(35, 8 + itemsPerPage + 1);
+                                SmallBox("Đã Huỷ Xoá",50,4,string(CYAN));
+                            }
+                        }
+                }
                 }else if (ch == NAV_ESC){
                     return ch;
                 }
@@ -1378,6 +1441,7 @@ void It_list_MB(int mod, bool main , listMB& dsMB, string res){
     Gotoxy(100,5);
     SmallBox("Số Lần Bay",15,1);
     int currentPage = 0;
+    int current_Row = 0;
     while(true){
          // Thiết lập thông số phân trang
         int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 máy bay
@@ -1422,7 +1486,7 @@ void It_list_MB(int mod, bool main , listMB& dsMB, string res){
         string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát." ;
       
         SmallBox(m,50,4,string(GRAY));
-        rowOnScreen = 0 ;
+        rowOnScreen = current_Row ;
         while(true){
             string s ;
             int index = rowOnScreen + startIndex;// rowOnScreen + startIndex -1
@@ -1441,6 +1505,8 @@ void It_list_MB(int mod, bool main , listMB& dsMB, string res){
                 SmallBox(s,false, false,true, true, Temp2[i],1, HIGHLIGHT);
             }
             NavKey ch = GetNavKey();
+            Gotoxy(35, 8 + itemsPerPage + 1);
+            SmallBox(m,50,4,string(GRAY));
             for(int i = 0; i < 5 ;i++){
                 Gotoxy(Temp[i],8 + rowOnScreen);
                  if(i == 1){
@@ -1456,6 +1522,7 @@ void It_list_MB(int mod, bool main , listMB& dsMB, string res){
                 SmallBox(s,false, false,true, true, Temp2[i],1);
             }
             if(ch == NAV_UP){
+                
                 if(rowOnScreen -1 >= 0) rowOnScreen--;
                 else {
                     listMB tmp ;
@@ -1497,7 +1564,66 @@ void It_list_MB(int mod, bool main , listMB& dsMB, string res){
                 else currentPage = totalPages-1 ;
                 break ;
             }else if (ch == NAV_ENTER){
-                if(mod == 0) break ;
+                if(mod == 0){
+                    Gotoxy(35, 8 + itemsPerPage + 1);
+                    SmallBox("Đây Là Chế Độ In Danh Sách, Bạn Chỉ Có Quyền Xem Ở Chế Độ Này",50,4,string(RED));
+                }if(mod == 2){
+                    s = dsMB.list[index]->soHieuMB;
+                    if(!Can_DeL_MB(dsMB,dsCB,const_cast<char*>(s.c_str()))){
+                        Gotoxy(35, 8 + itemsPerPage + 1);
+                        SmallBox("Máy Bay Không Thể Xoá Vì Đang Có Khách",50,4,string(RED));
+                    }else{
+                        Gotoxy(35, 8 + itemsPerPage + 1);
+                        SmallBox("Bạn Có Muốn Xoá Máy Bay Này Không? ENTER/Đồng Ý Hoặc Phím Bất Kỳ Để Huỷ",50,4,string(RED));
+                        for(int i = 0; i < 5 ;i++){
+                            Gotoxy(Temp[i],8 + rowOnScreen);
+                            if(i == 1){
+                                s = dsMB.list[index]->soHieuMB;
+                            }else if (i == 2){
+                                s = dsMB.list[index]->loaiMB;
+                            }else if (i == 3){
+                                s = to_string(dsMB.list[index]->socho);
+                            }else{
+                                s = to_string(dsMB.list[index]->SLB);
+                            }
+                            if(i == 0) s = to_string(index+1);
+                            SmallBox(s,false, false,true, true, Temp2[i],1, HIGHLIGHT);
+                        }
+                        s = dsMB.list[index]->soHieuMB;
+                        NavKey k = GetNavKey();
+                        if(k == NAV_ENTER){
+                            Del_MB(dsMB,dsCB, const_cast<char*>(s.c_str()));
+                            Gotoxy(35, 8 + itemsPerPage + 1);
+                            SmallBox("Đã Xoá Thành Công",50,4,string(GREEN));
+                            GetNavKey();
+
+                            // Tính toán lại số lượng phần tử của trang hiện tại SAU KHI XÓA
+                            int new_itemsOnThisPage = dsMB.slMB - (currentPage * itemsPerPage);
+                            if (new_itemsOnThisPage > itemsPerPage) new_itemsOnThisPage = itemsPerPage;
+
+                            // Xử lý các trường hợp ngoại lệ
+                            if (new_itemsOnThisPage <= 0 && currentPage > 0) {
+                                // Trường hợp: Xóa máy bay DUY NHẤT của trang cuối cùng
+                                // Phải lùi về trang trước đó và đặt con trỏ ở dòng cuối cùng của trang đó
+                                currentPage--;
+                                current_Row = itemsPerPage - 1; 
+                            } 
+                            else if (rowOnScreen >= new_itemsOnThisPage && new_itemsOnThisPage > 0) {
+                                // Trường hợp: Xóa máy bay ở DÒNG CUỐI CÙNG của trang hiện tại
+                                // Lùi con trỏ lên 1 dòng để không bị trỏ vào dòng trống
+                                current_Row = new_itemsOnThisPage - 1;
+                            } 
+                            else {
+                                // Trường hợp bình thường: Xóa ở giữa danh sách
+                                current_Row = rowOnScreen; 
+                            }
+                            break; // Thoát ra vòng ngoài để vẽ lại danh sách mới
+                        }else{
+                            Gotoxy(35, 8 + itemsPerPage + 1);
+                            SmallBox("Đã Huỷ Xoá",50,4,string(CYAN));
+                        }
+                    }
+                }
             }else if (ch == NAV_ESC){
                 return ;
             }
