@@ -20,7 +20,6 @@
 using namespace std;
 
 const int slMB_max = 300;
-const int slCB_max = 300;
 const int slHK_max = 100000;
 const int soHieuMB_max = 40;
 const int loaiMB_max = 40;
@@ -147,7 +146,7 @@ struct listCB{
     CB* head;                        // chuyến bay dầu tiên
     listCB();
 };
-
+// dsCB gồm 1 nhiều CB , 1 mỗi CB có 
 // --- cấu trúc hành khách cây nhị phân ---
 struct HK{
     char *ho;                           // họ và tên đệm chứa 40 kí tự

@@ -223,7 +223,11 @@ void CustomerAddMB();
 void CustomerAddCB();
 void CustomerAddHK();
 
-void It_list_MB(int mode);
+listMB UiFindMB(string& res,NavKey key, int& ch, listMB* A = nullptr);
+void OnlyPrint_List_MB(listMB& dsMB);
+NavKey It_Sub_List_MB(listMB& dsMB,int mod);
+
+void It_list_MB(int mode, bool main , listMB& dsMB, string res = "");
 void It_list_CB(int mod);
 
 void RunInNewTab(void (*func)() = [](){});
