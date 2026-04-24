@@ -660,7 +660,14 @@ listCB Find_CB_OnRage(listCB &dsCB, char* const query) {
     }
     return A;
 }
+
 listHK Find_HK_OnRage(listHK &dsHK, char* const query) {
     listHK A;
     return A;
 }
+
+bool Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB){
+    return true ;
+}
+
+void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB){}

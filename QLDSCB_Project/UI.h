@@ -224,11 +224,13 @@ void CustomerAddCB();
 void CustomerAddHK();
 
 listMB UiFindMB(string& res,NavKey key, int& ch, listMB* A = nullptr);
+void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[]);
+void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
 void OnlyPrint_List_MB(listMB& dsMB);
 NavKey It_Sub_List_MB(listMB& dsMB,int mod);
 
-void It_list_MB(int mode, bool main , listMB& dsMB, string res = "");
-void It_list_CB(int mod);
+void It_list_MB(int mode, string res = "");
+void It_list_CB(int mod,string res = "");
 
 void RunInNewTab(void (*func)() = [](){});
 int InputStatus(int &result, int x, int y);
