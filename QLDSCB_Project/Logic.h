@@ -26,14 +26,6 @@ long long ss_ngay(DateTime const &a, DateTime const &b); // so sánh 2 ngày, tr
 // MB = type của cấu trúc 1 máy bay
 // LƯU Ý :: CÁC HÀM MÁY BAY ĐÃ ĐƯỢC TỐI ƯU SẴN, HÃY ĐẢM BẢO KHI SỬ DỤNG, DANH SÁCH MÁY BAY ĐÃ ĐƯỢC SẮP XẾP. DANH SÁCH MÁY BAY CHƯA ĐƯỢC SẮP XẾP SẼ CHO RA KẾT QUẢ SAI Ở MỌI HÀM.
 
-/**
- * @brief       Lưu dsMB vào file văn bản txt
- * @param dsMB  Mảng các con trỏ trỏ đến đối tượng máy bay
- * @param save  Tham chiếu biến ghi nội dung trong dsMB vào file txt
- * @return      true nếu ghi file thành công. false nếu ngược lại
- */
-bool Save_MB(ofstream& save, listMB& dsMB);
-
 void swap_MB(MB* &a, MB* &b); // tien ich swap noi dung cua 2 may bay
 
 /**
@@ -343,5 +335,20 @@ bool Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB);
  *  @note Danh sách truyền vào sẽ không bao giờ là rỗng , mặc định là luôn xoá được
  */
 void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB);
+
+/**
+ * @brief Kiểm tra xem có chỉnh được không
+ * @return trả về 1XXX nếu số chỗ thay đổi không hợp lệ, có khách ngồi ở vé XXX
+ *         2 nếu shMB trùng chỉnh sữa bị trùng
+ *         0 chỉnh được 
+ */
+string Can_Edit_MB(listMB &dsMB,listCB &dsCB, char* const soHieuMB, MB* infoUpdate);
+
+/**
+ *  @brief Chỉnh Sữa 1 máy bay trong 1 danh sách con không cần quan tâm dsCB
+ *  @param SubDsMB danh sách con trả về khi tìm kiếm từ hàm findOnRange
+ *  @note Danh sách truyền vào sẽ không bao giờ là rỗng.
+ */
+void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate);
 
 #endif

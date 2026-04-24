@@ -229,12 +229,17 @@ void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
 void OnlyPrint_List_MB(listMB& dsMB);
 NavKey It_Sub_List_MB(listMB& dsMB,int mod);
 
+bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
+bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
+
 void It_list_MB(int mode, string res = "");
 void It_list_CB(int mod,string res = "");
 
 void RunInNewTab(void (*func)() = [](){});
+
+void RedrawInput(const string &result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight);
 int InputStatus(int &result, int x, int y);
-int InputString(string &result, int x, int y, int maxLength, char placeholder = '_', bool onlyNumbers = false);
+int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false);
 
 void Menu_QuanLyMayBay();
 void Menu_QuanLyChuyenBay();
