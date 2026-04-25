@@ -671,3 +671,9 @@ bool Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB){
 }
 
 void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB){}
+
+string Can_Edit_MB(listMB &dsMB,listCB &dsCB, char* const soHieuMB, MB* infoUpdate){
+    return "0" ;
+}
+
+void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate){}

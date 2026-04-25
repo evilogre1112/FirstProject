@@ -53,7 +53,7 @@ string subOptions3[4] = {
 
 string subOptions4[5] = {
     "Thêm",
-    "Sữa",
+    "Sửa",
     "Xoá",
     "In Danh Sách",
     "Quay Lại"
@@ -298,6 +298,28 @@ int visualLength(const string& s) {
     return length;
 }
 
+// Hàm bổ trợ để vẽ lại nội dung nhập liệu (hỗ trợ căn giữa)
+void RedrawInput(const string &result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight) {
+    // 1. Xóa sạch vùng nhập liệu cũ bằng placeholder
+    Gotoxy(x, y);
+    if (isHighlight) cout << HIGHLIGHT; // Bật màu nền nếu cần
+    cout << string(maxLength, placeholder);
+    if (isHighlight) cout << RESET;
+
+    // 2. Tính toán vị trí x bắt đầu in dựa trên visualLength 
+    int printX = x;
+    if (isCenter) {
+        int vLen = visualLength(result); 
+        printX = x + (maxLength - vLen) / 2;
+    }
+
+    // 3. In kết quả thực tế lên màn hình
+    Gotoxy(printX, y);
+    if (isHighlight) cout << HIGHLIGHT;
+    cout << result;
+    if (isHighlight) cout << RESET;
+}
+
 int InputStatus(int &result, int x, int y) {
     string Label[] = {"Huỷ Chuyến", "Còn Vé", "Hết Vé", "Hoàn Tất"};
     string Color[4];
@@ -338,38 +360,41 @@ int InputStatus(int &result, int x, int y) {
 
 
 // Trả về: 0 (ESC), 1 (ENTER), 2 (UP), 3 (DOWN)
-int InputString(string &result, int x, int y, int maxLength, char placeholder , bool onlyNumbers ) {
-    // Không reset 'result' về rỗng để giữ lại chữ cũ khi người dùng quay lại ô này
-    Gotoxy(x, y);
-    cout << string(maxLength, placeholder); 
-    Gotoxy(x, y);
-    cout << result; // In đè chữ cũ lên trên hàng gạch
+int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers, bool isCenter, bool isHighlight, bool isUppercase) {
+    // Vẽ lần đầu tiên
+    RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
 
     while (true) {
-        int ch ;
+        int ch;
         NavKey key = GetNavKey(ch); 
 
-        if (key == NAV_UP) return NAV_UP;
-        if (key == NAV_DOWN) return NAV_DOWN;
-        if (key == NAV_ENTER) return NAV_ENTER;
-        if (key == NAV_ESC) return NAV_ESC;
+        if (key != NAV_UNKNOWN && key != NAV_BACK) return (int)key;
 
-        if (key == NAV_BACK) { // Phím BACKSPACE
+        if (key == NAV_BACK) {
             if (!result.empty()) {
-                result.pop_back();
-                cout << "\b" << placeholder << "\b";
+                unsigned char c = (unsigned char)result.back();
+                if (c >= 0x80) {
+                    while (!result.empty() && ((unsigned char)result.back() & 0xc0) == 0x80) {
+                        result.pop_back();
+                    }
+                }
+                if (!result.empty()) result.pop_back();
+                
+                RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
             }
         } 
         else if (result.length() < maxLength) {
-            // CHẶN CHỮ NGAY TỪ LÚC GÕ
+            // Ràng buộc ký tự
             if (onlyNumbers && !isdigit(ch)) continue; 
-            if(ch != ' ' && ch != '-' && !isalpha(ch) && !isdigit(ch)) continue ;
-            // Các ràng buộc khác
+            if (ch != ' ' && ch != '-' && !isalnum(ch)) continue; 
             if (!onlyNumbers && !isprint(ch)) continue;
             if (result.empty() && ch == ' ') continue;
 
-            result += (char)ch;
-            cout << (char)ch;
+            // XỬ LÝ VIẾT HOA THEO BIẾN ĐIỀU KHIỂN
+            char finalChar = (isUppercase) ? (char)toupper(ch) : (char)ch;
+
+            result += finalChar;
+            RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
         }
     }
 }
@@ -1322,7 +1347,78 @@ bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
             return false ;
         }
     }
-};
+}
+
+bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]){
+   
+    string input[] = {"","",""};
+    char* Shmb = SubList.list[index]->soHieuMB; 
+    input[0] = SubList.list[index]->soHieuMB;
+    input[1] = SubList.list[index]->loaiMB;
+    input[2] = to_string(SubList.list[index]->socho);
+    int idx = 0;
+    int ch = 1 ; 
+    while(true){
+        Gotoxy(35, 8 + itemsPerPage + 1);    
+        SmallBox("Đang Hiệu Chỉnh - Dùng ◄/► để nhảy ô, ENTER để lưu, ESC thoát", 50, 4, string(BOLDCYAN));
+        ch = InputString(input[idx], Temp[idx + 1] + 1, 8 + rowOnScreen, Temp2[idx + 1] - 2, ' ', (idx == 2),true,true, (idx ==0));
+        RedrawInput(input[idx], Temp[idx + 1] + 1, 8 + rowOnScreen, Temp2[idx + 1] - 2, ' ', true, false);
+        if(ch == NAV_ESC) return false ;
+        if(ch == NAV_LEFT) idx == 0 ? idx = 2 : idx = idx - 1 ;
+        if(ch == NAV_RIGHT)idx == 2 ? idx = 0 : idx = idx + 1 ; 
+        if(ch == NAV_ENTER){
+            if(input[0].empty() || input[1].empty() || input[2].empty()){
+                Gotoxy(35, 8 + itemsPerPage + 1);
+                SmallBox("Lỗi: Không được để trống thông tin!", 50, 4, string(RED));
+                GetNavKey();
+                continue; 
+            }
+
+            MB* tmp = new MB;
+            tmp->set_socho(stoi(input[2]));
+            tmp->set_loaiMB(const_cast<char*>(input[1].c_str()));
+            tmp->set_soHieuMB(const_cast<char*>(input[0].c_str()));
+            string error_code = Can_Edit_MB(dsMB,dsCB,Shmb,tmp) ;
+            if(stoi(input[2]) > socho_max){
+                 SmallBox("Sửa Thất Bại, Số Chỗ Không Quá: " + to_string(socho_max), 50, 4, string(RED));
+                 delete tmp ;
+                 GetNavKey();
+                 continue;
+            }
+            if(error_code != "0"){
+                Gotoxy(35, 8 + itemsPerPage + 1);    
+                if(error_code[0] == '1' ){
+                    string sub = error_code.substr(1);
+                    SmallBox("Sửa Thất Bại, Có Khách Đặt Ở Chỗ" + sub, 50, 4, string(RED));
+                    delete tmp ;
+                }else{
+                    SmallBox("Sửa Thất Bại, Số Hiệu: " + input[0] +" Bị Trùng", 50, 4, string(RED));
+                    delete tmp ;
+                }
+                GetNavKey();
+            }else{
+                Gotoxy(35, 8 + itemsPerPage + 1);    
+                SmallBox("Bạn Có Chắc Muốn Sửa Máy Bay Này Chứ? Nhấn ENTER Để Xác Nhận, Phím Bất Kỳ Để Hủy", 50, 4, string(YELLOW));
+                NavKey k = GetNavKey();
+                if(k != NAV_ENTER){
+                    Gotoxy(35, 8 + itemsPerPage + 1);    
+                    SmallBox("Đã Huỷ Chỉnh Sửa", 50, 4, string(CYAN));
+                    delete tmp ;
+                    GetNavKey();
+                    continue ;
+                }else{
+                    Edit_MB(dsMB,dsCB,Shmb,tmp);
+                    if(!IsMainList)Edit_SubDsMB(SubList,Shmb,tmp);
+                    delete tmp ;
+                    Gotoxy(35, 8 + itemsPerPage + 1);    
+                    SmallBox("Sửa Thành Công!", 50, 4, string(GREEN));
+                    GetNavKey();
+                    return true ;
+                }
+            }
+        }
+    }
+}
 
  NavKey It_Sub_List_MB(listMB& SubList,int mod){
         int Temp[] = {10,20,50,90,100};
@@ -1407,6 +1503,10 @@ bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
                     }else if(mod == 2){
                        bool IsDeleted = MODE2_MB(SubList, false, index, current_Row, currentPage, rowOnScreen, itemsPerPage, Temp, Temp2) ;
                        if (IsDeleted) break;
+                    }else if (mod == 1){
+                        current_Row = rowOnScreen;
+                        bool IsEdited = MODE3_MB(SubList, false, index, current_Row, currentPage, rowOnScreen, itemsPerPage, Temp, Temp2) ;
+                        if (IsEdited) break;
                     } 
                 }else if (ch == NAV_ESC){
                     return ch;
@@ -1529,6 +1629,10 @@ void It_list_MB(int mod, string res){
                 }else if(mod == 2){
                     bool IsDeleted = MODE2_MB(dsMB, true, index, current_Row, currentPage, rowOnScreen, itemsPerPage, Temp, Temp2) ;
                     if (IsDeleted) break;
+                }else if (mod == 1){
+                    current_Row = rowOnScreen;
+                    bool IsEdited = MODE3_MB(dsMB, true, index, current_Row, currentPage, rowOnScreen, itemsPerPage, Temp, Temp2) ;
+                    if (IsEdited) break;
                 }
             }else if (ch == NAV_ESC){
                 return ;
