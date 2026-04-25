@@ -9,54 +9,6 @@
 
 using namespace std;
 
-// --- Cấu trúc đánh dấu ngày khởi hành và maCB cho MB và HK (linked list)---
-
-markNode::markNode() {
-    strcpy(maCB,"");
-    NgayKH = DateTime();
-    next = NULL;
-}
-
-listMark::listMark() {
-    head = NULL;
-}
-
-bool add_mark(listMark &dsHD, markNode* node) {
-    if (node == NULL) return false;
-    if (dsHD.head == NULL) {
-        dsHD.head = node;
-        return true;
-    }
-    markNode* temp = dsHD.head;
-    while (temp->next != NULL) {
-        if (ss_ngay(node->NgayKH, temp->NgayKH) <= 1440) return false;
-        temp = temp->next;
-    }
-    if (ss_ngay(node->NgayKH, temp->NgayKH) <= 1440) return false;
-    temp->next = node;
-    return true;
-}
-
-bool del_mark(listMark &dsHD, char* const maCB) {
-    if (dsHD.head == NULL) return false;
-    if (ss_str(dsHD.head->maCB, maCB) == 0) {
-        delete dsHD.head;
-        dsHD.head = NULL;
-        return true;
-    }
-    markNode* temp1 = dsHD.head;
-    while (temp1->next != NULL) {
-        if (ss_str(temp1->next->maCB, maCB) == 0) {
-            markNode* temp2 = temp1->next;
-            temp1->next = temp2->next;
-            delete temp2;
-            return true;
-        }
-        temp1 = temp1->next;
-    }
-    return false;
-}
-
 // ---- cấu trúc máy bay ----//
 MB::MB() {
     strcpy(soHieuMB,"");    // hàm này copy từ phía phải sang trái
@@ -165,21 +117,23 @@ bool DateTime::set_dd(int d){
     // ---- cấu trúc chuyến bay ----
 
 CB::CB(int sc) {                      // truyền tham số socho 
-        maCB[0] = '\0';
-        trangThai = 1;
-        soHieuMB[0] = '\0';
-        socho = sc;
-        sbDich = new char[50];        // độ dài tên 50 kí tự
-        sbDich[0] = '\0';
-        if(sc>0) {
-            DSV= new char*[socho];
-            for(int i=0;i<sc;i++)
-            {
-                DSV[i] = new char[cmnd_max];
-                DSV[i][0] = '\0';
-            }
-        } else { DSV = NULL;}
-    }
+    maCB[0] = '\0';
+    trangThai = 1;
+    soHieuMB[0] = '\0';
+    socho = sc;
+    sove = 0;
+    sbDich = new char[50];        // độ dài tên 50 kí tự
+    sbDich[0] = '\0';
+    if(sc>0) {
+        DSV= new char*[socho];
+        for(int i=0;i<sc;i++)
+        {
+            DSV[i] = new char[cmnd_max];
+            DSV[i][0] = '\0';
+        }
+    } else { DSV = NULL;}
+    next = NULL;
+}
 
 CB::CB(){
     maCB[0] = '\0';
@@ -188,6 +142,7 @@ CB::CB(){
     sbDich = NULL;
     DSV = NULL;
     socho = 0;
+    sove = 0;
     next = NULL;
 }    
 
@@ -279,6 +234,16 @@ CB::CB(){
         head = NULL;
     }
 
+// -- Cấu trúc đánh dấu CB --
+markCB::markCB() {
+    mark = NULL;
+    next = NULL;
+}
+
+markList::markList() {
+    head = NULL;
+}
+
     // ---- cấu trúc hành khách ----//
     HK::HK(){
         ho =NULL;
@@ -286,6 +251,7 @@ CB::CB(){
         cmnd = NULL;
         phai = false;
         left = right = NULL;
+        dsDatVe.head = NULL;
     }
 
     bool HK::set_cmnd(char *new_cmnd){
@@ -434,6 +400,7 @@ CB::CB(){
         // --- 4. Đọc Số lượng vé đã bán ---
         int soVeDaBan = 0;
         if (f >> soVeDaBan) {
+            tmp->sove = soVeDaBan;
             f.ignore(100, '\n'); // Xóa bộ đệm sau khi đọc xong con số
         }
         // --- 5. Đọc danh sách vé bằng vòng FOR (Vị trí | CMND) ---
@@ -453,12 +420,7 @@ CB::CB(){
         // --- 6. Thêm vào Danh sách liên kết ---
         if (!Add_CB(dsCB, dsMB, tmp)) {
             // Nếu hàm Add_CB từ chối (trả về false), phải dọn dẹp RAM ngay
-            delete[] tmp->sbDich;
-            for (int i = 0; i < tmp->socho; i++) {
-                delete[] tmp->DSV[i];
-            }
-            delete[] tmp->DSV;
-            delete tmp; 
+            delete tmp; // Détructor da tu giai phong
         }
         f >> ws; 
     }
