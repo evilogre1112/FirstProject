@@ -44,6 +44,16 @@ listMB::listMB() {
         list[i] = NULL;
 }
 
+void listMB::Clear() {
+    for (int i = 0; i < slMB; i++) {
+        if (list[i] != NULL) {
+            delete list[i];
+            list[i] = NULL;
+        }
+    }
+    slMB = 0;
+}
+
 DateTime::DateTime (){
     hh=12;
     mm=00;
@@ -229,10 +239,21 @@ CB::CB(){
     return true;
 
 }
-    listCB::listCB(){
-        slCB = 0;
-        head = NULL;
+listCB::listCB(){
+    slCB = 0;
+    head = NULL;
+}
+
+void listCB::Clear() {
+    CB* temp = head;
+    while (temp != NULL) {
+        CB* toDelete = temp;
+        temp = temp->next;
+        delete toDelete;
     }
+    head = NULL;
+    slCB = 0;
+}
 
 // -- Cấu trúc đánh dấu CB --
 markCB::markCB() {
