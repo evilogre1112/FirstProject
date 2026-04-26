@@ -223,8 +223,9 @@ void CustomerAddMB();
 void CustomerAddCB();
 void CustomerAddHK();
 
-listMB UiFindMB(string& res,NavKey key, int& ch, listMB* A = nullptr);
 void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[]);
+
+void UiFindMB(string& res, NavKey key, int& ch, listMB& A);
 void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
 void OnlyPrint_List_MB(listMB& dsMB);
 NavKey It_Sub_List_MB(listMB& dsMB,int mod);
@@ -232,6 +233,14 @@ NavKey It_Sub_List_MB(listMB& dsMB,int mod);
 bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
 bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
 
+bool MODE2_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
+bool MODE3_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
+
+NavKey It_Sub_List_CB(listCB& SubList,int mod);
+void OnlyPrint_List_CB(listCB& dsCB);
+
+void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
+void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage);
 void It_list_MB(int mode, string res = "");
 void It_list_CB(int mod,string res = "");
 

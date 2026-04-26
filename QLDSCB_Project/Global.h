@@ -110,6 +110,7 @@ struct listCB{
     int slCB;                         // số lượng chuyến bay
     CB* head;                        // chuyến bay dầu tiên
     listCB();
+    void Clear();
 };
 // dsCB gồm 1 nhiều CB , 1 mỗi CB có
 
@@ -141,6 +142,7 @@ struct MB {
 struct listMB {
     int slMB;
     MB* list[slMB_max];
+    void Clear();
     listMB();
 };
 
