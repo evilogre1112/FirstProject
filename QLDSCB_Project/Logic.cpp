@@ -336,30 +336,53 @@ void copy_CB(CB* CB1, CB* CB2) {
     }
 }
 
-void Swap_CB(CB* &CB1, CB* &CB2) { // can sua
-    CB* t1 = CB1->next;
-    CB* t2 = CB2->next;
-    CB* tmp = CB1;
+void Swap_CB(CB* &CB1, CB* &CB2) {
+    CB* temp = CB1;
     CB1 = CB2;
-    CB2 = tmp;
-    CB1->next = t2;
-    CB2->next = t1;
+    CB2 = temp;
 }
 
-void Sort_CB(listCB &dsCB) { // can sua
-    CB* temp1 = dsCB.head;
-    if (temp1 == NULL) return;
-    CB* temp2;
-    while (temp1 != NULL) {
-        temp2 = temp1->next;
-        while (temp2 != NULL) {
-            if (ss_str(temp1->maCB, temp2->maCB) == 1) {
-                Swap_CB(temp1, temp2);
-            }
-            temp2 = temp2->next;
+int HP_CB(CB** dsCB, int l, int r) {
+    int i = l;
+    int j = r;
+    char pivot[maCB_max];
+    strcpy(pivot, dsCB[l]->maCB);
+    while (true) {
+        while (ss_str(pivot, dsCB[i]->maCB) == 1) i++;
+        while (ss_str(pivot, dsCB[j]->maCB) == 2) j--;
+        if (i < j) {
+            Swap_CB(dsCB[i], dsCB[j]);
+            i++;
+            j--;
         }
-        temp1 = temp1->next;
+        else return j;
     }
+}
+
+void QuickSort_CB(CB** dsCB, int l, int r) {
+    if (l >= r) return;
+    int m = HP_CB(dsCB, l, r);
+    QuickSort_CB(dsCB, l, m);
+    QuickSort_CB(dsCB, m + 1, r);
+}
+
+void Sort_CB(listCB &dsCB) {
+    if (dsCB.slCB <= 1) return;
+    CB** dsMangCB = new CB*[dsCB.slCB];
+    CB* temp = dsCB.head;
+    int i = 0;
+    while (temp != NULL) {
+        dsMangCB[i] = temp;
+        i++;
+        temp = temp->next;
+    }
+    QuickSort_CB(dsMangCB, 0, dsCB.slCB - 1);
+    for (int i = 0; i < dsCB.slCB; i++) {
+        if (i == dsCB.slCB - 1) dsMangCB[i]->next = NULL;
+        else dsMangCB[i]->next = dsMangCB[i + 1];
+    }
+    dsCB.head = dsMangCB[0];
+    delete[] dsMangCB;
 }
 
 CB *Find_CB(listCB &dsCB, char* const maCB) {
