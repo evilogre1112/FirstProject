@@ -195,6 +195,28 @@ bool Get_Data_MB(listMB &dsMB, const char *path_file_MB);
     4.  phai
 */
 bool Get_Data_HK(listHK &dsHK, const char *path_file_HK);
-
+/*
+    1.  maCB
+    2.  ngayKH
+    3.  sbDich
+    4.  trangThai
+    5.  soHieuMB
+    6.  socho
+    7.  DSV (vị trí | cmnd)
+*/
+bool Set_Data_CB(listCB &dsCB, const char *path_file_CB);
+/*
+    1.  soHieuMB
+    2.  loaiMB
+    3.  socho
+*/
+bool Set_Data_MB(listMB &dsMB, const char *path_file_MB);
+/*
+    1.  ho 
+    2.  ten
+    3.  cmnd
+    4.  phai
+*/
+bool Set_Data_HK(listHK &dsHK, const char *path_file_HK);
 
 #endif

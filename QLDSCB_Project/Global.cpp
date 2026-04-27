@@ -536,3 +536,62 @@ CB::CB(){
     f.close();
     return true;
 }
+
+bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
+    ofstream f(path_file_CB);
+    if(!f.is_open()) return false;
+    CB* temp = dsCB.head;
+    while(temp != NULL){
+        f << temp->maCB << '|'
+            << setfill('0') << setw(2) << temp->ngayKH.hh << ':'
+            << setfill('0') << setw(2) << temp->ngayKH.mm << '|'
+            << setfill('0') << setw(2) << temp->ngayKH.dd << '/'
+            << setfill('0') << setw(2) << temp->ngayKH.mt << '/'
+            << setfill('0') << setw(4) << temp->ngayKH.yy << '|'
+            << temp->sbDich << '|'
+            << temp->trangThai << '|'
+            << temp->soHieuMB << '|';
+        // Đếm số vé đã bán
+        int soVeDaBan = 0;
+        for (int i = 0; i < temp->socho; i++) {
+            if (strcmp(temp->DSV[i], "0") != 0) {
+                soVeDaBan++;
+            }
+        }
+        f << soVeDaBan << '\n';
+        // Ghi danh sách vé (vị trí | CMND)
+        for (int i = 0; i < temp->socho; i++) {
+            if (strcmp(temp->DSV[i], "0") != 0) {
+                f << (i + 1) << '|' << temp->DSV[i];
+            
+                
+            if (i < temp->socho - 1) f << '\n';
+            }
+        }
+        temp = temp->next;
+    }
+    f.close();
+    return true;
+}
+
+bool Set_Data_MB(listMB &dsMB, const char *path_file_MB){
+    ofstream f(path_file_MB);
+    if(!f.is_open()) return false;
+    for (int i = 0; i < dsMB.slMB; i++) {
+        MB* mb = dsMB.list[i];
+        f << mb->soHieuMB << '|' << mb->loaiMB << '|' << mb->socho;
+        if (i < dsMB.slMB - 1) {
+            f << endl;
+        }
+    }
+    f.close();
+    return true;
+}
+
+bool Set_Data_HK(listHK &dsHK, const char *path_file_HK){
+    ofstream f(path_file_HK);
+    if(!f.is_open()) return false;
+    // Implementation for setting HK data
+    f.close();
+    return true;
+}
