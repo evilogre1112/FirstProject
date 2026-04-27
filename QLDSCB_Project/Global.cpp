@@ -127,23 +127,23 @@ bool DateTime::set_dd(int d){
     // ---- cấu trúc chuyến bay ----
 
 CB::CB(int sc) {                      // truyền tham số socho 
-        maCB[0] = '\0';
-        trangThai = 1;
-        soHieuMB[0] = '\0';
-        socho = sc;
-        sove = 0;
-        sbDich = new char[50];        // độ dài tên 50 kí tự
-        sbDich[0] = '\0';
-        if(sc>0) {
-            DSV= new char*[socho];
-            for(int i=0;i<sc;i++)
-            {
-                DSV[i] = new char[cmnd_max];
-                DSV[i][0] = '\0';
-            }
-        } else { DSV = NULL;}
-        next = NULL;
-    }
+    maCB[0] = '\0';
+    trangThai = 1;
+    soHieuMB[0] = '\0';
+    socho = sc;
+    sove = 0;
+    sbDich = new char[50];        // độ dài tên 50 kí tự
+    sbDich[0] = '\0';
+    if(sc>0) {
+        DSV= new char*[socho];
+        for(int i=0;i<sc;i++)
+        {
+            DSV[i] = new char[cmnd_max];
+            DSV[i][0] = '\0';
+        }
+    } else { DSV = NULL;}
+    next = NULL;
+}
 
 CB::CB(){
     maCB[0] = '\0';
@@ -156,68 +156,68 @@ CB::CB(){
     next = NULL;
 }    
 
-    CB::~CB(){
-        if(sbDich != NULL) delete[] sbDich;
-        if (DSV !=NULL) 
-        {
-            for(int i=0; i<socho; i++){
-                delete[] DSV[i];        //giải phóng chuỗi Cmnd
-            }
-            delete[] DSV;
-        }
-    }
-    
-    bool CB::set_maCB(char ma[maCB_max])
+CB::~CB(){
+    if(sbDich != NULL) delete[] sbDich;
+    if (DSV !=NULL) 
     {
-        if(ma==NULL || strlen(ma)==0) return false; //kiểm tra rỗng
-        strncpy(this->maCB, ma, maCB_max);
-        this->maCB[maCB_max-1] ='\0';
-        //bảo đảm chuỗi luôn có điểm kết thuc
-        return true;
-    }
-
-    bool CB::set_ngayHK(int h, int m, int y, int mmt, int d){
-        bool check = true;  
-        check &= this->ngayKH.set_yy(y);
-        check &= this->ngayKH.set_mt(mmt);
-        check &= this->ngayKH.set_dd(d);
-        check &= this->ngayKH.set_hh(h);
-        check &= this->ngayKH.set_mm(m);
-        return check; // Trả về true nếu tất cả các giá trị đều hợp lệ
-
-    }
-
-    bool CB::set_sbDich(char *sbd){
-        int n=strlen(sbd);
-        if(sbd==NULL|| n==0) return false;
-
-        // giải phóng bộ nhớ nếu còn
-        if( this->sbDich != NULL ) delete[] this->sbDich;
-        this->sbDich = new char[n+1];
-        strncpy(this->sbDich,sbd,n);
-        this->sbDich[n] = '\0';
-        return true;
-    }
-
-    bool CB::set_trangThai(int i){
-        // Kiểm tra i có nằm trong phạm vi 0-3 không
-        if (i >= 0 && i <= 3) {
-            this->trangThai = i;
-            return true;
+        for(int i=0; i<socho; i++){
+            delete[] DSV[i];        //giải phóng chuỗi Cmnd
         }
-        return false;
+        delete[] DSV;
     }
+}
+    
+bool CB::set_maCB(char ma[maCB_max])
+{
+    if(ma==NULL || strlen(ma)==0) return false; //kiểm tra rỗng
+    strncpy(this->maCB, ma, maCB_max);
+    this->maCB[maCB_max-1] ='\0';
+    //bảo đảm chuỗi luôn có điểm kết thuc
+    return true;
+}
 
-    bool CB::set_soHieuMB(char *shmb){
-        int n=strlen(shmb);
-        if(shmb==NULL|| n==0) return false;
+bool CB::set_ngayHK(int h, int m, int y, int mmt, int d){
+    bool check = true;  
+    check &= this->ngayKH.set_yy(y);
+    check &= this->ngayKH.set_mt(mmt);
+    check &= this->ngayKH.set_dd(d);
+    check &= this->ngayKH.set_hh(h);
+    check &= this->ngayKH.set_mm(m);
+    return check; // Trả về true nếu tất cả các giá trị đều hợp lệ
 
-        strncpy(this->soHieuMB,shmb,n);
-        this->soHieuMB[n] = '\0';
+}
+
+bool CB::set_sbDich(char *sbd){
+    int n=strlen(sbd);
+    if(sbd==NULL|| n==0) return false;
+
+    // giải phóng bộ nhớ nếu còn
+    if( this->sbDich != NULL ) delete[] this->sbDich;
+    this->sbDich = new char[n+1];
+    strncpy(this->sbDich,sbd,n);
+    this->sbDich[n] = '\0';
+    return true;
+}
+
+bool CB::set_trangThai(int i){
+    // Kiểm tra i có nằm trong phạm vi 0-3 không
+    if (i >= 0 && i <= 3) {
+        this->trangThai = i;
         return true;
     }
+    return false;
+}
 
-    bool CB::set_socho(int c) {
+bool CB::set_soHieuMB(char *shmb){
+    int n=strlen(shmb);
+    if(shmb==NULL|| n==0) return false;
+
+    strncpy(this->soHieuMB,shmb,n);
+    this->soHieuMB[n] = '\0';
+    return true;
+}
+
+bool CB::set_socho(int c) {
     if (c <= 0) return false;
 
     // 1. Giải phóng bộ nhớ cũ (nếu có) để tránh memory leak
@@ -239,10 +239,10 @@ CB::CB(){
     return true;
 
 }
-    listCB::listCB(){
-        slCB = 0;
-        head = NULL;
-    }
+listCB::listCB(){
+    slCB = 0;
+    head = NULL;
+}
 
 void listCB::Clear() {
     CB* temp = head;
@@ -440,7 +440,6 @@ markList::markList() {
         }
         // --- 6. Thêm vào Danh sách liên kết ---
         if (!Add_CB(dsCB, dsMB, tmp)) {
-            // Nếu hàm Add_CB từ chối (trả về false), phải dọn dẹp RAM ngay
             delete[] tmp->sbDich;
             for (int i = 0; i < tmp->socho; i++) {
                 delete[] tmp->DSV[i];
@@ -450,7 +449,6 @@ markList::markList() {
         }
         f >> ws; 
     }
-
     f.close();
     return true;
 }
@@ -483,7 +481,6 @@ markList::markList() {
            if (!Add_MB(dsMB, tmp)) {
             // Nếu Add_MB trả về false (do trùng mã hoặc danh sách đầy 300)
             delete tmp; 
-            // Không cần break ở đây tiếp tục đọc các máy bay khác hợp lệ
         }
     }
 
