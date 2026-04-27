@@ -156,68 +156,68 @@ CB::CB(){
     next = NULL;
 }    
 
-    CB::~CB(){
-        if(sbDich != NULL) delete[] sbDich;
-        if (DSV !=NULL) 
-        {
-            for(int i=0; i<socho; i++){
-                delete[] DSV[i];        //giải phóng chuỗi Cmnd
-            }
-            delete[] DSV;
-        }
-    }
-    
-    bool CB::set_maCB(char ma[maCB_max])
+CB::~CB(){
+    if(sbDich != NULL) delete[] sbDich;
+    if (DSV !=NULL) 
     {
-        if(ma==NULL || strlen(ma)==0) return false; //kiểm tra rỗng
-        strncpy(this->maCB, ma, maCB_max);
-        this->maCB[maCB_max-1] ='\0';
-        //bảo đảm chuỗi luôn có điểm kết thuc
-        return true;
-    }
-
-    bool CB::set_ngayHK(int h, int m, int y, int mmt, int d){
-        bool check = true;  
-        check &= this->ngayKH.set_yy(y);
-        check &= this->ngayKH.set_mt(mmt);
-        check &= this->ngayKH.set_dd(d);
-        check &= this->ngayKH.set_hh(h);
-        check &= this->ngayKH.set_mm(m);
-        return check; // Trả về true nếu tất cả các giá trị đều hợp lệ
-
-    }
-
-    bool CB::set_sbDich(char *sbd){
-        int n=strlen(sbd);
-        if(sbd==NULL|| n==0) return false;
-
-        // giải phóng bộ nhớ nếu còn
-        if( this->sbDich != NULL ) delete[] this->sbDich;
-        this->sbDich = new char[n+1];
-        strncpy(this->sbDich,sbd,n);
-        this->sbDich[n] = '\0';
-        return true;
-    }
-
-    bool CB::set_trangThai(int i){
-        // Kiểm tra i có nằm trong phạm vi 0-3 không
-        if (i >= 0 && i <= 3) {
-            this->trangThai = i;
-            return true;
+        for(int i=0; i<socho; i++){
+            delete[] DSV[i];        //giải phóng chuỗi Cmnd
         }
-        return false;
+        delete[] DSV;
     }
+}
+    
+bool CB::set_maCB(char ma[maCB_max])
+{
+    if(ma==NULL || strlen(ma)==0) return false; //kiểm tra rỗng
+    strncpy(this->maCB, ma, maCB_max);
+    this->maCB[maCB_max-1] ='\0';
+    //bảo đảm chuỗi luôn có điểm kết thuc
+    return true;
+}
 
-    bool CB::set_soHieuMB(char *shmb){
-        int n=strlen(shmb);
-        if(shmb==NULL|| n==0) return false;
+bool CB::set_ngayHK(int h, int m, int y, int mmt, int d){
+    bool check = true;  
+    check &= this->ngayKH.set_yy(y);
+    check &= this->ngayKH.set_mt(mmt);
+    check &= this->ngayKH.set_dd(d);
+    check &= this->ngayKH.set_hh(h);
+    check &= this->ngayKH.set_mm(m);
+    return check; // Trả về true nếu tất cả các giá trị đều hợp lệ
 
-        strncpy(this->soHieuMB,shmb,n);
-        this->soHieuMB[n] = '\0';
+}
+
+bool CB::set_sbDich(char *sbd){
+    int n=strlen(sbd);
+    if(sbd==NULL|| n==0) return false;
+
+    // giải phóng bộ nhớ nếu còn
+    if( this->sbDich != NULL ) delete[] this->sbDich;
+    this->sbDich = new char[n+1];
+    strncpy(this->sbDich,sbd,n);
+    this->sbDich[n] = '\0';
+    return true;
+}
+
+bool CB::set_trangThai(int i){
+    // Kiểm tra i có nằm trong phạm vi 0-3 không
+    if (i >= 0 && i <= 3) {
+        this->trangThai = i;
         return true;
     }
+    return false;
+}
 
-    bool CB::set_socho(int c) {
+bool CB::set_soHieuMB(char *shmb){
+    int n=strlen(shmb);
+    if(shmb==NULL|| n==0) return false;
+
+    strncpy(this->soHieuMB,shmb,n);
+    this->soHieuMB[n] = '\0';
+    return true;
+}
+
+bool CB::set_socho(int c) {
     if (c <= 0) return false;
 
     // 1. Giải phóng bộ nhớ cũ (nếu có) để tránh memory leak
@@ -440,12 +440,15 @@ markList::markList() {
         }
         // --- 6. Thêm vào Danh sách liên kết ---
         if (!Add_CB(dsCB, dsMB, tmp)) {
-            // Nếu hàm Add_CB từ chối (trả về false), phải dọn dẹp RAM ngay
-            delete tmp; // Détructor da tu giai phong
+            delete[] tmp->sbDich;
+            for (int i = 0; i < tmp->socho; i++) {
+                delete[] tmp->DSV[i];
+            }
+            delete[] tmp->DSV;
+            delete tmp; 
         }
         f >> ws; 
     }
-
     f.close();
     return true;
 }
@@ -478,7 +481,6 @@ markList::markList() {
            if (!Add_MB(dsMB, tmp)) {
             // Nếu Add_MB trả về false (do trùng mã hoặc danh sách đầy 300)
             delete tmp; 
-            // Không cần break ở đây tiếp tục đọc các máy bay khác hợp lệ
         }
     }
 
@@ -516,6 +518,76 @@ markList::markList() {
         Add_HK(dsHK, b_ho, b_ten, b_cmnd, b_phai);
     }
 
+    f.close();
+    return true;
+}
+
+bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
+    ofstream f(path_file_CB);
+    if(!f.is_open()) return false;
+    CB* temp = dsCB.head;
+    while(temp != NULL){
+        f << temp->maCB << '|'
+            << setfill('0') << setw(2) << temp->ngayKH.hh << ':'
+            << setfill('0') << setw(2) << temp->ngayKH.mm << '|'
+            << setfill('0') << setw(2) << temp->ngayKH.dd << '/'
+            << setfill('0') << setw(2) << temp->ngayKH.mt << '/'
+            << setfill('0') << setw(4) << temp->ngayKH.yy << '|'
+            << temp->sbDich << '|'
+            << temp->trangThai << '|'
+            << temp->soHieuMB << '|';
+        // Đếm số vé đã bán
+        f << temp->sove << '\n';
+        // Ghi danh sách vé (vị trí | CMND)
+        if(temp->sove > 0) {    
+            int d=0;
+            for (int i = 0; i < temp->socho; i++) {
+                if (strcmp(temp->DSV[i], "0") != 0) {
+                    f << (i + 1) << '|' << temp->DSV[i];
+                    d++;
+                    if(d<temp->sove||temp->next!=NULL) f << '\n';
+                }
+            }
+        }else{
+            if(temp->next!=NULL) f << '\n';
+        }
+        temp = temp->next;
+    }
+    f.close();
+    return true;
+}
+
+bool Set_Data_MB(listMB &dsMB, const char *path_file_MB){
+    ofstream f(path_file_MB);
+    if(!f.is_open()) return false;
+    if(dsMB.slMB == 0) {
+        f.close();
+        return true; // Nếu không có máy bay nào, tạo file trống
+    }
+    for (int i = 0; i < dsMB.slMB; i++) {
+        MB* mb = dsMB.list[i];
+        f << mb->soHieuMB << '|' << mb->loaiMB << '|' << mb->socho;
+        if (i < dsMB.slMB - 1) {
+            f << endl;
+        }
+    }
+    f.close();
+    return true;
+}
+
+bool Set_Data_HK(listHK &dsHK, const char *path_file_HK){
+    ofstream f(path_file_HK);
+    if(!f.is_open()) return false;
+    if (dsHK.goc == NULL) { f.close(); return true; }
+    // Ham duyet luu theo thu tu NLR
+    Stack<HK*> s;
+    s.push(dsHK.goc);
+    while(!s.isEmpty()){
+        HK* temp =s.pop();
+        f << temp->cmnd << '|' << temp->ho << '|' << temp->ten << '|' << temp->phai << '\n';
+        if(temp->right != NULL) s.push(temp->right);
+        if(temp->left != NULL) s.push(temp->left);
+    }
     f.close();
     return true;
 }
