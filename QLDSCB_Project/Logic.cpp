@@ -35,6 +35,7 @@ bool cmp_prefix(char* str, char* prefix) {
     if (str[i] == '\0' && prefix[i] != '\0') return false;
     return true;
 }
+
 // Tiện ích tính số phút chênh lệch của 2 ngày bất kì từ 1900 về sau
 bool isLeap(int y) {
     return (y % 400 == 0) || (y % 4 == 0 && y % 100 != 0);
@@ -73,15 +74,64 @@ long long ss_ngay(DateTime const &a, DateTime const &b) {
     return llabs(toMinutes(a) - toMinutes(b));
 }
 
+// Các hàm phục vụ cho việc đánh dấu các CB cho MB và HK
+void clearMarkMB(MB* MB) {
+    markCB* tnode = MB->dsHD.head;
+    while (tnode != NULL) {
+        markCB* temp = tnode;
+        tnode = tnode->next;
+        delete temp;
+    }
+    MB->dsHD.head = NULL;
+}
+
+bool addMarkMB(MB* MB, markCB* newMark) {
+    markCB* tnode = MB->dsHD.head;
+    if (newMark == NULL) return false;
+    if (tnode == NULL) {
+        MB->dsHD.head = newMark;
+        return true;
+    }
+    while (tnode->next != NULL) {
+        if (ss_ngay(tnode->mark->ngayKH, newMark->mark->ngayKH) < 1440) return false;
+        tnode = tnode->next;
+    }
+    if (ss_ngay(tnode->mark->ngayKH, newMark->mark->ngayKH) < 1440) return false;
+    tnode->next = newMark;
+    return true;
+}
+
+bool delMarkMB(MB* MB, char* const maCB) {
+    markCB* tnode = MB->dsHD.head;
+    if (tnode == NULL) return false;
+    if (ss_str(tnode->mark->maCB, maCB) == 0) {
+        markCB* tmpDel = tnode;
+        tnode = tnode->next;
+        MB->dsHD.head = tnode;
+        delete tmpDel;
+        return true;
+    }
+    markCB* temp = tnode;
+    tnode = tnode->next;
+    while (tnode != NULL) {
+        if (ss_str(tnode->mark->maCB, maCB) == 0) {
+            markCB* tmpDel = temp->next;
+            temp->next = tnode->next;
+            delete tmpDel;
+            return true;
+        }
+        tnode = tnode->next;
+        temp = temp->next;
+    }
+    return false;
+}
 
 // May Bay
-// Hàm Đọc và Ghi file
-bool Save_MB(ofstream& save, listMB& dsMB);
 
 void swap_MB(MB* &a, MB* &b) {
-    MB temp = *a;
-    *a = *b;
-    *b = temp;
+    MB* temp = a;
+    a = b;
+    b = temp;
 }
 
 // Tiện ích sắp xếp
@@ -157,26 +207,26 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
 
 bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
-    bool check = false; // kiem tra xem co hanh khach tren chuyen bay do hay chua
-    if (temp != NULL) {
-        for (int i = 0; i < temp->socho; i++) {
-            if (temp->DSV[i][0] != '\0') {
-                check = true;
-                break;
-            }
-        }
-    }
-    if (check == true) return false; // Khong the xoa mot may bay ma da co chuyen bay dang su dung da co khach
+    if (temp != NULL) return false; // Khong the xoa mot may bay ma da co chuyen bay dang su dung da co khach
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false; // Khong the xoa mot may bay khong ton tai
+    markCB* tnode = dsMB.list[index]->dsHD.head;
+    while (tnode != NULL) { // Huy nhung chuyen bay dang su dung may bay bi xoa
+        tnode->mark->trangThai = 0;
+        for (int i = 0; i < tnode->mark->socho; i++)
+            delete[] tnode->mark->DSV[i];
+        delete[] tnode->mark->DSV;
+        tnode->mark->DSV = NULL;
+        tnode->mark->socho = 0;
+        tnode = tnode->next;
+    }
+    clearMarkMB(dsMB.list[index]);
     delete dsMB.list[index];
     for (int i = index; i < dsMB.slMB - 1; i++) {
         dsMB.list[i] = dsMB.list[i + 1];
     }
     dsMB.list[dsMB.slMB - 1] = NULL;
     dsMB.slMB--;
-    if (temp != NULL )
-        Cancel_CB(dsCB, temp->maCB);
     return true;
 }
 
@@ -187,10 +237,40 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
     // Trường hợp cập nhật trùng mã máy bay
     if (ss_str(dsMB.list[index]->soHieuMB, infoUpdate->soHieuMB) == 0) {
         int SLBcu = dsMB.list[index]->SLB;
+        markCB* tnode = dsMB.list[index]->dsHD.head;
         *dsMB.list[index] = *infoUpdate;
-        dsMB.list[index]->SLB = SLBcu;
-        CB* temp = Find_Active_MB(dsCB, soHieuMB);
-        if (temp != NULL) {
+        dsMB.list[index]->SLB = SLBcu; // Thông tin này không được thay đổi
+        dsMB.list[index]->dsHD.head = tnode; // Thông tin này không được thay đổi
+        CB* temp = dsCB.head;
+        while (temp != NULL) {
+            if (ss_str(temp->soHieuMB, soHieuMB) == 0) {
+                char **newDSV = new char* [infoUpdate->socho];
+                for (int i = 0; i < temp->socho; i++)
+                    newDSV[i] = temp->DSV[i];
+                for (int i = temp->socho; i < infoUpdate->socho; i++) {
+                    newDSV[i] = new char[cmnd_max];
+                    newDSV[i][0] = '\0';
+                }
+                temp->socho = infoUpdate->socho;
+                strcpy(temp->soHieuMB, infoUpdate->soHieuMB);
+                delete[] temp->DSV;
+                temp->DSV = newDSV;
+            }
+            temp = temp->next;
+        }
+        return true;
+    }
+    // Trường hợp cập nhật khác mã máy bay
+    int exist = Find_MB(dsMB, infoUpdate->soHieuMB);
+    if (exist != -1) return false;
+    int SLBcu = dsMB.list[index]->SLB;
+    markCB* tnode = dsMB.list[index]->dsHD.head;
+    *dsMB.list[index] = *infoUpdate;
+    dsMB.list[index]->SLB = SLBcu; // Thông tin này không được thay đổi
+    dsMB.list[index]->dsHD.head = tnode; // Thông tin này không được thay đổi
+    CB* temp = dsCB.head;
+    while (temp != NULL) {
+        if (ss_str(temp->soHieuMB, soHieuMB) == 0) {
             char **newDSV = new char* [infoUpdate->socho];
             for (int i = 0; i < temp->socho; i++)
                 newDSV[i] = temp->DSV[i];
@@ -203,27 +283,7 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
             delete[] temp->DSV;
             temp->DSV = newDSV;
         }
-        return true;
-    }
-    // Trường hợp cập nhật khác mã máy bay
-    int exist = Find_MB(dsMB, infoUpdate->soHieuMB);
-    if (exist != -1) return false;
-    int SLBcu = dsMB.list[index]->SLB;
-    *dsMB.list[index] = *infoUpdate;
-    dsMB.list[index]->SLB = SLBcu;
-    CB* temp = Find_Active_MB(dsCB, soHieuMB);
-    if (temp != NULL) {
-        char **newDSV = new char* [infoUpdate->socho];
-        for (int i = 0; i < temp->socho; i++)
-            newDSV[i] = temp->DSV[i];
-        for (int i = temp->socho; i < infoUpdate->socho; i++) {
-            newDSV[i] = new char[cmnd_max];
-            newDSV[i][0] = '\0';
-        }
-        temp->socho = infoUpdate->socho;
-        strcpy(temp->soHieuMB, infoUpdate->soHieuMB);
-        delete[] temp->DSV;
-        temp->DSV = newDSV;
+        temp = temp->next;
     }
     Sort_MB(dsMB, 0, dsMB.slMB - 1);
     return true;
@@ -249,76 +309,89 @@ void copy_CB(CB* CB1, CB* CB2) {
    
     strcpy(CB1->soHieuMB, CB2->soHieuMB);
     
-    for (int i = 0; i < CB1->socho; i++) {
-        delete[] CB1->DSV[i];
-    }
-  
+    CB1->sove = CB2->sove;
+    int sochocu = CB1->socho;
     CB1->socho = CB2->socho;
     
-    char** newDSV = new char* [CB2->socho];
-    for (int i = 0; i < CB2->socho; i++) {
-        newDSV[i] = new char[cmnd_max];
-        strcpy(newDSV[i], CB2->DSV[i]);
+    if (CB2->DSV != NULL) {
+        if (CB1->DSV != NULL)
+            for (int i = 0; i < sochocu; i++) {
+                delete[] CB1->DSV[i];
+            }
+        char** newDSV = new char* [CB2->socho];
+        for (int i = 0; i < CB2->socho; i++) {
+            newDSV[i] = new char[cmnd_max];
+            strcpy(newDSV[i], CB2->DSV[i]);
+        }
+        delete[] CB1->DSV;
+        CB1->DSV = newDSV;
     }
-    delete[] CB1->DSV;
-    CB1->DSV = newDSV;
+    else {
+        if (CB1->DSV != NULL)
+            for (int i = 0; i < sochocu; i++) {
+                delete[] CB1->DSV[i];
+            }
+        delete[] CB1->DSV;
+        CB1->DSV = NULL;
+    }
 }
 
 void Swap_CB(CB* &CB1, CB* &CB2) {
-    
-    char tmp_maCB[maCB_max];
-    strcpy(tmp_maCB, CB1->maCB);
-    strcpy(CB1->maCB, CB2->maCB);
-    strcpy(CB2->maCB, tmp_maCB);
+    CB* temp = CB1;
+    CB1 = CB2;
+    CB2 = temp;
+}
 
-    DateTime tmpDate = CB1->ngayKH;
-    CB1->ngayKH = CB2->ngayKH;
-    CB2->ngayKH = tmpDate;
-   
-    char* tmpSB = CB1->sbDich;
-    CB1->sbDich = CB2->sbDich;
-    CB2->sbDich = tmpSB;
-  
-    int tmpTrangThai = CB1->trangThai;
-    CB1->trangThai = CB2->trangThai;
-    CB2->trangThai = tmpTrangThai;
-   
-    char tmp_soHieu[soHieuMB_max];
-    strcpy(tmp_soHieu, CB1->soHieuMB);
-    strcpy(CB1->soHieuMB, CB2->soHieuMB);
-    strcpy(CB2->soHieuMB, tmp_soHieu);
-  
-    int tmpSoCho = CB1->socho;
-    CB1->socho = CB2->socho;
-    CB2->socho = tmpSoCho;
+int HP_CB(CB** dsCB, int l, int r) {
+    int i = l;
+    int j = r;
+    char pivot[maCB_max];
+    strcpy(pivot, dsCB[l]->maCB);
+    while (true) {
+        while (ss_str(pivot, dsCB[i]->maCB) == 1) i++;
+        while (ss_str(pivot, dsCB[j]->maCB) == 2) j--;
+        if (i < j) {
+            Swap_CB(dsCB[i], dsCB[j]);
+            i++;
+            j--;
+        }
+        else return j;
+    }
+}
 
-    char** tmpDSV = CB1->DSV;
-    CB1->DSV = CB2->DSV;
-    CB2->DSV = tmpDSV;
+void QuickSort_CB(CB** dsCB, int l, int r) {
+    if (l >= r) return;
+    int m = HP_CB(dsCB, l, r);
+    QuickSort_CB(dsCB, l, m);
+    QuickSort_CB(dsCB, m + 1, r);
 }
 
 void Sort_CB(listCB &dsCB) {
-    CB* temp1 = dsCB.head;
-    if (temp1 == NULL) return;
-    CB* temp2;
-    while (temp1 != NULL) {
-        temp2 = temp1->next;
-        while (temp2 != NULL) {
-            if (ss_str(temp1->maCB, temp2->maCB) == 1) {
-                Swap_CB(temp1, temp2);
-            }
-            temp2 = temp2->next;
-        }
-        temp1 = temp1->next;
+    if (dsCB.slCB <= 1) return;
+    CB** dsMangCB = new CB*[dsCB.slCB];
+    CB* temp = dsCB.head;
+    int i = 0;
+    while (temp != NULL) {
+        dsMangCB[i] = temp;
+        i++;
+        temp = temp->next;
     }
+    QuickSort_CB(dsMangCB, 0, dsCB.slCB - 1);
+    for (int i = 0; i < dsCB.slCB; i++) {
+        if (i == dsCB.slCB - 1) dsMangCB[i]->next = NULL;
+        else dsMangCB[i]->next = dsMangCB[i + 1];
+    }
+    dsCB.head = dsMangCB[0];
+    delete[] dsMangCB;
 }
 
 CB *Find_CB(listCB &dsCB, char* const maCB) {
     CB* temp = dsCB.head;
     if (temp == NULL) return NULL;
     while(temp != NULL) {
-        if (ss_str(temp->maCB, maCB) == 0) return temp;
-        if (ss_str(temp->maCB, maCB) == 1) return NULL;
+        int result = ss_str(temp->maCB, maCB);
+        if (result == 0) return temp;
+        if (result == 1) return NULL;
         temp = temp->next;
     }
     return NULL;
@@ -344,7 +417,7 @@ CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB) {
     CB* temp = dsCB.head;
     while(temp != NULL) {
         if (ss_str(temp->soHieuMB, soHieuMB) == 0) {
-            if (temp->trangThai == 1 || temp->trangThai == 2) return temp;
+            if ((temp->trangThai == 1 || temp->trangThai == 2) && temp->sove > 0) return temp;
         }
         temp = temp->next;
     }
@@ -352,9 +425,16 @@ CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB) {
 }
 
 bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
-    if (Find_Active_MB(dsCB, newCB->soHieuMB) != NULL) return false;
     int index = Find_MB(dsMB, newCB->soHieuMB);
-    if (index == -1) return false;
+    if (index == -1) return false; // Khong the them mot chuyen bay voi may bay khong ton tai
+    markCB* newMark = new markCB();
+    newMark->mark = newCB;
+    if (newCB->trangThai == 1 || newCB->trangThai == 2) {
+        if (addMarkMB(dsMB.list[index], newMark) == false) {
+            delete newMark;
+            return false; // Khong the them trung MB neu MB do dang hoat dong tren cac chuyen bay khac ma khong cach nhau it nhat 1 ngay
+        }
+    }
     CB* temp = find_insert_posCB(dsCB, newCB->maCB);
     if (temp == NULL && dsCB.head == NULL) {
         dsCB.head = newCB;
@@ -369,7 +449,10 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
         if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
         return true;
     }
-    if (ss_str(temp->maCB, newCB->maCB) == 0) return false;
+    if (ss_str(temp->maCB, newCB->maCB) == 0) {
+        delMarkMB(dsMB.list[index], newCB->maCB);
+        return false; // Khong the them mot chuyen bay neu bi trung maCB
+    }
     CB* temp2 = temp->next;
     temp->next = newCB;
     newCB->next = temp2;
@@ -378,47 +461,69 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
     return true;
 }
 
-bool Update_Time_CB(listCB &dsCB, char* const maCB, const DateTime &newTime) {
+bool Update_Time_CB(listCB &dsCB, listMB &dsMB, char* const maCB, const DateTime &newTime) {
     CB* temp = Find_CB(dsCB, maCB);
     if (temp == NULL) return false;
     if (temp->trangThai == 3 || temp->trangThai == 0) return false;
-    for (int i = 0; i < temp->socho; i++) {
-        if (temp->DSV[i][0] != '\0') return false; // khon cho phep thay doi thoi gian khoi hanh neu CB da co hanh khach dat
+    if (temp->sove > 0) return false; // Khong the thay doi thoi gian neu da co khach dat ve
+    int index = Find_MB(dsMB, temp->soHieuMB);
+    markCB* tnode = dsMB.list[index]->dsHD.head;
+    while (tnode != NULL) {
+        if (ss_str(tnode->mark->maCB, maCB) != 0) {
+            if (ss_ngay(tnode->mark->ngayKH, newTime) < 1440) return false; // Khong the thay doi thoi gian neu nhu thoi gian do bi xung dot voi thoi gian cua cac chuyen bay su dung cung mot may bay
+        }
+        tnode = tnode->next;
     }
     temp->ngayKH = newTime;
     return true;
 }
 
 int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
-    CB* temp = Find_Active_MB(dsCB, infor->soHieuMB);
-    if (temp != NULL && ss_str(temp->maCB, maCB) != 0) return -2;
-    temp = Find_CB(dsCB, infor->maCB);
-    if (temp != NULL && ss_str(maCB, infor->maCB) != 0) return -1;
-    if (Find_MB(dsMB, infor->soHieuMB) == -1) return -3;
-    temp = Find_CB(dsCB, maCB);
-    if (temp == NULL) return -4;
-    if (temp->socho > infor->socho) return -5;
-    bool check = false;
-    for (int i = 0; i < temp->socho; i++) {
-        if (temp->DSV[i][0] != '\0') {
-            check = true;
-            break;
+    CB* temp = Find_CB(dsCB, maCB);
+    if (temp == NULL) return -1; // Chuyen bay khong ton tai
+    if (ss_str(infor->maCB, maCB) != 0) return -2; // Khong duoc sua maCB
+    if (temp->trangThai == 0 || temp->trangThai == 3) return -3; // Khong duoc sua cac chuyen bay da huy hoac hoan tat
+    if (temp->socho > infor->socho) return -4; // So cho moi khong duoc nho hon so cho cu
+    
+    if (ss_str(temp->soHieuMB, infor->soHieuMB) == 0) { // Truong hop cap nhat trung so hieu MB
+        // Truong hop da co khach
+        if (temp->sove > 0) {
+            if (ss_str(temp->sbDich, infor->sbDich) != 0) return -5; // Nhung thong tin khong duoc thay doi khi da co khach
+            if (ss_ngay(temp->ngayKH, infor->ngayKH) != 0) return -5; // Nhung thong tin khong duoc thay doi khi da co khach
+            if (temp->trangThai != infor->trangThai) return -5; // Nhung thong tin khong duoc thay doi khi da co khach
+        }
+        else { // Truong hop khong co khach
+            if (Update_Time_CB(dsCB, dsMB, maCB, infor->ngayKH) == false) return -6; // Xung dot thoi gian
+            strcpy(temp->sbDich, infor->sbDich);
+            temp->trangThai = infor->trangThai;
         }
     }
-    
-    if (check) { // Trường hợp đã có khách
-        if (ss_str(temp->sbDich, infor->sbDich) != 0) return -6;
-        if (ss_ngay(temp->ngayKH, infor->ngayKH) != 0) return -6;
-        if (temp->trangThai != infor->trangThai) return -6;
-        
-    }
-    else { // Trường hợp chưa có khách
-        strcpy(temp->sbDich, infor->sbDich);
+    else { // Truong hop khac so hieu MB
+        // Truong hop da co khach
+        if (temp->sove > 0) {
+            if (ss_str(temp->sbDich, infor->sbDich) != 0) return -5; // Nhung thong tin khong duoc thay doi khi da co khach
+            if (ss_ngay(temp->ngayKH, infor->ngayKH) != 0) return -5; // Nhung thong tin khong duoc thay doi khi da co khach
+            if (temp->trangThai != infor->trangThai) return -5; // Nhung thong tin khong duoc thay doi khi da co khach
+        }
+        // Truong hop khong co khach
+        // Thay doi mark moi cho MB moi
+        int index = Find_MB(dsMB, infor->soHieuMB);
+        if (index == -1) return -7; // MB duoc cap nhat khong ton tai
+        markCB* tnode = dsMB.list[index]->dsHD.head;
+        while (tnode != NULL) { // Kiem tra xung dot thoi gian
+            if (ss_ngay(tnode->mark->ngayKH, infor->ngayKH) < 1440) return -6; // Xung dot thoi gian
+            tnode = tnode->next;
+        }
+        int index2 = Find_MB(dsMB, temp->soHieuMB);
+        markCB* newMark = new markCB();
+        newMark->mark = temp;
+        delMarkMB(dsMB.list[index2], temp->maCB); // Xoa mark cua MB cu
         temp->ngayKH = infor->ngayKH;
+        addMarkMB(dsMB.list[index], newMark); // Them mark CB hien tai cho MB moi
+        strcpy(temp->sbDich, infor->sbDich);
         temp->trangThai = infor->trangThai;
+        strcpy(temp->soHieuMB, infor->soHieuMB);
     }
-    strcpy(temp->maCB, infor->maCB);
-    // Cap nhat so cho moi cho CB
     char **newDSV = new char* [infor->socho];
     for (int i = 0; i < temp->socho; i++)
         newDSV[i] = temp->DSV[i];
@@ -427,30 +532,24 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
         newDSV[i][0] = '\0';
     }
     temp->socho = infor->socho;
-    strcpy(temp->soHieuMB, infor->soHieuMB);
     delete[] temp->DSV;
     temp->DSV = newDSV;
-    Sort_CB(dsCB);
     return true;
 }
 
-bool Cancel_CB(listCB &dsCB, char* const maCB) {
-    CB* temp = Find_CB(dsCB, maCB);
-    if (temp == NULL) return false;
-    if (temp->trangThai == 3 || temp->trangThai == 0) return false;
-    bool check = false; // kiem tra xem co hanh khach dat chuyen bay do hay chua
-    for (int i = 0; i < temp->socho; i++) {
-        if (temp->DSV[i][0] != '\0') {
-            check = true;
-            break;
-        }
-    }
-    if (check == true) return false; // Khong the huy mot chuyen bay da co khach
+bool Cancel_CB(listCB &dsCB, listMB &dsMB, char* const maCB) {
+    CB* temp = Find_CB(dsCB,  maCB);
+    if (temp == NULL) return false; // Chuyen bay khong ton tai
+    if (temp->trangThai == 3 || temp->trangThai == 0) return false; // Da hoat tat hoac bi huy -> khong huy
+    if (temp->sove > 0) return false; // Da co khach -> khong huy
     temp->trangThai = 0;
+    int index = Find_MB(dsMB, temp->soHieuMB);
+    delMarkMB(dsMB.list[index], maCB);
     for (int i = 0; i < temp->socho; i++)
         delete[] temp->DSV[i];
     delete[] temp->DSV;
     temp->DSV = NULL;
+    temp->socho = 0;
     return true;
 }
 
@@ -461,6 +560,7 @@ int Status_CB(listCB &dsCB, char* const maCB) {
 }
 
 void Init_Tickets(CB *newCB, int soCho) {
+    if (newCB->DSV != NULL) return;
     newCB->DSV = new char*[soCho];
     for (int i = 0; i < soCho; i++) {
         newCB->DSV[i] = new char[cmnd_max];
@@ -599,18 +699,19 @@ void Sort_SLB(listMB& dsMB, int l, int r) {
 }
 
 listMB Get_Flight_Stats (listMB &dsMB) {
-    listMB flight_Statics;
+    listMB flight_Statics = listMB();
     flight_Statics.slMB = dsMB.slMB;
     for (int i = 0; i < dsMB.slMB; i++) {
         flight_Statics.list[i] = new MB();
         *flight_Statics.list[i] = *dsMB.list[i];
+        flight_Statics.list[i]->dsHD.head = NULL; // Khong copy dsMark de dam bao dsMark cua MB an toan
     }
     Sort_SLB(flight_Statics, 0, flight_Statics.slMB - 1);
     return flight_Statics;
 }
 
 listMB Find_MB_OnRage(listMB& dsMB, char* const query) {
-    listMB A;
+    listMB A = listMB();
     A.slMB = 0;
     char temp[soHieuMB_max];
     char prefix[soHieuMB_max];
@@ -622,6 +723,7 @@ listMB Find_MB_OnRage(listMB& dsMB, char* const query) {
         if (cmp_prefix(temp, prefix)) {
             A.list[A.slMB] = new MB();
             *A.list[A.slMB] = *dsMB.list[i];
+            A.list[A.slMB]->dsHD.head = NULL; // Khong copy dsMark de dam bao dsMark cua MB an toan
             A.slMB++;
         }
     }
@@ -671,3 +773,9 @@ bool Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB){
 }
 
 void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB){}
+
+string Can_Edit_MB(listMB &dsMB,listCB &dsCB, char* const soHieuMB, MB* infoUpdate){
+    return "0" ;
+}
+
+void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate){}

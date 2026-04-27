@@ -82,41 +82,6 @@ struct DateTime{
     bool set_yy(int y);
 };
 
-// --- Cấu trúc đánh dấu ngày khởi hành và maCB cho MB và HK (linked list)---
-
-struct markNode {
-    char maCB[maCB_max];
-    DateTime NgayKH;
-    markNode* next;
-    markNode();
-};
-
-struct listMark {
-    markNode* head;
-    listMark();
-};
-
-bool add_mark(listMark &dsHD, markNode* node); // Đưa một node đánh dấu mới vào danh sách
-bool del_mark(listMark &dsHD, char* const maCB); // Xoá một node đánh dấu trong danh sách theo maCB
-
-// --- cấu trúc máy bay ---
-struct MB {
-    char soHieuMB[soHieuMB_max];
-    char loaiMB[loaiMB_max];
-    int socho;
-    int SLB;
-    listMark dsHD;
-    MB();
-    bool set_soHieuMB(char *shmb);
-    bool set_loaiMB(char *loai);
-    bool set_socho(int c);
-};
-
-struct listMB {
-    int slMB;
-    MB* list[slMB_max];
-    listMB();
-};
 
 // --- cấu trúc chuyến bay ---
 
@@ -127,6 +92,7 @@ struct CB{
     int trangThai;                    // 0 hủy chuyến, 1 còn vé, 2 hết vé, 3 hoàn tất
     char soHieuMB[soHieuMB_max];      // số hiệu máy bay
     int socho;                        // số chỗ trên máy bay
+    int sove;                         // số vé đã đặt trên chuyến bay đó
     char **DSV;                       // mảng cấp phát động chứa cmnd chảu khách hàng 3 kí tự cuối chứa vị trí vé
     CB* next;                         // chứa địa chỉ contro tiếp theo
     CB();                             // ko tham số
@@ -137,7 +103,6 @@ struct CB{
     bool set_trangThai(int i);
     bool set_soHieuMB(char *shmb);
     bool set_socho(int c);
-
     ~CB();
 };
 
@@ -145,8 +110,43 @@ struct listCB{
     int slCB;                         // số lượng chuyến bay
     CB* head;                        // chuyến bay dầu tiên
     listCB();
+    void Clear();
 };
-// dsCB gồm 1 nhiều CB , 1 mỗi CB có 
+// dsCB gồm 1 nhiều CB , 1 mỗi CB có
+
+// -- Cấu truc đánh dấu chuyến bay
+struct markCB {
+    CB* mark;
+    markCB* next;
+    markCB();
+};
+
+struct markList {
+    markCB* head;
+    markList();
+};
+
+// --- cấu trúc máy bay ---
+struct MB {
+    char soHieuMB[soHieuMB_max];
+    char loaiMB[loaiMB_max];
+    int socho;
+    int SLB;
+    markList dsHD;
+    MB();
+    bool set_soHieuMB(char *shmb);
+    bool set_loaiMB(char *loai);
+    bool set_socho(int c);
+};
+
+struct listMB {
+    int slMB;
+    MB* list[slMB_max];
+    void Clear();
+    listMB();
+};
+
+
 // --- cấu trúc hành khách cây nhị phân ---
 struct HK{
     char *ho;                           // họ và tên đệm chứa 40 kí tự
@@ -154,7 +154,7 @@ struct HK{
     char *cmnd;                         // cmnd có 13 kí tự
     bool phai;                          // true = gái   ;false = trai
     HK *left, *right;
-    listMark dsDatVe;
+    markList dsDatVe;
     HK();
     ~HK();                             
     bool set_ho(char *new_ho);          // true thì đã cập nhật tên họ mới 

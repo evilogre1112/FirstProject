@@ -19,12 +19,12 @@ Dự án quản lý vận hành hàng không, tập trung vào tối ưu hóa vi
 
 ### 🚀 Danh sách chức năng chính
 
-* [ ] **a. Quản lý Máy bay:** Cập nhật  danh sách máy bay.  $\color{cyan}{\text{(Thêm/Xóa/Hiệu chỉnh)}}$
+* [ ] **a. Quản lý Máy bay:** Cập nhật  danh sách máy bay.  $\color{cyan}{\text{(Thêm/Xóa/Hiệu chỉnh)}}$ (95%)
 * [ ] **b. Quản lý Chuyến bay:** 
-    * Lập chuyến bay mới.
+    * Lập chuyến bay mới. (Đã Hoàn Thành)
     * Hiệu chỉnh ngày giờ khởi hành.
     * Hủy chuyến.
-    * $\color{Red}{\text{DSCB luôn có thứ tự tăng dần theo mã chuyến bay}}$
+    * $\color{Red}{\text{DSCB luôn có thứ tự tăng dần theo mã chuyến bay}}$ ( Đã Hoàn Thành)
 
 
 * [ ] **c. Đặt vé:** 
@@ -37,7 +37,7 @@ Dự án quản lý vận hành hàng không, tập trung vào tối ưu hóa vi
 * [ ] **e. In danh sách hành khách:** Dựa vào mã chuyến bay, in danh sách theo mẫu kết xuất.
 * [ ] **f. Tra cứu chuyến bay:** Tìm chuyến bay theo ngày `dd/mm/yyyy`  và nơi đến `XXXXX` mà còn vé. `cho biết cụ thể số lượng slot trống và giờ bay.`
 * [ ] **g. In danh sách vé trống:** Liệt kê các số vé chưa có người đặt của một chuyến bay X.
-* [ ] **h. Thống kê lượt bay:** In danh sách máy bay và số lượt thực hiện chuyến bay, sắp xếp **giảm dần** theo số lượt.
+* [ ] **h. Thống kê lượt bay:** In danh sách máy bay và số lượt thực hiện chuyến bay, sắp xếp **giảm dần** theo số lượt.(Đã hoàn thành)
 
 ---
 
