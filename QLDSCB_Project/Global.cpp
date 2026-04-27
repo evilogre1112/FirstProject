@@ -127,23 +127,23 @@ bool DateTime::set_dd(int d){
     // ---- cấu trúc chuyến bay ----
 
 CB::CB(int sc) {                      // truyền tham số socho 
-    maCB[0] = '\0';
-    trangThai = 1;
-    soHieuMB[0] = '\0';
-    socho = sc;
-    sove = 0;
-    sbDich = new char[50];        // độ dài tên 50 kí tự
-    sbDich[0] = '\0';
-    if(sc>0) {
-        DSV= new char*[socho];
-        for(int i=0;i<sc;i++)
-        {
-            DSV[i] = new char[cmnd_max];
-            DSV[i][0] = '\0';
-        }
-    } else { DSV = NULL;}
-    next = NULL;
-}
+        maCB[0] = '\0';
+        trangThai = 1;
+        soHieuMB[0] = '\0';
+        socho = sc;
+        sove = 0;
+        sbDich = new char[50];        // độ dài tên 50 kí tự
+        sbDich[0] = '\0';
+        if(sc>0) {
+            DSV= new char*[socho];
+            for(int i=0;i<sc;i++)
+            {
+                DSV[i] = new char[cmnd_max];
+                DSV[i][0] = '\0';
+            }
+        } else { DSV = NULL;}
+        next = NULL;
+    }
 
 CB::CB(){
     maCB[0] = '\0';
@@ -239,10 +239,10 @@ CB::CB(){
     return true;
 
 }
-listCB::listCB(){
-    slCB = 0;
-    head = NULL;
-}
+    listCB::listCB(){
+        slCB = 0;
+        head = NULL;
+    }
 
 void listCB::Clear() {
     CB* temp = head;
@@ -441,7 +441,12 @@ markList::markList() {
         // --- 6. Thêm vào Danh sách liên kết ---
         if (!Add_CB(dsCB, dsMB, tmp)) {
             // Nếu hàm Add_CB từ chối (trả về false), phải dọn dẹp RAM ngay
-            delete tmp; // Détructor da tu giai phong
+            delete[] tmp->sbDich;
+            for (int i = 0; i < tmp->socho; i++) {
+                delete[] tmp->DSV[i];
+            }
+            delete[] tmp->DSV;
+            delete tmp; 
         }
         f >> ws; 
     }
@@ -535,21 +540,19 @@ bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
             << temp->trangThai << '|'
             << temp->soHieuMB << '|';
         // Đếm số vé đã bán
-        int soVeDaBan = 0;
-        for (int i = 0; i < temp->socho; i++) {
-            if (strcmp(temp->DSV[i], "0") != 0) {
-                soVeDaBan++;
-            }
-        }
-        f << soVeDaBan << '\n';
+        f << temp->sove << '\n';
         // Ghi danh sách vé (vị trí | CMND)
-        for (int i = 0; i < temp->socho; i++) {
-            if (strcmp(temp->DSV[i], "0") != 0) {
-                f << (i + 1) << '|' << temp->DSV[i];
-            
-                
-            if (i < temp->socho - 1) f << '\n';
+        if(temp->sove > 0) {    
+            int d=0;
+            for (int i = 0; i < temp->socho; i++) {
+                if (strcmp(temp->DSV[i], "0") != 0) {
+                    f << (i + 1) << '|' << temp->DSV[i];
+                    d++;
+                    if(d<temp->sove||temp->next!=NULL) f << '\n';
+                }
             }
+        }else{
+            if(temp->next!=NULL) f << '\n';
         }
         temp = temp->next;
     }
@@ -560,6 +563,10 @@ bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
 bool Set_Data_MB(listMB &dsMB, const char *path_file_MB){
     ofstream f(path_file_MB);
     if(!f.is_open()) return false;
+    if(dsMB.slMB == 0) {
+        f.close();
+        return true; // Nếu không có máy bay nào, tạo file trống
+    }
     for (int i = 0; i < dsMB.slMB; i++) {
         MB* mb = dsMB.list[i];
         f << mb->soHieuMB << '|' << mb->loaiMB << '|' << mb->socho;
@@ -574,7 +581,16 @@ bool Set_Data_MB(listMB &dsMB, const char *path_file_MB){
 bool Set_Data_HK(listHK &dsHK, const char *path_file_HK){
     ofstream f(path_file_HK);
     if(!f.is_open()) return false;
-    // Implementation for setting HK data
+    if (dsHK.goc == NULL) { f.close(); return true; }
+    // Ham duyet luu theo thu tu NLR
+    Stack<HK*> s;
+    s.push(dsHK.goc);
+    while(!s.isEmpty()){
+        HK* temp =s.pop();
+        f << temp->cmnd << '|' << temp->ho << '|' << temp->ten << '|' << temp->phai << '\n';
+        if(temp->right != NULL) s.push(temp->right);
+        if(temp->left != NULL) s.push(temp->left);
+    }
     f.close();
     return true;
 }
