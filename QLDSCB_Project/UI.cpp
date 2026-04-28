@@ -1591,20 +1591,22 @@ void It_list_MB(int mod, string res){
                 if(rowOnScreen -1 >= 0) rowOnScreen--;
                 else {
                     listMB tmp ;
+                    bool backToMain = false;
                     tmp = Find_MB_OnRage(dsMB, const_cast<char*>(res.c_str()));
                     while(true){
                         Gotoxy(20 + res.length(),4);
                         int ch = 0 ;
                         NavKey key = GetNavKey(ch);
-                        UiFindMB(res,key,ch,tmp);
+
                         if(key == NAV_ESC){
                             tmp.Clear();
                             return ;
                         } 
-                        OnlyPrint_List_MB(tmp);
+                       
                         if(key == NAV_DOWN && tmp.slMB > 0) {
                             if(tmp.slMB == dsMB.slMB) {
                                 tmp.Clear();
+                                backToMain = true;
                                 break ;
                             }
                             NavKey c = It_Sub_List_MB(tmp,mod);
@@ -1613,6 +1615,12 @@ void It_list_MB(int mod, string res){
                                 return ;
                             }
                         }
+                        UiFindMB(res, key, ch, tmp);
+                        OnlyPrint_List_MB(tmp);
+                    }
+                    if (backToMain) {
+                        current_Row = 0; 
+                        break; 
                     }
                 } 
             }
@@ -1661,7 +1669,7 @@ void UiFindCB(string& res, NavKey key, int& ch, listCB& A) {
         cout << res << "  "; 
         isChanged = true;
     } 
-    else if (isalnum(ch) && key == NAV_UNKNOWN) { 
+    else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) { 
         res += toupper((char)ch); 
         Gotoxy(20, 4);
         cout << res; 
@@ -1874,6 +1882,7 @@ void It_list_CB(int mod, string res){
     string u = "  " + q[0] + q[1] +"    " +q[2] + q[3];
     SmallBox(u,50,4);
     int currentPage = 0;
+    int current_Row = 0;
     while(true){
          // Thiết lập thông số phân trang
         int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 CB
@@ -1915,7 +1924,7 @@ void It_list_CB(int mod, string res){
             temp = temp->next;
         }
 
-        rowOnScreen = 0 ;
+        rowOnScreen = current_Row ;
         while(true){
             string s ;
             int index = rowOnScreen + startIndex;// rowOnScreen + startIndex
@@ -1961,20 +1970,21 @@ void It_list_CB(int mod, string res){
                 if(rowOnScreen -1 >= 0) rowOnScreen--;
                 else{
                     listCB tmp ; 
-                    tmp = Find_CB_OnRage(dsCB, const_cast<char*>(res.c_str()));    
+                    tmp = Find_CB_OnRage(dsCB, const_cast<char*>(res.c_str()));
+                    bool backToMain = false;    
                     while(true){
                         Gotoxy(20 + res.length(),4);
                         int ch = 0 ;
                         NavKey key = GetNavKey(ch);
-                        UiFindCB(res,key,ch,tmp);
+                       
                         if(key == NAV_ESC){
                             tmp.Clear();
                             return ;
                         } 
-                        OnlyPrint_List_CB(tmp);
                         if(key == NAV_DOWN && tmp.slCB > 0) {
                             if(tmp.slCB == dsCB.slCB){
                                 tmp.Clear();
+                                backToMain = true;
                                 break ;
                             } 
                             NavKey c = It_Sub_List_CB(tmp,mod);
@@ -1983,6 +1993,12 @@ void It_list_CB(int mod, string res){
                                 return ;
                             }
                         }
+                        UiFindCB(res,key,ch,tmp);
+                        OnlyPrint_List_CB(tmp);
+                    }
+                    if (backToMain) {
+                        current_Row = 0; 
+                        break; 
                     }
                 } 
             }
