@@ -219,7 +219,7 @@ int GetKey(int chosen,int count);
 int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
 
-void CustomerAddMB();
+NavKey CustomerAddMB();
 void CustomerAddCB();
 void CustomerAddHK();
 
@@ -245,6 +245,7 @@ void It_list_MB(int mode, string res = "");
 void It_list_CB(int mod,string res = "");
 
 void RunInNewTab(void (*func)() = [](){});
+void RunInNewTab(NavKey (*func)());
 
 void RedrawInput(const string &result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight);
 int InputStatus(int &result, int x, int y);

@@ -747,7 +747,7 @@ void ViewQLMB(){
     }  
 }
 
-void CustomerAddMB() {
+NavKey CustomerAddMB() {
     int width = 80;
     int startX = (GetTerminalWidth() - width) / 2;
     int formY = 6;
@@ -757,7 +757,7 @@ void CustomerAddMB() {
         Gotoxy(startX, 10);
         cout << RED << "Lỗi: Danh sách máy bay đã đầy! Không thể thêm." << RESET;
         _getch();
-        return; 
+        return NAV_ESC; 
     }
 
     ClearScreen();
@@ -800,7 +800,7 @@ void CustomerAddMB() {
 
         if (action == NAV_ESC){
             ClearScreen();
-            return; 
+            return NAV_ESC; 
         } 
         else if (action == NAV_UP) { 
             currentField = (currentField == 0) ? 2 : currentField - 1;
@@ -822,6 +822,17 @@ void CustomerAddMB() {
                 }
 
                 Gotoxy(startX, formY + 15);
+               
+                if (Find_MB(dsMB, const_cast<char*>(inputs[0].c_str())) != -1) { 
+                    Gotoxy(startX + 15, formY + 12);
+                    cout << RED << "Lỗi: Số hiệu [" << inputs[0] << "] đã tồn tại! Bấm phím bất kỳ..." << RESET;
+                    _getch(); 
+                    
+                    Gotoxy(startX, formY + 15);
+                    SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
+                    currentField = 0; 
+                    continue;
+                }
                 SmallBox("Xác nhận thêm máy bay này? (ENTER: Đồng ý - ESC: Quay lại sửa)", (int)width, (int)3, (string)YELLOW);
                 
                 bool isConfirm = false;
@@ -840,34 +851,24 @@ void CustomerAddMB() {
                     Gotoxy(startX, formY + 15);
                     SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
                     continue; 
-                }
-
-                // --- TIẾN HÀNH LƯU ---
-                Gotoxy(startX, formY + 15);
-                SmallBox("ĐANG LƯU DỮ LIỆU...", (int)width, (int)3, (string)GREEN);
-
-                MB* NewMB = new MB; 
-                strcpy(NewMB->soHieuMB, inputs[0].c_str());
-                strcpy(NewMB->loaiMB, inputs[1].c_str());
-                NewMB->socho = soCho;
-
-                if(Add_MB(dsMB, NewMB)) {
-                    Gotoxy(startX + 20, formY + 18);
-                    cout << YELLOW << "Đã lưu thành công! Nhấn phím bất kỳ để thoát." << RESET;
-                    _getch();
-                    ClearScreen();
-                    return; 
-                } else {
-                    Gotoxy(startX + 15, formY + 16);
-                    cout << RED << "Lỗi: Số hiệu [" << inputs[0] << "] đã tồn tại! Bấm phím bất kỳ..." << RESET;
-                    delete NewMB;
-                    _getch(); 
-                    
+                }else{
+                    // --- TIẾN HÀNH LƯU ---
                     Gotoxy(startX, formY + 15);
-                    SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
-                    currentField = 0; // Trùng mã thì đưa về ô đầu tiên để sửa
-                }
+                    SmallBox("ĐANG LƯU DỮ LIỆU...", (int)width, (int)3, (string)GREEN);
 
+                    Gotoxy(startX + 12, formY + 18);
+                    MB* NewMB = new MB; 
+                    strcpy(NewMB->soHieuMB, inputs[0].c_str());
+                    strcpy(NewMB->loaiMB, inputs[1].c_str());
+                    NewMB->socho = soCho;
+                    Add_MB(dsMB, NewMB);
+                    cout << YELLOW << "Đã lưu thành công! Nhấn phím bất kỳ để tiếp tục, ESC để thoát." << RESET;
+                  
+                    int key = GetNavKey();
+                    ClearScreen();
+                    if(key == NAV_ESC) return NAV_ESC;
+                    else return NAV_ENTER;  
+                }
             } else {
                 // --- CHƯA ĐIỀN ĐỦ MỤC ---
                 if (currentField < 2) {
@@ -2305,6 +2306,15 @@ void RunInNewTab(void (*func)()) {
     cout << CLOSETAB;
 }
 
+void RunInNewTab(NavKey (*func)()) {
+    NavKey ch = NAV_ENTER;
+    do {
+        cout << NEWTAB;
+        ch = func();     
+        cout << CLOSETAB; 
+        
+    } while(ch == NAV_ENTER); 
+}
 // []() { func(<type> Name);}
 
 void Menu_QuanLyMayBay() {
