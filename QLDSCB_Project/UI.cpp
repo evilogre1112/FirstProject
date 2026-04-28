@@ -1386,6 +1386,7 @@ bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
             tmp->set_soHieuMB(const_cast<char*>(input[0].c_str()));
             string error_code = Can_Edit_MB(dsMB,dsCB,Shmb,tmp) ;
             if(stoi(input[2]) > socho_max){
+                 Gotoxy(35, 8 + itemsPerPage + 1); 
                  SmallBox("Sửa Thất Bại, Số Chỗ Không Quá: " + to_string(socho_max), 50, 4, string(RED));
                  delete tmp ;
                  GetNavKey();
@@ -1393,7 +1394,7 @@ bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
             }
             if(error_code != "0"){
                 Gotoxy(35, 8 + itemsPerPage + 1);    
-                if(error_code[0] == '1' ){
+                if(error_code[0] == '1' ){   
                     string sub = error_code.substr(1);
                     SmallBox("Sửa Thất Bại, Có Khách Đặt Ở Chỗ" + sub, 50, 4, string(RED));
                     delete tmp ;
