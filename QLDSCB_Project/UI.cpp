@@ -1213,7 +1213,7 @@ void UiFindMB(string& res, NavKey key, int& ch, listMB& A) {
         cout << res << "  ";
         isChanged = true;
     } 
-    else if (isalnum(ch) && key == NAV_UNKNOWN) { 
+    else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) { 
         res += toupper((char)ch); 
         Gotoxy(20, 4);
         cout << res; 
@@ -1396,7 +1396,7 @@ bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
                 Gotoxy(35, 8 + itemsPerPage + 1);    
                 if(error_code[0] == '1' ){   
                     string sub = error_code.substr(1);
-                    SmallBox("Sửa Thất Bại, Có Khách Đặt Ở Chỗ" + sub, 50, 4, string(RED));
+                    SmallBox("Sửa Thất Bại, máy bay đang thực chuyến bay không thể sữa chỗ ngồi", 50, 4, string(RED));
                     delete tmp ;
                 }else{
                     SmallBox("Sửa Thất Bại, Số Hiệu: " + input[0] +" Bị Trùng", 50, 4, string(RED));
