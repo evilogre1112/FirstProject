@@ -219,7 +219,7 @@ int GetKey(int chosen,int count);
 int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
 
-void CustomerAddMB();
+NavKey CustomerAddMB();
 void CustomerAddCB();
 void CustomerAddHK();
 

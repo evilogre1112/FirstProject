@@ -330,6 +330,11 @@ listCB Find_CB_OnRage(listCB &dsCB, char* const query);
 listHK Find_HK_OnRage(listHK &dsHK, char* const query);
 
 /**
+ * @brief kiểm tra xem có thể thêm máy bay vào danh sách được không
+ * @return true nếu được , false nếu không được
+ */
+
+/**
  * @brief Kiểm tra xem có xoá được không
  * @return nếu xoá được trả về true , ngược lại false 
  */
