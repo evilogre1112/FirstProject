@@ -2012,10 +2012,12 @@ void It_list_CB(int mod, string res){
             }else if (ch == NAV_RIGHT){
                 if(currentPage+1 <totalPages ) currentPage++;
                 else currentPage = 0 ;
+                current_Row = 0 ;
                 break ;
             }else if(ch == NAV_LEFT){
                 if(currentPage-1 >=0 ) currentPage--;
                 else currentPage = totalPages-1 ;
+                current_Row = 0 ;
                 break ;
             }else if (ch == NAV_ENTER){
                 if(mod == 0){
