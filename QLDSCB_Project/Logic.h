@@ -343,7 +343,7 @@ void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB);
 
 /**
  * @brief Kiểm tra xem có chỉnh được không
- * @return 1XX trả về X nếu số chỗ thay đổi không hợp lệ, có khách ngồi ở vé XXX
+ * @return 1 nếu số chỗ thay đổi không hợp lệ,
  *         2 nếu shMB trùng chỉnh sữa bị trùng
  *         0 chỉnh được
  */
