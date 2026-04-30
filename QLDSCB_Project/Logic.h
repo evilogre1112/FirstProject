@@ -25,6 +25,10 @@ void clearMarkMB(MB* MB); // Xoá toàn bộ đánh dấu
 bool addMarkMB(MB* MB, markCB* newMark); // Đánh dấu chuyến bay cho MB
 bool delMarkMB(MB* MB, char* const maCB); // Xoá đánh dấu theo maCB cho MB
 
+void clearMarkHK(HK* HK); // Xoá toàn bộ đánh dấu
+bool addMarkHK(HK* HK, markCB* newMark); // Đánh dấu chuyến bay cho HK
+bool delMarkHK(HK* HK, char* const maCB); // Xoá đánh dấu theo maCB cho HK
+
 // --- CÂU A: QUẢN LÝ MÁY BAY ---
 // Thao tác trên DSMB
 // MB = type của cấu trúc 1 máy bay
@@ -235,9 +239,13 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
  * @param dsCB  Danh sách chuyến bay
  * @param maCB  Mã chuyến bay
  * @param CMND  Số CMND cần kiểm tra trong danh sách vé
- * @return      True nếu đã có tên trong danh sách vé, false nếu chưa
+ * @return     Mã lỗi
+ * @note       1 CB không tồn tại
+ *             2 Hành khách không tồn tại
+ *             3 Hành khách chưa đặt vé
+ *             0 Hành khách đã đặt vé
  */
-bool Is_Ticket_Booked(CB* const dsCB,const char* maCB,const char* CMND);
+string Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND);
 
 /**
  * @brief               Thực hiện đặt vé (ghi CMND vào chỗ ngồi) trên một chuyến bay cụ thể
@@ -245,9 +253,15 @@ bool Is_Ticket_Booked(CB* const dsCB,const char* maCB,const char* CMND);
  * @param maCB          Mã chuyến bay
  * @param CMND          Số chứng minh nhân dân của hành khách
  * @param seatNumber    Số thứ tự ghế khách chọn (từ 1 đến Số chỗ)
- * @return              True nếu đặt thành công, false nếu ghế đã có người hoặc chuyến bay không còn cho đặt hoặc khách hàng mới chưa có trong dsKH
+ * @return            Trả về mã lỗi
+ * @note       1 CB không tồn tại
+ *             2 Hành khách không tồn tại
+ *             3 Chuyến bay hết vé hoặc không còn hoạt động
+ *             4 Đã có khách đặt ghế tại seatNumber
+ *             5 Đăng ký chuyến sai thời gian quy định
+ *             0 Hành khách đã đặt vé
  */
-bool Book_Ticket(CB* dsCB,const char* maCB,const char* CMND, int seatNumber);
+string Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber);
 
 // --- CÂU D: HỦY VÉ ---
 
