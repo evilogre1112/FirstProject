@@ -126,6 +126,57 @@ bool delMarkMB(MB* MB, char* const maCB) {
     return false;
 }
 
+void clearMarkHK(HK* HK) {
+    markCB* tnode = HK->dsDatVe.head;
+    while (tnode != NULL) {
+        markCB* temp = tnode;
+        tnode = tnode->next;
+        delete temp;
+    }
+    HK->dsDatVe.head = NULL;
+}
+
+bool addMarkHK(HK* HK, markCB* newMark) {
+    markCB* tnode = HK->dsDatVe.head;
+    if (newMark == NULL) return false;
+    if (tnode == NULL) {
+        HK->dsDatVe.head = newMark;
+        return true;
+    }
+    while (tnode->next != NULL) {
+        if (ss_ngay(tnode->mark->ngayKH, newMark->mark->ngayKH) < 1440) return false;
+        tnode = tnode->next;
+    }
+    if (ss_ngay(tnode->mark->ngayKH, newMark->mark->ngayKH) < 1440) return false;
+    tnode->next = newMark;
+    return true;
+}
+
+bool delMarkHK(HK* HK, char* const maCB) {
+    markCB* tnode = HK->dsDatVe.head;
+    if (tnode == NULL) return false;
+    if (ss_str(tnode->mark->maCB, maCB) == 0) {
+        markCB* tmpDel = tnode;
+        tnode = tnode->next;
+        HK->dsDatVe.head = tnode;
+        delete tmpDel;
+        return true;
+    }
+    markCB* temp = tnode;
+    tnode = tnode->next;
+    while (tnode != NULL) {
+        if (ss_str(tnode->mark->maCB, maCB) == 0) {
+            markCB* tmpDel = temp->next;
+            temp->next = tnode->next;
+            delete tmpDel;
+            return true;
+        }
+        tnode = tnode->next;
+        temp = temp->next;
+    }
+    return false;
+}
+
 // May Bay
 
 void swap_MB(MB* &a, MB* &b) {
@@ -207,7 +258,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
 
 bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
-    if (temp != NULL) return false; // Khong the xoa mot may bay ma da co chuyen bay dang su dung da co khach
+    if (temp != NULL) return false; // Khong the xoa mot may bay ma da co chuyen bay dang su dung
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false; // Khong the xoa mot may bay khong ton tai
     markCB* tnode = dsMB.list[index]->dsHD.head;
@@ -234,8 +285,15 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false;
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
-    if (temp != NULL) {
-        if (infoUpdate->socho < dsMB.list[index]->socho) return false;
+    markCB* tnode = dsMB.list[index]->dsHD.head;
+    if (temp != NULL) { // Có chuyến bay đang sử dụng máy bay này
+        while (tnode != NULL) {
+            for (int i = tnode->mark->socho - 1; i >= 0; i--) {
+                if (tnode->mark->DSV[i][0] != '\0' && infoUpdate->socho <= i) return false;
+                else if (tnode->mark->DSV[i][0] != '\0') break;
+            }
+            tnode = tnode->next;
+        }
     }
     int old_soCho = dsMB.list[index]->socho;
     // Trường hợp cập nhật trùng mã máy bay
@@ -257,13 +315,16 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
                         newDSV[i][0] = '\0';
                     }
                 }
-                else { // Nếu số chỗ update nhỏ hơn tức là chưa có chuyến nào sử dụng mà có khách
+                else if (infoUpdate->socho < old_soCho){ // Nếu số chỗ update nhỏ hơn
                     for (int i = 0; i < infoUpdate->socho; i++) {
-                        newDSV[i] = new char[cmnd_max];
-                        newDSV[i][0] = '\0';
+                        newDSV[i] = temp->DSV[i];
                     }
-                    for (int i = 0; i < temp->socho; i++)
+                    for (int i = infoUpdate->socho; i < old_soCho; i++)
                         delete[] temp->DSV[i];
+                }
+                else { // Nếu số chỗ update là bằng nhau
+                    for (int i = 0; i < infoUpdate->socho; i++)
+                        newDSV[i] = temp->DSV[i];
                 }
                 temp->socho = infoUpdate->socho;
                 delete[] temp->DSV;
@@ -273,43 +334,7 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
         }
         return true;
     }
-    // Trường hợp cập nhật khác mã máy bay
-    int exist = Find_MB(dsMB, infoUpdate->soHieuMB);
-    if (exist != -1) return false;
-    int SLBcu = dsMB.list[index]->SLB;
-    markCB* tnode = dsMB.list[index]->dsHD.head;
-    *dsMB.list[index] = *infoUpdate;
-    dsMB.list[index]->SLB = SLBcu; // Thông tin này không được thay đổi
-    dsMB.list[index]->dsHD.head = tnode; // Thông tin này không được thay đổi
-    temp = dsCB.head;
-    while (temp != NULL) {
-        if (ss_str(temp->soHieuMB, soHieuMB) == 0) { // Tìm những chuyến bay đang sử dụng máy bay này
-            char **newDSV = new char* [infoUpdate->socho];
-            if (infoUpdate->socho > old_soCho) { // Nếu số chỗ Update lớn hơn số chỗ hiện tại
-                for (int i = 0; i < temp->socho; i++)
-                    newDSV[i] = temp->DSV[i];
-                for (int i = temp->socho; i < infoUpdate->socho; i++) {
-                    newDSV[i] = new char[cmnd_max];
-                    newDSV[i][0] = '\0';
-                }
-            }
-            else { // Nếu số chỗ update nhỏ hơn tức là chưa có chuyến nào sử dụng mà có khách
-                for (int i = 0; i < infoUpdate->socho; i++) {
-                    newDSV[i] = new char[cmnd_max];
-                    newDSV[i][0] = '\0';
-                }
-                for (int i = 0; i < temp->socho; i++)
-                    delete[] temp->DSV[i];
-            }
-            temp->socho = infoUpdate->socho;
-            strcpy(temp->soHieuMB, infoUpdate->soHieuMB);
-            delete[] temp->DSV;
-            temp->DSV = newDSV;
-        }
-        temp = temp->next;
-    }
-    Sort_MB(dsMB, 0, dsMB.slMB - 1);
-    return true;
+    return false;
 }
 
 // Chuyen Bay
@@ -436,11 +461,11 @@ CB* find_insert_posCB(listCB &dsCB, char* const maCB) {
     return NULL;
 }
 
-CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB) {
+CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB) { // Tìm xem có chuyến bay nào đang hoạt động (Đang có chuyến bay sử dụng)
     CB* temp = dsCB.head;
     while(temp != NULL) {
         if (ss_str(temp->soHieuMB, soHieuMB) == 0) {
-            if ((temp->trangThai == 1 || temp->trangThai == 2) && temp->sove > 0) return temp;
+            if ((temp->trangThai == 1 || temp->trangThai == 2)) return temp;
         }
         temp = temp->next;
     }
@@ -506,7 +531,10 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
     if (temp == NULL) return -1; // Chuyen bay khong ton tai
     if (ss_str(infor->maCB, maCB) != 0) return -2; // Khong duoc sua maCB
     if (temp->trangThai == 0 || temp->trangThai == 3) return -3; // Khong duoc sua cac chuyen bay da huy hoac hoan tat
-    if (temp->socho > infor->socho) return -4; // So cho moi khong duoc nho hon so cho cu
+    for (int i = temp->socho - 1; i >= 0; i--) {
+        if (temp->DSV[i][0] != '\0' && infor->socho <= i) return -4; // Không thể đổi socho mà bé hơn sô chố lớn nhất đang có khách
+        else if (temp->DSV[i][0] != '\0') break;
+    }
     
     if (ss_str(temp->soHieuMB, infor->soHieuMB) == 0) { // Truong hop cap nhat trung so hieu MB
         // Truong hop da co khach
@@ -548,11 +576,16 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
         strcpy(temp->soHieuMB, infor->soHieuMB);
     }
     char **newDSV = new char* [infor->socho];
-    for (int i = 0; i < temp->socho; i++)
+    int cpysocho = min(infor->socho, temp->socho);
+    for (int i = 0; i < cpysocho; i++)
         newDSV[i] = temp->DSV[i];
     for (int i = temp->socho; i < infor->socho; i++) {
         newDSV[i] = new char[cmnd_max];
         newDSV[i][0] = '\0';
+    }
+    if (infor->socho < temp->socho) { // Don dep cac so cho bi thua
+        for (int i = infor->socho; i < temp->socho; i++)
+            delete[] temp->DSV[i];
     }
     temp->socho = infor->socho;
     delete[] temp->DSV;
@@ -656,14 +689,36 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
     return true;
 }
 
-bool Is_Ticket_Booked(CB *const dsCB, const char* maCB, const char* CMND)
-{
-    return false;
+string Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND) {
+    CB* tempCB = Find_CB(dsCB, maCB);
+    if (tempCB == NULL) return "1"; // ma chuyen bay khong ton tai trong he thong
+    HK* tempHK = Find_HK_At_List(dsHK, CMND);
+    if (tempHK == NULL) return "2"; // hanh khach khong ton tai trong he thong
+    markCB* tnode = tempHK->dsDatVe.head;
+    while (tnode != NULL) {
+        if (ss_str(tnode->mark->maCB, maCB) == 0) return "0"; // hanh khach da dat ve tren chuyen bay nay
+        tnode = tnode->next;
+    }
+    return "3"; // hanh khach chua dat ve tren CB nay
 }
 
-bool Book_Ticket(CB *dsCB, const char* maCB, const char* CMND, int seatNumber)
-{
-    return false;
+string Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber) {
+    string res = Is_Ticket_Booked(dsCB, dsHK, maCB, CMND);
+    if (res != "3") return res;
+    CB* tempCB = Find_CB(dsCB, maCB);
+    if (tempCB->trangThai != 1) return "3"; // Chuyen bay da het ve hoac khong con hoat dong
+    if (tempCB->DSV[seatNumber - 1][0] != '\0') return "4"; // da co khach dat ghe nay;
+    HK* tempHK = Find_HK_At_List(dsHK, CMND);
+    markCB* newMark = new markCB();
+    newMark->mark = tempCB;
+    if (addMarkHK(tempHK, newMark) == false) {
+        delete newMark;
+        return "5"; // dang ky chuyen bay sai thoi gian quy dinh;
+    }
+    strcpy(tempCB->DSV[seatNumber - 1], CMND);
+    tempCB->sove++;
+    if (tempCB->sove == tempCB->socho) tempCB->trangThai = 2; // CB da het ve;
+    return "0";
 }
 
 bool Cancel_Ticket(CB *&dsCB, const char* maCB, int seatNumber)
@@ -812,14 +867,18 @@ void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB) {
 string Can_Edit_MB(listMB &dsMB,listCB &dsCB, char* const soHieuMB, MB* infoUpdate){
     int index = Find_MB(dsMB, soHieuMB);
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
-    if (temp != NULL) {
-        if (infoUpdate->socho < dsMB.list[index]->socho) return "1"; // có khách thì không được đổi số chỗ nhỏ hơn
+    markCB* tnode = dsMB.list[index]->dsHD.head;
+    if (temp != NULL) { // Có chuyến bay đang sử dụng máy bay này
+        while (tnode != NULL) {
+            for (int i = tnode->mark->socho - 1; i >= 0; i--) {
+                if (tnode->mark->DSV[i][0] != '\0' && infoUpdate->socho <= i) {
+                    return "1" + to_string(i + 1);
+                }
+                else if (tnode->mark->DSV[i][0] != '\0') break;
+            }
+            tnode = tnode->next;
+        }
     }
-    // Trường hợp cập nhật trùng mã máy bay
-    if (ss_str(dsMB.list[index]->soHieuMB, infoUpdate->soHieuMB) == 0) return "0";
-    // Trường hợp cập nhật khác mã máy bay
-    int exist = Find_MB(dsMB, infoUpdate->soHieuMB);
-    if (exist != -1) return "2";
     return "0";
 }
 
@@ -834,11 +893,4 @@ void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate) {
         SubDsMB.list[index]->dsHD.head = tnode; // Thông tin này không được thay đổi
         return;
     }
-    // Trường hợp cập nhật khác mã máy bay
-    int SLBcu = SubDsMB.list[index]->SLB;
-    markCB* tnode = SubDsMB.list[index]->dsHD.head;
-    *SubDsMB.list[index] = *infoUpdate;
-    SubDsMB.list[index]->SLB = SLBcu; // Thông tin này không được thay đổi
-    SubDsMB.list[index]->dsHD.head = tnode; // Thông tin này không được thay đổi
-    Sort_MB(SubDsMB, 0, SubDsMB.slMB - 1);
 }
