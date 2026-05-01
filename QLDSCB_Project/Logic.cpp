@@ -689,41 +689,55 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
     return true;
 }
 
-string Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND) {
+int Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND) {
     CB* tempCB = Find_CB(dsCB, maCB);
-    if (tempCB == NULL) return "1"; // ma chuyen bay khong ton tai trong he thong
+    if (tempCB == NULL) return -1; // ma chuyen bay khong ton tai trong he thong
     HK* tempHK = Find_HK_At_List(dsHK, CMND);
-    if (tempHK == NULL) return "2"; // hanh khach khong ton tai trong he thong
+    if (tempHK == NULL) return -2; // hanh khach khong ton tai trong he thong
     markCB* tnode = tempHK->dsDatVe.head;
     while (tnode != NULL) {
-        if (ss_str(tnode->mark->maCB, maCB) == 0) return "0"; // hanh khach da dat ve tren chuyen bay nay
+        if (ss_str(tnode->mark->maCB, maCB) == 0) return 0; // hanh khach da dat ve tren chuyen bay nay
         tnode = tnode->next;
     }
-    return "3"; // hanh khach chua dat ve tren CB nay
+    return -3; // hanh khach chua dat ve tren CB nay
 }
 
-string Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber) {
-    string res = Is_Ticket_Booked(dsCB, dsHK, maCB, CMND);
-    if (res != "3") return res;
+int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber) {
+    int res = Is_Ticket_Booked(dsCB, dsHK, maCB, CMND);
+    if (res != -3) {
+        if (res == 0) return -3; // Hanh khach da dat ve
+        return res;
+    }
     CB* tempCB = Find_CB(dsCB, maCB);
-    if (tempCB->trangThai != 1) return "3"; // Chuyen bay da het ve hoac khong con hoat dong
-    if (tempCB->DSV[seatNumber - 1][0] != '\0') return "4"; // da co khach dat ghe nay;
+    if (tempCB->trangThai != 1) return -4; // Chuyen bay da het ve hoac khong con hoat dong
+    if (tempCB->DSV[seatNumber - 1][0] != '\0') return -5; // da co khach dat ghe nay;
     HK* tempHK = Find_HK_At_List(dsHK, CMND);
     markCB* newMark = new markCB();
     newMark->mark = tempCB;
     if (addMarkHK(tempHK, newMark) == false) {
         delete newMark;
-        return "5"; // dang ky chuyen bay sai thoi gian quy dinh;
+        return -6; // dang ky chuyen bay sai thoi gian quy dinh;
     }
     strcpy(tempCB->DSV[seatNumber - 1], CMND);
     tempCB->sove++;
     if (tempCB->sove == tempCB->socho) tempCB->trangThai = 2; // CB da het ve;
-    return "0";
+    return 0;
 }
 
-bool Cancel_Ticket(CB *&dsCB, const char* maCB, int seatNumber)
-{
-    return false;
+int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber) {
+    CB* tempCB = Find_CB(dsCB, maCB);
+    if (tempCB == NULL) return -1; // Chuyen bay khong ton tai
+    if (tempCB->trangThai == 0 || tempCB->trangThai == 3) return -2; // Chuyen bay da khong con hoat dong
+    if (tempCB->DSV[seatNumber - 1][0] == '\0') return -3; // Ghe trong, chua co khach dat
+    HK* tempHK = Find_HK_At_List(dsHK, tempCB->DSV[seatNumber - 1]);
+    delMarkHK(tempHK, maCB);
+    char* emptySeat = new char[cmnd_max];
+    emptySeat[0] = '\0';
+    delete[] tempCB->DSV[seatNumber - 1];
+    tempCB->DSV[seatNumber - 1] = emptySeat;
+    tempCB->sove--;
+    tempCB->trangThai = 1;
+    return 0;
 }
 
 HK **Get_DSHKCB(CB *const dsCB, HK *const dsHK, const char* maCB, int &sldsHK)
