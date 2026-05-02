@@ -891,51 +891,137 @@ NavKey CustomerAddMB() {
     }
 }
 
+void UiThongTinMB(int x,int y , int width, int height,string s){
+    int formY = y ;
+    int startX = x ;
+    ClearRegion(startX + width+1, formY+4, width/2-2, height-4);
+    Gotoxy(startX + width+2, formY+4);
+    int mbIndex = Find_MB(dsMB, const_cast<char*>(s.c_str()));
+    cout << "Số hiệu: " << dsMB.list[mbIndex]->soHieuMB;
+    Gotoxy(startX + width+2, formY+6);
+    cout << "Loại máy bay: " << dsMB.list[mbIndex]->loaiMB;
+    Gotoxy(startX + width+2, formY+8);
+    cout << "Số chỗ: " << dsMB.list[mbIndex]->socho;
+}
+
+int SmallListShMB( string& res, int witdh , int height , int x, int y, int items, listMB& A,int X, int Y, int w , int h){
+    items = min(items, A.slMB);
+    string s ;
+    int here = 0 ;
+    int pos_op = 0 ;
+    while(true){
+        for(int i = 0 ; i < items ;i++){
+            Gotoxy(x+1,y + (i+1)*2+1);
+            if(i + here < A.slMB){
+                s = string(A.list[i+here]->soHieuMB);
+                if (i == pos_op) s = HIGHLIGHT + s + RESET;
+                cout << s + string(witdh - s.size()-3, ' ');
+            }
+        }
+        if(w != - 1 && h != -1) UiThongTinMB(X,Y,w,h,string(A.list[pos_op + here]->soHieuMB));
+        int ch ;
+        NavKey key = GetNavKey(ch);
+        Gotoxy(x+1,y+(pos_op+1)*2 + 1);
+        s = string(A.list[pos_op + here]->soHieuMB);
+        cout << s ;
+        if(key == NAV_ESC) return NAV_ESC;
+        if(key == NAV_DOWN){
+            if(pos_op + 1 == items) here++;
+            pos_op = (pos_op +1 == items) ? 0 : pos_op + 1 ;
+            here = min(A.slMB -1 , here);
+        }else if( key == NAV_UP){
+            if(pos_op - 1 < 0) here-- ;
+            if(pos_op - 1 < 0 && here < 0) return NAV_UP;
+            pos_op = (pos_op - 1 < 0) ? items - 1: pos_op - 1;
+        }else if(key == NAV_ENTER){
+            res = s ;
+            ClearRegion(x+1,y+3,20,items);
+            return NAV_ENTER ; 
+        }else if(key == NAV_UNKNOWN && char(ch) == 'f'){
+            return NAV_UP;
+        }
+    }
+    
+   
+}
+
+void UiSmallListShMB(int width, int max_items, int x, int y, listMB& A){
+    string s;
+    if(A.slMB == 0) {
+        Gotoxy(x+1, y + 3);
+        cout << RED << "không tìm thấy máy bay nào!" << string(width - 25, ' ') << RESET;
+        ClearRegion(x+1, y + 4, width - 2, max_items); 
+        return;
+    }
+
+    int renderCount = min(max_items, A.slMB);
+
+    for(int i = 0 ; i < renderCount ; i++){
+        Gotoxy(x+1, y + (i+1)*2+1);
+        s = string(A.list[i]->soHieuMB);
+        cout << s + string(width - s.size() - 3, ' ');
+    }
+    
+    for(int i = renderCount; i < max_items; i++) {
+        Gotoxy(x+1, y + (i+1)*2+1);
+        cout << string(width - 2, ' '); 
+    }
+}
+
+
+
 void CustomerAddCB() {
     int width = 80;
-    int startX = (GetTerminalWidth() - width) / 2;
+    int startX = 0;
     int formY = 6;
 
     ClearScreen();
     Gotoxy(startX, 1);
     SmallBox("THÊM CHUYẾN BAY MỚI", (int)width, (int)3, (string)YELLOW);
-    
+    Gotoxy(startX+width, 1);
+    SmallBox("THÔNG TIN MÁY BAY", (int)width/2, (int)3, (string)YELLOW);
+    Gotoxy(startX + width,formY+9);
+    SmallBox("SỐ VÉ MUỐN KHỞI TẠO ",width/2,1,(string)YELLOW);
+    Gotoxy(startX + width+8,formY+12);
+    SmallBox("", false, true, false, false,width/2-16, 2,GRAY);
     Gotoxy(startX, formY);
     SmallBox("", true, true, true, true, width, 13, WHITE); // Giảm chiều cao box xuống 15
+    Gotoxy(startX + width, formY);
+    SmallBox("", true, true, true, true, width/2 , 7 , WHITE); 
 
-    string labels[] = {"Mã Chuyến bay:", "Ngày giờ khởi hành:", "Sân bay đến:", "Số hiệu máy bay:","Trạng Thái:"};
+
+    string labels[] = {"Mã Chuyến bay:", "Ngày giờ khởi hành:", "Sân bay đến:", "Số hiệu máy bay:","SHMB đã chọn: "};
     int labelX = startX + 5;
     int inputX = startX + 25;
     string Label[] = {"Huỷ Chuyến", "Còn Vé", "Hết Vé", "Hoàn Tất"};
     string gap(5, ' '); // Khoảng cách giữa 2 lựa chọn
+    int size = 4 ;
     // Đổi khoảng cách từ (i * 4) thành (i * 2)
-    for (int i = 0; i < 5; i++) {
-        Gotoxy(labelX, formY + 2 + (i * 2));
-        cout << labels[i];
-        Gotoxy(inputX, formY + 2 + (i * 2));
-        if(i != 4){
+    for (int i = 0; i < size; i++) {
+       
+        if(i != size - 1){
+            Gotoxy(labelX, formY + 2 + (i * 2));
+            cout << labels[i];
+            Gotoxy(inputX, formY + 2 + (i * 2));
             cout << string(50, '_'); 
-        }else{
-            cout << string(RED) << SQ << Label[0] << string(RESET) ;
-            cout << gap ;
-            for(int i = 1 ; i < 4;i++){
-                cout << string(GRAY) << SQ << Label[i] << string(RESET); 
-                cout << gap ;
-            }
-         
+        }else {
+            Gotoxy(labelX, formY + 3 + (i * 2));
+            cout << labels[i];
+            Gotoxy(inputX, formY + 2 + (i * 2));
+            SmallBox(string(22,' ') + AD, 25,1);
         }
     }
-    
+    Gotoxy(inputX + 30, formY + 3 + (size - 1) * 2);
+    cout << labels[4];
     string text = "ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy";
     Gotoxy(startX, formY + 15); // Đưa dòng hướng dẫn lên sát mép dưới form
-    SmallBox(text, (int)width, (int)3, (string)WHITE);
+    SmallBox(text, width + width/2, 3, (string)WHITE);
     // --- LOGIC NHẬP LIỆU VÀ ĐIỀU HƯỚNG ---
-    string inputs[5] = {"", "", "","",""}; 
+    string inputs[5] = {"", "", "",""}; 
     int currentField = 0; // 0: Mã_CB, 1: Ngày giờ khởi hành, 2: Sbd , 3: shMB, 4: status 
-    int stat = 0 ;
     while (true) {
         Gotoxy(startX + 5, formY + 12); cout << string(width - 10, ' ');
-
+        string s = "";
         int action;
         if (currentField == 0) {
             action = InputString(inputs[0], inputX, formY + 2, maCB_max, '_', false);
@@ -945,9 +1031,49 @@ void CustomerAddCB() {
             // Tham số TRUE cuối cùng sẽ chặn toàn bộ các ký tự không phải là số
             action = InputString(inputs[2], inputX, formY + 6, sbDich_max, '_', false); 
         }else if (currentField == 3){
-            action = InputString(inputs[3], inputX, formY + 8, soHieuMB_max , '_', false);
-        }else if(currentField == 4){
-            action = InputStatus(stat, inputX, formY + 10);
+            listMB tmp ;
+            bool backToMain = false;
+            tmp = Find_MB_OnRage(dsMB, const_cast<char*>(s.c_str()));
+            UiSmallListShMB(25, 2, inputX, formY + 2 + currentField*2, tmp);
+            while(true){
+                Gotoxy(inputX+1+s.size(), formY + 2 + currentField*2+1);
+                int ch = 0 ;
+                NavKey key = GetNavKey(ch);
+                ClearRegion(inputX+1, formY + 2 + currentField*2+3, 30, 3);
+                if(key == NAV_UP){
+                    action = NAV_UP ;
+                    tmp.Clear();
+                    break;
+                }
+
+                if(key == NAV_ESC){
+                    tmp.Clear();
+                    return ;
+                } 
+                
+                if(key == NAV_DOWN && tmp.slMB > 0) {
+        
+                    action = SmallListShMB(s,25,1,inputX,formY + 2 + currentField*2,2,tmp,startX ,formY -2,width,7);
+                    if(action == NAV_ESC){
+                        ClearRegion(inputX+1, formY + 2 + currentField*2+3, 30, 3);
+                        tmp.Clear();
+                        return ;
+                    }else if(action == NAV_ENTER){
+                        tmp.Clear();
+                        int len = visualLength(labels[4]);
+                        Gotoxy(inputX+ len + 30, formY + 3 + (size - 1) * 2);
+                        cout << s << string(10 - s.size(), ' ');
+                        inputs[3] = s ;
+                        ClearRegion(inputX+1, formY + 2 + currentField*2+3, 30, 3);
+                        break;
+                    }
+                }
+                UiFindMB(s, key, ch, tmp, inputX+1, formY + 2 + currentField*2+1);
+                UiSmallListShMB(25, 2, inputX, formY + 2 + currentField*2, tmp);
+            }
+            if (backToMain) {
+                break; 
+            }
         }
 
         // Xử lý sự kiện trả về từ InputString
@@ -957,10 +1083,10 @@ void CustomerAddCB() {
         } 
         
         else if (action == NAV_UP) { 
-            currentField = (currentField == 0) ? 4 : currentField - 1;
+            currentField = (currentField == 0) ? 3 : currentField - 1;
         } 
         else if (action == NAV_DOWN) { 
-            currentField = (currentField == 4) ? 0 : currentField + 1;
+            currentField = (currentField == 3) ? 0 : currentField + 1;
         }else if (action == NAV_ENTER) { // Nhấn ENTER
             if (!inputs[0].empty() && !inputs[1].empty() && !inputs[2].empty() && !inputs[3].empty()) {
                 if (GetDayFromStr(inputs[1]) == -1) {
@@ -971,7 +1097,7 @@ void CustomerAddCB() {
                     continue;
                 }
                 Gotoxy(startX, formY + 15);
-                SmallBox("Xác nhận thêm chuyến bay này? (ENTER: Đồng ý - ESC: Quay lại sửa)", (int)width, (int)3, (string)YELLOW);
+                SmallBox("Xác nhận thêm chuyến bay này? (ENTER: Đồng ý - ESC: Quay lại sửa)", width + width/2, 3, (string)YELLOW);
                 
                 bool isConfirm = false;
                 while (true) {
@@ -987,7 +1113,7 @@ void CustomerAddCB() {
 
                 if (!isConfirm) {
                     Gotoxy(startX, formY + 15);
-                    SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
+                    SmallBox(text, width + width/2, 3, (string)WHITE);
                     continue; 
                 }
 
@@ -1005,12 +1131,11 @@ void CustomerAddCB() {
                 
                 NewCB->set_sbDich(const_cast<char*>(inputs[2].c_str()));
                 NewCB->set_soHieuMB(const_cast<char*>(inputs[3].c_str()));
-                NewCB->trangThai = stat;
+                NewCB->trangThai = 1;
 
                 int pos = Find_MB(dsMB, NewCB->soHieuMB) ; 
-                if (pos != -1) {
-                    NewCB->set_socho(dsMB.list[pos]->socho);
-                }
+            
+                NewCB->set_socho(dsMB.list[pos]->socho);
 
                 if(Add_CB(dsCB,dsMB, NewCB)) {
                     Gotoxy(startX + 15, formY + 18);
@@ -1026,7 +1151,7 @@ void CustomerAddCB() {
                         cout << RED << "Lỗi: Số hiệu [" << inputs[3] << "] không tồn tại trong bãi!" << RESET;
                     }
                     else if(Find_CB(dsCB, NewCB->maCB) != nullptr) {
-                        cout << RED << "Lỗi: Mã chuyến bay [" << inputs[0] << "] đã tồn tại!" << RESET;
+                        cout << RED << "Lỗi: Mã chuyến bay [" << inputs[0] << "] không thể đặt trong cùng 1 ngày!" << RESET;
                     }
                     else {
                         cout << RED << "Lỗi: Máy bay đang bận bay chuyến khác!" << RESET;
@@ -1036,18 +1161,18 @@ void CustomerAddCB() {
                     _getch(); 
                     
                     Gotoxy(startX, formY + 15);
-                    SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
+                    SmallBox(text, width + width/2, 3, (string)WHITE);
                     currentField = 0; 
                 }
             } else {
-                if (currentField < 4) {
+                if (currentField < size) {
                     currentField++; 
                 } else {
                     Gotoxy(startX + 5, formY + 12);
                     cout << RED << "Lỗi: Không được để trống bất kỳ trường nào! Bấm phím bất kỳ..." << RESET;
                     _getch();
                     
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < size; i++) {
                         if (inputs[i].empty()) {
                             currentField = i;
                             break;
@@ -1204,18 +1329,18 @@ void CustomerAddHK() {
 }
 
 
-void UiFindMB(string& res, NavKey key, int& ch, listMB& A) {
+void UiFindMB(string& res, NavKey key, int& ch, listMB& A, int x, int y) {
     bool isChanged = false; 
 
     if (key == NAV_BACK && !res.empty()) {
         res.pop_back();
-        Gotoxy(20, 4);
+        Gotoxy(x, y);
         cout << res << "  ";
         isChanged = true;
     } 
     else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) { 
         res += toupper((char)ch); 
-        Gotoxy(20, 4);
+        Gotoxy(x, y);
         cout << res; 
         isChanged = true;
     }
@@ -1615,7 +1740,7 @@ void It_list_MB(int mod, string res){
                                 return ;
                             }
                         }
-                        UiFindMB(res, key, ch, tmp);
+                        UiFindMB(res, key, ch, tmp,20,4);
                         OnlyPrint_List_MB(tmp);
                     }
                     if (backToMain) {

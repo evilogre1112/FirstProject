@@ -63,7 +63,7 @@ DateTime::DateTime (){
 }
 
 int DateTime::get_hh(){
-        return hh;
+    return hh;
 }
 
 int DateTime::get_mm(){
@@ -71,15 +71,15 @@ int DateTime::get_mm(){
 }
 
 int DateTime::get_dd(){
-        return dd;
+    return dd;
 }
 
 int DateTime::get_mt(){
-        return mt;
+    return mt;
 }
 
 int DateTime::get_yy(){
-        return yy;
+    return yy;
 }
 
 bool DateTime::set_hh(int h){
