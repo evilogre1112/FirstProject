@@ -169,7 +169,6 @@ bool Update_Time_CB(listCB &dsCB, listMB &dsMB, char* const maCB, const DateTime
  * @param infor     Nội dung càn được cập nhật
  * @return          Nếu không thể thay đổi, trả về mã lỗi, còn nêu thành công thì trả về 1
  */
-// LƯU Ý: infor truyền vào vào với soHieuMB nào thì socho cung phai theo đó
 int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor);
 
 
@@ -360,7 +359,7 @@ listHK Find_HK_OnRage(listHK &dsHK, char* const query);
  *         2 Trùng mã MB
  *         0 Thêm được
  */
-string Can_Add_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB);
+string Can_Add_MB(listMB &dsMB,listCB &dsCB,MB* newMB);
 
 /**
  * @brief Kiểm tra xem có xoá MBđược không
@@ -373,8 +372,8 @@ string Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB);
 
 /**
  * @brief Kiểm tra xem có chỉnh được không
- * @return 1 nếu số chỗ thay đổi không hợp lệ,
- *         2 nếu shMB trùng chỉnh sữa bị trùng
+ * @return 1  nếu số vé mở bán trên các chuyến bay đang dùng MB đó lớn hơn số chỗ sau khi thay đổi
+ *         2 nếu MB cần sửa không tồn tại
  *         0 chỉnh được
  */
 string Can_Edit_MB(listMB &dsMB,listCB &dsCB, char* const soHieuMB, MB* infoUpdate);
@@ -387,6 +386,7 @@ string Can_Edit_MB(listMB &dsMB,listCB &dsCB, char* const soHieuMB, MB* infoUpda
  * @note   1 MB cho chuyến bay mới không tồn tại
  *         2 Xung đột thời gian
  *         3 Trùng maCB
+ *         4 Số vé mở bán lớn hơn số chỗ của MB
  *         0 Thêm được
  */
 string Can_Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB);
