@@ -240,12 +240,12 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
  * @param maCB  Mã chuyến bay
  * @param CMND  Số CMND cần kiểm tra trong danh sách vé
  * @return     Mã lỗi
- * @note       1 CB không tồn tại
- *             2 Hành khách không tồn tại
- *             3 Hành khách chưa đặt vé
+ * @note       -1 CB không tồn tại
+ *             -2 Hành khách không tồn tại
+ *             -3 Hành khách chưa đặt vé
  *             0 Hành khách đã đặt vé
  */
-string Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND);
+int Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND);
 
 /**
  * @brief               Thực hiện đặt vé (ghi CMND vào chỗ ngồi) trên một chuyến bay cụ thể
@@ -254,14 +254,15 @@ string Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* cons
  * @param CMND          Số chứng minh nhân dân của hành khách
  * @param seatNumber    Số thứ tự ghế khách chọn (từ 1 đến Số chỗ)
  * @return            Trả về mã lỗi
- * @note       1 CB không tồn tại
- *             2 Hành khách không tồn tại
- *             3 Chuyến bay hết vé hoặc không còn hoạt động
- *             4 Đã có khách đặt ghế tại seatNumber
- *             5 Đăng ký chuyến sai thời gian quy định
- *             0 Hành khách đã đặt vé
+ * @note       -1 CB không tồn tại
+ *             -2 Hành khách không tồn tại
+ *             -3 Hành khách đã đặt vé
+ *             -4 Chuyến bay hết vé hoặc không còn hoạt động
+ *             -5 Đã có khách đặt ghế tại seatNumber
+ *             -6 Đăng ký chuyến sai thời gian quy định
+ *             0 Hành khách đặt vé thành công
  */
-string Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber);
+int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber);
 
 // --- CÂU D: HỦY VÉ ---
 
@@ -269,9 +270,14 @@ string Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMN
  * @brief               Thực hiện hủy vé của hành khách trên một chuyến bay
  * @param dsCB          Danh sách chuyến bay
  * @param seatNumber    Số thứ tự ghế cần hủy (tính từ 1 đến n)
- * @return              True nếu hủy thành công, false nếu ghế đó vốn dĩ đang trống hoặc chuyến bay không còn cho phép hủy
+ * @return             Mã lối
+ * @note            -1 Chuyến bay không tồn tại
+ *                  -2 Chuyen bay không còn hoạt động
+ *                  -3 Ghế trống chưa có khách đặt
+ *                  0  Huỷ vé thành công
+ *
  */
-bool Cancel_Ticket(CB* &dsCB, const char* maCB , int seatNumber);  
+int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber);  
 
 // -- CÂU E: IN DANH SÁCH HÀNH KHÁCH THEO MÃ CB --
 
