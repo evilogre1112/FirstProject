@@ -225,7 +225,7 @@ void CustomerAddHK();
 
 void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[]);
 
-void UiFindMB(string& res, NavKey key, int& ch, listMB& A);
+void UiFindMB(string& res, NavKey key, int& ch, listMB& A,int x, int y);
 void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
 void OnlyPrint_List_MB(listMB& dsMB);
 NavKey It_Sub_List_MB(listMB& dsMB,int mod);

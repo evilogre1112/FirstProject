@@ -63,7 +63,7 @@ DateTime::DateTime (){
 }
 
 int DateTime::get_hh(){
-        return hh;
+    return hh;
 }
 
 int DateTime::get_mm(){
@@ -71,15 +71,15 @@ int DateTime::get_mm(){
 }
 
 int DateTime::get_dd(){
-        return dd;
+    return dd;
 }
 
 int DateTime::get_mt(){
-        return mt;
+    return mt;
 }
 
 int DateTime::get_yy(){
-        return yy;
+    return yy;
 }
 
 bool DateTime::set_hh(int h){
@@ -621,7 +621,7 @@ bool Set_Data_CB(CB &CB, const char *path_file_CB){
     f.close();
     return true;
 }
-bool Set_Data_MB(MB& mb, const char *path_file_MB){
+bool Set_Data_MB(MB &mb, const char *path_file_MB){
     // mở file với chế dộ thêm cuối file
     ofstream f(path_file_MB, ios::app);
     if(!f.is_open()) return false;
@@ -632,7 +632,7 @@ bool Set_Data_MB(MB& mb, const char *path_file_MB){
     f.close();
     return true;
 }
-bool Set_Data_HK(HK& hk, const char *path_file_HK){
+bool Set_Data_HK(HK &hk, const char *path_file_HK){
     // mở file với chế dộ thêm cuói file
     ofstream f(path_file_HK, ios::app);
     if(!f.is_open()) return false;
