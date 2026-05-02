@@ -591,3 +591,55 @@ bool Set_Data_HK(listHK &dsHK, const char *path_file_HK){
     f.close();
     return true;
 }
+
+bool Set_Data_CB(CB &CB, const char *path_file_CB){
+    // mở file với chế dộ thêm cuói file
+    ofstream f(path_file_CB, ios::app);
+    if(!f.is_open()) return false;
+    f << '\n' <<CB.maCB << '|'
+        << setfill('0') << setw(2) << CB.ngayKH.hh << ':'
+        << setfill('0') << setw(2) << CB.ngayKH.mm << '|'
+        << setfill('0') << setw(2) << CB.ngayKH.dd << '/'
+        << setfill('0') << setw(2) << CB.ngayKH.mt << '/'
+        << setfill('0') << setw(4) << CB.ngayKH.yy << '|'
+        << CB.sbDich << '|'
+        << CB.trangThai << '|'
+        << CB.soHieuMB << '|';
+    // Đếm số vé đã bán
+    f << CB.sove << '\n';
+    // Ghi danh sách vé (vị trí | CMND)
+    if(CB.sove > 0) {    
+        int d=0;
+        for (int i = 0; i < CB.socho; i++) {
+            if (strcmp(CB.DSV[i], "0") != 0) {
+                f << (i + 1) << '|' << CB.DSV[i];
+                d++;
+                if(d<CB.sove) f << '\n';
+            }
+        }
+    }
+    f.close();
+    return true;
+}
+bool Set_Data_MB(MB &mb, const char *path_file_MB){
+    // mở file với chế dộ thêm cuối file
+    ofstream f(path_file_MB, ios::app);
+    if(!f.is_open()) return false;
+    
+    // In \n trước để ngắt dòng với data cũ, sau đó mới ghi data máy bay mới
+    f << '\n' << mb.soHieuMB << '|' << mb.loaiMB << '|' << mb.socho;
+    
+    f.close();
+    return true;
+}
+bool Set_Data_HK(HK &hk, const char *path_file_HK){
+    // mở file với chế dộ thêm cuói file
+    ofstream f(path_file_HK, ios::app);
+    if(!f.is_open()) return false;
+    
+    // Do code lưu toàn bộ HK của bạn đã có \n ở cuối dòng, nên ở đây ghi bình thường
+    f << hk.cmnd << '|' << hk.ho << '|' << hk.ten << '|' << hk.phai << '\n';
+    
+    f.close();
+    return true;
+}

@@ -368,7 +368,7 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
         int ch;
         NavKey key = GetNavKey(ch); 
 
-        if (key != NAV_UNKNOWN && key != NAV_BACK) return (int)key;
+        if (key != NAV_UNKNOWN && key != NAV_BACK) return key;
 
         if (key == NAV_BACK) {
             if (!result.empty()) {
@@ -439,10 +439,7 @@ int InputDateTime(string &result, int x, int y, char placeholder = '_') {
         int ch ;
         NavKey key = GetNavKey(ch); 
 
-        if (key == NAV_UP) return NAV_UP;
-        if (key == NAV_DOWN) return NAV_DOWN;
-        if (key == NAV_ENTER) return NAV_ENTER;
-        if (key == NAV_ESC) return NAV_ESC;
+        if (key != NAV_UNKNOWN && key != NAV_BACK) return key;
 
         if (key == NAV_BACK) { // BACKSPACE
             if (!result.empty()) {
@@ -1017,14 +1014,14 @@ void CustomerAddCB() {
     Gotoxy(startX, formY + 15); // Đưa dòng hướng dẫn lên sát mép dưới form
     SmallBox(text, width + width/2, 3, (string)WHITE);
     // --- LOGIC NHẬP LIỆU VÀ ĐIỀU HƯỚNG ---
-    string inputs[5] = {"", "", "",""}; 
-    int currentField = 0; // 0: Mã_CB, 1: Ngày giờ khởi hành, 2: Sbd , 3: shMB, 4: status 
+    string inputs[5] = {"", "", "","",""}; 
+    int currentField = 0; // 0: Mã_CB, 1: Ngày giờ khởi hành, 2: Sbd , 3: shMB, 4: số vé khơi tạo
     while (true) {
         Gotoxy(startX + 5, formY + 12); cout << string(width - 10, ' ');
         string s = "";
         int action;
         if (currentField == 0) {
-            action = InputString(inputs[0], inputX, formY + 2, maCB_max, '_', false);
+            action = InputString(inputs[0], inputX, formY + 2, maCB_max, '_', false);//
         } else if (currentField == 1) {
             action = InputDateTime(inputs[1], inputX, formY + 4, '_');
         } else if (currentField == 2) {
@@ -1074,6 +1071,8 @@ void CustomerAddCB() {
             if (backToMain) {
                 break; 
             }
+        }else if(currentField == 4){
+            action = InputString(inputs[4], startX + width+19, formY + 13, 3, ' ', true, true); 
         }
 
         // Xử lý sự kiện trả về từ InputString
@@ -1083,12 +1082,16 @@ void CustomerAddCB() {
         } 
         
         else if (action == NAV_UP) { 
-            currentField = (currentField == 0) ? 3 : currentField - 1;
+            currentField = (currentField <= 0) ? 3 : currentField - 1;
         } 
         else if (action == NAV_DOWN) { 
-            currentField = (currentField == 3) ? 0 : currentField + 1;
+            currentField = (currentField >= 3) ? 0 : currentField + 1;
+        }else if(action == NAV_RIGHT){ 
+            currentField = (currentField == 4) ? 0 : 4;
+        }else if(action == NAV_LEFT){
+            currentField = (currentField == 0) ? 4 : 0;
         }else if (action == NAV_ENTER) { // Nhấn ENTER
-            if (!inputs[0].empty() && !inputs[1].empty() && !inputs[2].empty() && !inputs[3].empty()) {
+            if (!inputs[0].empty() && !inputs[1].empty() && !inputs[2].empty() && !inputs[3].empty() && !inputs[4].empty()) {
                 if (GetDayFromStr(inputs[1]) == -1) {
                     Gotoxy(startX + 5, formY + 12); 
                     cout << RED << "Lỗi: Ngày giờ khởi hành chưa điền đủ định dạng! Bấm phím bất kỳ..." << RESET;
@@ -1119,7 +1122,7 @@ void CustomerAddCB() {
 
                 // --- TIẾN HÀNH LƯU ---
                 Gotoxy(startX, formY + 15);
-                SmallBox("ĐANG LƯU DỮ LIỆU...", (int)width, (int)3, (string)GREEN);
+                SmallBox("ĐANG LƯU DỮ LIỆU...", width + width/2, 3, (string)GREEN);
 
                 CB* NewCB = new CB; 
                 NewCB->set_maCB(const_cast<char*>(inputs[0].c_str()));
@@ -1135,10 +1138,10 @@ void CustomerAddCB() {
 
                 int pos = Find_MB(dsMB, NewCB->soHieuMB) ; 
             
-                NewCB->set_socho(dsMB.list[pos]->socho);
+                NewCB->set_socho(stoi(inputs[4]));
 
                 if(Add_CB(dsCB,dsMB, NewCB)) {
-                    Gotoxy(startX + 15, formY + 18);
+                    Gotoxy(startX + width/2, formY + 18);
                     cout << YELLOW << "Đã lưu thành công! Nhấn phím bất kỳ để thoát." << RESET;
                     _getch();
                     ClearScreen();
