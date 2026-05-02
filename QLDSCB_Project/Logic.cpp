@@ -740,18 +740,29 @@ int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber) 
     return 0;
 }
 
-HK **Get_DSHKCB(CB *const dsCB, HK *const dsHK, const char* maCB, int &sldsHK)
-{
+HK **Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK) {
+    CB* tempCB = Find_CB(dsCB, maCB);
+    if (tempCB == NULL) return NULL; // chuyen bay khong ton tai
+    if (tempCB->trangThai == 0 || tempCB->trangThai == 3) return NULL; // chuyen bay khong con hoat dong
+    if (tempCB->sove == 0) return NULL; // chuyen bay khong co khach
+    if (dsHK.slHK == 0) return NULL; // chua co thong tin khach hang
+    HK** dsHKCB = new HK* [tempCB->sove];
+    sldsHK = 0;
+    for (int i = 0; i < tempCB->socho; i++) {
+        if (tempCB->DSV[i][0] != '\0') {
+            HK* tempHK = Find_HK_At_List(dsHK, tempCB->DSV[i]);
+            dsHKCB[sldsHK] = tempHK;
+            sldsHK++;
+        }
+    }
+    return dsHKCB;
+}
+
+CB **Search_CB(CB *const dsCB, const DateTime &date, const char* address) {
     return nullptr;
 }
 
-CB **Search_CB(CB *const dsCB, const DateTime &date, const char* address, int &sldsCB)
-{
-    return nullptr;
-}
-
-int *Get_Empty_Seats(CB *const dsCB, const char* maCB, int &sldsVT)
-{
+int *Get_Empty_Seats(CB *const dsCB, const char* maCB) {
     return nullptr;
 }
 
@@ -860,25 +871,30 @@ listHK Find_HK_OnRage(listHK &dsHK, char* const query) {
     return A;
 }
 
-bool Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB){
+// -- Các gói kiểm tra --
+
+// -- Gói MB --
+
+string Can_Add_MB(listMB &dsMB, listCB &dsCB, MB* newMB) {
+    if (dsMB.slMB >= 300)
+        return "1"; // Vượt quá số lượng MB
+    int index = find_insert_posMB(dsMB, newMB->soHieuMB);
+    if (index == dsMB.slMB)
+        return "0";
+    if (ss_str(dsMB.list[index]->soHieuMB, newMB->soHieuMB) == 0)
+        return "2"; // Trùng số hiệu MB
+    return "0";
+}
+
+string Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB) {
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
-    if (temp != NULL) return false; // Khong the xoa mot may bay ma da co chuyen bay dang su dung da co khach
+    if (temp != NULL) return "1"; // Khong the xoa mot may bay ma da co chuyen bay dang su dung
     int index = Find_MB(dsMB, soHieuMB);
-    if (index == -1) return false; // Khong the xoa mot may bay khong ton tai
-    return true;
+    if (index == -1) return "2"; // Khong the xoa mot may bay khong ton tai
+    return "0";
 }
 
-void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB) {
-    int index = Find_MB(SubDsMB, soHieuMB);
-    delete SubDsMB.list[index];
-    for (int i = index; i < SubDsMB.slMB - 1; i++) {
-        SubDsMB.list[i] = SubDsMB.list[i + 1];
-    }
-    SubDsMB.list[SubDsMB.slMB - 1] = NULL;
-    SubDsMB.slMB--;
-}
-
-string Can_Edit_MB(listMB &dsMB,listCB &dsCB, char* const soHieuMB, MB* infoUpdate){
+string Can_Edit_MB(listMB &dsMB, listCB &dsCB, char* const soHieuMB, MB* infoUpdate) {
     int index = Find_MB(dsMB, soHieuMB);
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
     markCB* tnode = dsMB.list[index]->dsHD.head;
@@ -894,6 +910,71 @@ string Can_Edit_MB(listMB &dsMB,listCB &dsCB, char* const soHieuMB, MB* infoUpda
         }
     }
     return "0";
+}
+
+// -- Gói CB --
+
+string Can_Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
+    int index = Find_MB(dsMB, newCB->soHieuMB);
+    if (index == -1) return "1"; // Khong the them mot chuyen bay voi may bay khong ton tai
+    if (newCB->trangThai == 1 || newCB->trangThai == 2) {
+        markCB* tnode = dsMB.list[index]->dsHD.head;
+        while (tnode != NULL) {
+            if (ss_ngay(newCB->ngayKH, tnode->mark->ngayKH) < 1440) return "2"; // Xung dot thoi gian quy dinh, khong the dung cung mot may dang hoat dong o chuyen khac ma thoi gian cach nhau it hon 1 ngay
+            tnode = tnode->next;
+        }
+    }
+    CB* temp = find_insert_posCB(dsCB, newCB->maCB);
+    if (temp == NULL && dsCB.head == NULL) {
+        return "0";
+    }
+    if (temp == NULL && dsCB.head != NULL) {
+        return "0";
+    }
+    if (ss_str(temp->maCB, newCB->maCB) == 0) {
+        return "3"; // Khong the them mot chuyen bay neu bi trung maCB
+    }
+    return "0";
+}
+
+// -- Gói HK --
+
+string Can_Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai) {
+    if (dsHK.goc == NULL) {
+        return "0";
+    }
+    HK* temp = dsHK.goc;
+    while (temp != NULL) {
+        int result = ss_str(cmnd, temp->cmnd);
+        if (result == 1) {
+            if (temp->right == NULL) {
+                break;
+            }
+            else temp = temp->right;
+        }
+        else if (result == 2) {
+            if (temp->left == NULL) {
+                break;
+            }
+            else temp = temp->left;
+        }
+        else {
+            return "1"; // Bi trung cmnd
+        }
+    }
+    return "0";
+}
+
+// =============================================================== //
+
+void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB) {
+    int index = Find_MB(SubDsMB, soHieuMB);
+    delete SubDsMB.list[index];
+    for (int i = index; i < SubDsMB.slMB - 1; i++) {
+        SubDsMB.list[i] = SubDsMB.list[i + 1];
+    }
+    SubDsMB.list[SubDsMB.slMB - 1] = NULL;
+    SubDsMB.slMB--;
 }
 
 void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate) {

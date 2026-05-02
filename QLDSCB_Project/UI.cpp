@@ -1424,7 +1424,7 @@ void OnlyPrint_List_MB(listMB& dsMB){
 
 bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]){
     string s = SubList.list[index]->soHieuMB;
-    if(!Can_DeL_MB(dsMB,dsCB,const_cast<char*>(s.c_str()))){
+    if(Can_DeL_MB(dsMB,dsCB,const_cast<char*>(s.c_str())) != "0"){
         Gotoxy(35, 8 + itemsPerPage + 1);
         SmallBox("Máy Bay Không Thể Xoá Vì Đang Có Khách",50,4,string(RED));
         return false ;

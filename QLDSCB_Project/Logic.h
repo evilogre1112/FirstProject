@@ -290,7 +290,7 @@ int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber);
  * @return          Trả về mảng con trỏ hành khách
  * @note            Trả về NULL nếu không thấy chuyến bay hoặc không có khách. UI phải delete[] sau khi dùng.
  */
-HK** Get_DSHKCB(CB* const dsCB, HK* const dsHK,const char* maCB, int &sldsHK);
+HK **Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK);
 
 // -- CÂU F: TRA CỨU CÁC CHUYẾN BAY DỰA VÀO NGÀY VÀ NƠI ĐẾN --
 
@@ -349,17 +349,27 @@ listMB Find_MB_OnRage(listMB &dsMB, char* const query);
 listCB Find_CB_OnRage(listCB &dsCB, char* const query);
 listHK Find_HK_OnRage(listHK &dsHK, char* const query);
 
+// -- Các gói kiểm tra --
+
+// -- Gói MB --
+
 /**
- * @brief Kiểm tra xem có xoá được không
- * @return nếu xoá được trả về true , ngược lại false 
+ * @brief Kiểm tra xem có thêm MB  được không
+ * @return Mã lỗi
+ * @note   1 Vượt quá số lượng MB
+ *         2 Trùng mã MB
+ *         0 Thêm được
  */
-bool Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB);
+string Can_Add_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB);
+
 /**
- *  @brief Xoá 1 máy bay trong 1 danh sách con không cần quan tâm dsCB
- *  @param SubDsMB danh sách con trả về khi tìm kiếm từ hàm findOnRange
- *  @note Danh sách truyền vào sẽ không bao giờ là rỗng , mặc định là luôn xoá được
+ * @brief Kiểm tra xem có xoá MBđược không
+ * @return Mã lỗi
+ * @note   1 Đang có MB thực hiện chuyến
+ *         2 MB không tồn tại
+ *         0 Xoá được
  */
-void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB);
+string Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB);
 
 /**
  * @brief Kiểm tra xem có chỉnh được không
@@ -368,6 +378,38 @@ void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB);
  *         0 chỉnh được
  */
 string Can_Edit_MB(listMB &dsMB,listCB &dsCB, char* const soHieuMB, MB* infoUpdate);
+
+// -- Gói CB --
+
+/**
+ * @brief Kiểm tra xem có thêm CB  được không
+ * @return Mã lỗi
+ * @note   1 MB cho chuyến bay mới không tồn tại
+ *         2 Xung đột thời gian
+ *         3 Trùng maCB
+ *         0 Thêm được
+ */
+string Can_Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB);
+
+// -- Gói HK --
+
+/**
+ * @brief Kiểm tra xem có thêm HK  được không
+ * @return Mã lỗi
+ * @note   1 Bị trùng cmnd
+ *         0 Thêm được
+ */
+string Can_Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai);
+
+// =============================================================== //
+
+/**
+ *  @brief Xoá 1 máy bay trong 1 danh sách con không cần quan tâm dsCB
+ *  @param SubDsMB danh sách con trả về khi tìm kiếm từ hàm findOnRange
+ *  @note Danh sách truyền vào sẽ không bao giờ là rỗng , mặc định là luôn xoá được
+ */
+
+void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB);
 
 /**
  *  @brief Chỉnh Sữa 1 máy bay trong 1 danh sách con không cần quan tâm dsCB
