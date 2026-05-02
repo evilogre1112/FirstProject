@@ -621,24 +621,24 @@ bool Set_Data_CB(CB &CB, const char *path_file_CB){
     f.close();
     return true;
 }
-bool Set_Data_MB(MB* mb, const char *path_file_MB){
+bool Set_Data_MB(MB& mb, const char *path_file_MB){
     // mở file với chế dộ thêm cuối file
     ofstream f(path_file_MB, ios::app);
     if(!f.is_open()) return false;
     
     // In \n trước để ngắt dòng với data cũ, sau đó mới ghi data máy bay mới
-    f << '\n' << mb->soHieuMB << '|' << mb->loaiMB << '|' << mb->socho;
+    f << '\n' << mb.soHieuMB << '|' << mb.loaiMB << '|' << mb.socho;
     
     f.close();
     return true;
 }
-bool Set_Data_HK(HK* hk, const char *path_file_HK){
+bool Set_Data_HK(HK& hk, const char *path_file_HK){
     // mở file với chế dộ thêm cuói file
     ofstream f(path_file_HK, ios::app);
     if(!f.is_open()) return false;
     
     // Do code lưu toàn bộ HK của bạn đã có \n ở cuối dòng, nên ở đây ghi bình thường
-    f << hk->cmnd << '|' << hk->ho << '|' << hk->ten << '|' << hk->phai << '\n';
+    f << hk.cmnd << '|' << hk.ho << '|' << hk.ten << '|' << hk.phai << '\n';
     
     f.close();
     return true;
