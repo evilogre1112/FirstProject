@@ -207,8 +207,10 @@ int GetYearFromStr(const string &datetimeStr);
 int GetHourFromStr(const string &datetimeStr);
 // Hàm lấy Phút (MM) - Cắt 2 ký tự từ vị trí 14
 int GetMinuteFromStr(const string &datetimeStr);
-
+// Hàm chuyển đổi DateTime thành chuỗi định dạng "DD/MM/YYYY HH:MM"
 string ToStringDate(DateTime dt);
+
+
 string TranFormSatus(int st);
 string TranFormGender(int st);
 
@@ -220,7 +222,7 @@ int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
 
 NavKey CustomerAddMB();
-void CustomerAddCB();
+NavKey CustomerAddCB();
 void CustomerAddHK();
 
 void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[]);
