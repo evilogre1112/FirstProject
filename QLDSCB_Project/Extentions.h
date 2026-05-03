@@ -20,14 +20,19 @@ using namespace std;
 
 string time_now();
 /**
+ * @brief chuyển đổi chuỗi định dạng dd/mm/yyyy hh:mm thành DateTime
+ * @param time_str chuỗi thời gian cần chuyển đổi
+ * @return đối tượng DateTime đã được chuyển đổi, nếu có lỗi sẽ trả về DateTime với tất cả các trường bằng 0
+ */
+DateTime time_now(string time_str);
+
+//=========== các hàm đọc dữ liệu ===========//
+/**
  * @brief đọc file chuyến bay
  * @param dsMB danh sách chuyến bay
  * @param path_file_MB đường dẫn file chuyến bay
  * @return true nếu lấy thành công
  */
-
-//=========== các hàm đọc dữ liệu ===========//
-
 bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB);
 /**
  * @brief đọc file máy bay
