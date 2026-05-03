@@ -1,6 +1,7 @@
 #include "Extentions.h"
 #include "Global.h"
 #include "Logic.h"
+#include "UI.h"
 #include <fstream>
 #include <cstring>
 #include <iostream>
@@ -19,6 +20,21 @@ string time_now() {
              now.get_hh(), now.get_mm());
              
     return string(buffer); 
+}
+DateTime time_now(string time_str){
+    DateTime dt;
+    if(time_str.length() != 16) return dt; // Kiểm tra định dạng cơ bản
+    int d = GetDayFromStr(time_str);
+    int m = GetMonthFromStr(time_str);
+    int y = GetYearFromStr(time_str);
+    int hh = GetHourFromStr(time_str);
+    int mm = GetMinuteFromStr(time_str);
+    dt.set_dd(d);
+    dt.set_mt(m);
+    dt.set_yy(y);
+    dt.set_hh(hh);
+    dt.set_mm(mm);
+    return dt;
 }
 
 //=========== các hàm đọc dữ liệu ===========//
