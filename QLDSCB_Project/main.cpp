@@ -7,6 +7,7 @@
 #include "Global.h"
 #include "Logic.h"
 #include "UI.h"
+#include "Extentions.h"
 
 using namespace std ;
 
