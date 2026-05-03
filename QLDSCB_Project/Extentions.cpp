@@ -10,10 +10,15 @@
 
 using namespace std;
 
-char *time_to_string(const DateTime &dt) {
-    char* buffer = new char[17]; // dd/mm/yyyy hh:mtmt +null
-    snprintf(buffer, 17, "%02d/%02d/%04d %02d:%02d", dt.get_dd(), dt.get_mt(), dt.get_yy(), dt.get_hh(), dt.get_mm());
-    return buffer;
+string time_now() {
+    char buffer[20]; 
+    DateTime now;
+    now.time_now(); // Cập nhật giờ hiện tại vào đối tượng DateTime
+    snprintf(buffer, sizeof(buffer), "%02d/%02d/%04d %02d:%02d", 
+             now.get_dd(), now.get_mt(), now.get_yy(), 
+             now.get_hh(), now.get_mm());
+             
+    return string(buffer); 
 }
 
 //=========== các hàm đọc dữ liệu ===========//

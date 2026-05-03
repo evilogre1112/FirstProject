@@ -18,7 +18,7 @@ using namespace std;
  * @return con trỏ đến chuỗi đã được cấp phát động, cần giải phóng sau khi sử dụng
  */
 
-char *time_to_string(const DateTime &dt);
+string time_now();
 /**
  * @brief đọc file chuyến bay
  * @param dsMB danh sách chuyến bay
