@@ -71,16 +71,17 @@ struct Stack {
 struct DateTime{
     int hh, mm, dd, mt, yy;
     DateTime();
-    int get_hh();
-    int get_mm();
-    int get_dd();
-    int get_mt();
-    int get_yy();
+    int get_hh()const;
+    int get_mm()const;
+    int get_dd()const;
+    int get_mt()const;
+    int get_yy()const;
     bool set_hh(int h);
     bool set_mm(int m);
     bool set_dd(int d);
     bool set_mt(int t);
     bool set_yy(int y);
+    void time_now();
 };
 
 
@@ -174,73 +175,5 @@ struct listHK{
     listHK();
 };
 
-/**
- * @brief đọc file chuyến bay
- * @param dsMB danh sách chuyến bay
- * @param path_file_MB đường dẫn file chuyến bay
- * @return true nếu lấy thành công
- */
-
-bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB);
-/**
- * @brief đọc file máy bay
- * @param dsMB danh sách máy bay
- * @param path_file_MB đường dẫn file máy bay
- * @return true nếu lấy thành công
- */
-bool Get_Data_MB(listMB &dsMB, const char *path_file_MB);
-/*
-    1.  ho 
-    2.  ten
-    3.  cmnd
-    4.  phai
-*/
-bool Get_Data_HK(listHK &dsHK, const char *path_file_HK);
-/*
-    1.  maCB
-    2.  ngayKH
-    3.  sbDich
-    4.  trangThai
-    5.  soHieuMB
-    6.  socho
-    7.  DSV (vị trí | cmnd)
-*/
-bool Set_Data_CB(listCB &dsCB, const char *path_file_CB);
-/*
-    1.  soHieuMB
-    2.  loaiMB
-    3.  socho
-*/
-bool Set_Data_MB(listMB &dsMB, const char *path_file_MB);
-/*
-    1.  ho 
-    2.  ten
-    3.  cmnd
-    4.  phai
-*/
-bool Set_Data_HK(listHK &dsHK, const char *path_file_HK);
-/*
-    1.  maCB
-    2.  ngayKH
-    3.  sbDich
-    4.  trangThai
-    5.  soHieuMB
-    6.  socho
-    7.  DSV (vị trí | cmnd)
-*/
-bool Set_Data_CB(CB &CB, const char *path_file_CB);
-/*
-    1.  soHieuMB
-    2.  loaiMB
-    3.  socho
-*/
-bool Set_Data_MB(MB &MB, const char *path_file_MB);
-/*
-    1.  ho 
-    2.  ten
-    3.  cmnd
-    4.  phai
-*/
-bool Set_Data_HK(HK &HK, const char *path_file_HK);
 
 #endif
