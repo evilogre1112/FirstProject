@@ -1,5 +1,6 @@
 #include "Logic.h"
 #include "Global.h"
+#include "Extentions.h"
 #include <iostream>
 #include <fstream>
 
@@ -36,43 +37,6 @@ bool cmp_prefix(char* str, char* prefix) {
     return true;
 }
 
-// Tiện ích tính số phút chênh lệch của 2 ngày bất kì từ 1900 về sau
-bool isLeap(int y) {
-    return (y % 400 == 0) || (y % 4 == 0 && y % 100 != 0);
-}
-
-int daysInMonth(int m, int y) {
-    int days[] = {0,31,28,31,30,31,30,31,31,30,31,30,31};
-    if (m == 2 && isLeap(y)) return 29;
-    return days[m];
-}
-
-long long toMinutes(DateTime dt) {
-    long long totalDays = 0;
-
-    // năm
-    for (int y = 1900; y < dt.get_yy(); y++) {
-        totalDays += isLeap(y) ? 366 : 365;
-    }
-
-    // tháng
-    for (int m = 1; m < dt.get_mt(); m++) {
-        totalDays += daysInMonth(m, dt.get_yy());
-    }
-
-    // ngày
-    totalDays += (dt.get_dd() - 1);
-
-    // phút
-    long long totalMinutes = totalDays * 24 * 60;
-    totalMinutes += dt.get_hh() * 60 + dt.get_mm();
-
-    return totalMinutes;
-}
-
-long long ss_ngay(DateTime const &a, DateTime const &b) {
-    return llabs(toMinutes(a) - toMinutes(b));
-}
 
 // Các hàm phục vụ cho việc đánh dấu các CB cho MB và HK
 void clearMarkMB(MB* MB) {

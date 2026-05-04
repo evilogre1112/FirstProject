@@ -4,6 +4,7 @@
 #include <functional>
 #include <cstring>
 #include "Logic.h"
+#include "Extentions.h"
 // Chỉ thêm windows.h nếu đang chạy trên Windows
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
@@ -219,51 +220,6 @@ int whereY() {
 #endif
 }
 
-// Hàm lấy Ngày (DD) - Cắt 2 ký tự từ vị trí 0
-int GetDayFromStr(const string &datetimeStr) {
-    if (datetimeStr.length() < 16) return -1; 
-    try { return stoi(datetimeStr.substr(0, 2)); } 
-    catch (...) { return -1; }
-}
-
-
-int GetMonthFromStr(const string &datetimeStr) {
-    if (datetimeStr.length() < 16) return -1;
-    try { return stoi(datetimeStr.substr(3, 2)); } 
-    catch (...) { return -1; }
-}
-
-
-int GetYearFromStr(const string &datetimeStr) {
-    if (datetimeStr.length() < 16) return -1;
-    try { return stoi(datetimeStr.substr(6, 4)); } 
-    catch (...) { return -1; }
-}
-
-int GetHourFromStr(const string &datetimeStr) {
-    if (datetimeStr.length() < 16) return -1;
-    try { return stoi(datetimeStr.substr(11, 2)); } 
-    catch (...) { return -1; }
-}
-
-int GetMinuteFromStr(const string &datetimeStr) {
-    if (datetimeStr.length() < 16) return -1;
-    try { return stoi(datetimeStr.substr(14, 2)); } 
-    catch (...) { return -1; }
-}
-
-string ToStringDate(DateTime dt) {
-    stringstream ss;
-    
-    // Sử dụng setw(2) và setfill('0') để đảm bảo luôn có 2 chữ số (vd: 09 thay vì 9)
-    ss << setfill('0') << setw(2) << dt.get_dd() << "/"
-       << setfill('0') << setw(2) << dt.get_mt() << "/"
-       << setw(4) << dt.get_yy() << " "
-       << setfill('0') << setw(2) << dt.get_hh() << ":"
-       << setfill('0') << setw(2) << dt.get_mm();
-       
-    return ss.str();
-}
 
 string TranFormSatus(int st){
      string SelectedColors[] = {RED, GREEN, YELLOW, CYAN};

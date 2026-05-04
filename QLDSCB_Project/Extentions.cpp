@@ -344,3 +344,102 @@ bool Set_Data_HK(HK& hk, const char *path_file_HK){
     f.close();
     return true;
 }
+
+int getFirstDayOfWeek(int month, int year) {
+    static int t[] = { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
+    year -= month < 3;
+    return (year + year / 4 - year / 100 + year / 400 + t[month - 1] + 1) % 7;
+}
+
+bool isNotPastTime(const DateTime& t, const DateTime& cur) {
+    if (t.yy != cur.yy) return t.yy > cur.yy;
+    if (t.mt != cur.mt) return t.mt > cur.mt;
+    if (t.dd != cur.dd) return t.dd > cur.dd;
+    if (t.hh != cur.hh) return t.hh > cur.hh;
+    return t.mm >= cur.mm;
+}
+
+// Tiện ích tính số phút chênh lệch của 2 ngày bất kì từ 1900 về sau
+bool isLeap(int y) {
+    return (y % 400 == 0) || (y % 4 == 0 && y % 100 != 0);
+}
+
+int daysInMonth(int m, int y) {
+    int days[] = {0,31,28,31,30,31,30,31,31,30,31,30,31};
+    if (m == 2 && isLeap(y)) return 29;
+    return days[m];
+}
+
+
+long long toMinutes(DateTime dt) {
+    long long totalDays = 0;
+
+    // năm
+    for (int y = 1900; y < dt.get_yy(); y++) {
+        totalDays += isLeap(y) ? 366 : 365;
+    }
+
+    // tháng
+    for (int m = 1; m < dt.get_mt(); m++) {
+        totalDays += daysInMonth(m, dt.get_yy());
+    }
+
+    // ngày
+    totalDays += (dt.get_dd() - 1);
+
+    // phút
+    long long totalMinutes = totalDays * 24 * 60;
+    totalMinutes += dt.get_hh() * 60 + dt.get_mm();
+
+    return totalMinutes;
+}
+
+long long ss_ngay(DateTime const &a, DateTime const &b) {
+    return llabs(toMinutes(a) - toMinutes(b));
+}
+
+// Hàm lấy Ngày (DD) - Cắt 2 ký tự từ vị trí 0
+int GetDayFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1; 
+    try { return stoi(datetimeStr.substr(0, 2)); } 
+    catch (...) { return -1; }
+}
+
+
+int GetMonthFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1;
+    try { return stoi(datetimeStr.substr(3, 2)); } 
+    catch (...) { return -1; }
+}
+
+
+int GetYearFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1;
+    try { return stoi(datetimeStr.substr(6, 4)); } 
+    catch (...) { return -1; }
+}
+
+int GetHourFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1;
+    try { return stoi(datetimeStr.substr(11, 2)); } 
+    catch (...) { return -1; }
+}
+
+int GetMinuteFromStr(const string &datetimeStr) {
+    if (datetimeStr.length() < 16) return -1;
+    try { return stoi(datetimeStr.substr(14, 2)); } 
+    catch (...) { return -1; }
+}
+
+string ToStringDate(DateTime dt) {
+    stringstream ss;
+    
+    // Sử dụng setw(2) và setfill('0') để đảm bảo luôn có 2 chữ số (vd: 09 thay vì 9)
+    ss << setfill('0') << setw(2) << dt.get_dd() << "/"
+       << setfill('0') << setw(2) << dt.get_mt() << "/"
+       << setw(4) << dt.get_yy() << " "
+       << setfill('0') << setw(2) << dt.get_hh() << ":"
+       << setfill('0') << setw(2) << dt.get_mm();
+       
+    return ss.str();
+}

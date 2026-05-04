@@ -46,6 +46,33 @@ int Get_Weekday(DateTime dt);
  */
 int Get_Weekday(string time_str);
 
+int getFirstDayOfWeek(int month, int year) ;
+
+bool isNotPastTime(const DateTime& t, const DateTime& cur);
+
+bool isLeap(int y);
+
+int daysInMonth(int m, int y);
+
+long long toMinutes(DateTime dt);
+
+long long ss_ngay(DateTime const &a, DateTime const &b);
+
+// Hàm lấy Ngày (DD) - Cắt 2 ký tự từ vị trí 0
+int GetDayFromStr(const string &datetimeStr);
+// Hàm lấy Tháng (MM) - Cắt 2 ký tự từ vị trí 3
+int GetMonthFromStr(const string &datetimeStr);
+// Hàm lấy Năm (YYYY) - Cắt 4 ký tự từ vị trí 6
+int GetYearFromStr(const string &datetimeStr);
+// Hàm lấy Giờ (HH) - Cắt 2 ký tự từ vị trí 11
+int GetHourFromStr(const string &datetimeStr);
+// Hàm lấy Phút (MM) - Cắt 2 ký tự từ vị trí 14
+int GetMinuteFromStr(const string &datetimeStr);
+// Hàm chuyển đổi DateTime thành chuỗi định dạng "DD/MM/YYYY HH:MM"
+string ToStringDate(DateTime dt);
+
+string DrawDateTimePicker(int start_x, int start_y);
+
 //=========== các hàm đọc dữ liệu ===========//
 /**
  * @brief đọc file chuyến bay
