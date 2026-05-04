@@ -21,7 +21,7 @@ string time_now() {
              
     return string(buffer); 
 }
-DateTime time_now(string time_str){
+DateTime StringtoTime(string time_str){
     DateTime dt;
     if(time_str.length() != 16) return dt; // Kiểm tra định dạng cơ bản
     int d = GetDayFromStr(time_str);
@@ -58,14 +58,14 @@ int Get_Weekday(DateTime dt){
 }
 
 int Get_Weekday(string time_str){
-    DateTime dt = time_now(time_str);
+    DateTime dt = StringtoTime(time_str);
     return Get_Weekday(dt);
 }
 
 //=========== các hàm đọc dữ liệu ===========//
 
 
-bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB) {
+bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_CB) {
 // Mở file ở chế độ binary để tránh triệt để lỗi dư ký tự \r trên Windows
     ifstream f(path_file_CB);
     if (!f.is_open()) {
@@ -76,7 +76,6 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB) {
     dsCB.head = NULL;
 
     char ma[maCB_max];
-
 // Vòng lặp lớn: Đọc từng chuyến bay
     while (f.getline(ma, maCB_max, '|')) {
         // Dọn dẹp ký tự xuống dòng bị dính từ vòng lặp trước (nếu có)
@@ -116,39 +115,46 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB) {
         tmp->DSV = new char*[tmp->socho];
         for (int i = 0; i < tmp->socho; i++) {
             tmp->DSV[i] = new char[cmnd_max];
-            strcpy(tmp->DSV[i], "0"); // Mặc định tất cả ghế đều trống ("0")
+            strcpy(tmp->DSV[i], "\0"); // Mặc định tất cả ghế đều trống
         }
-
-        // --- 4. Đọc Số lượng vé đã bán ---
-        int soVeDaBan = 0;
-        if (f >> soVeDaBan) {
-            tmp->sove = soVeDaBan;
-            f.ignore(100, '\n'); // Xóa bộ đệm sau khi đọc xong con số
-        }
-        // --- 5. Đọc danh sách vé bằng vòng FOR (Vị trí | CMND) ---
-        int vt;
-        char cmnd[cmnd_max];
-        for (int i = 0; i < soVeDaBan; i++) {
-            if (!(f >> vt)) break; // Kiểm tra nếu không đọc được số vị trí
-            f.ignore(1, '|');      // Bỏ qua đúng 1 ký tự '|'
-
-    // Đọc CMND cho đến khi gặp dấu '|' hoặc xuống dòng
-            f >> cmnd;
-            // Kiểm tra vị trí hợp lệ rồi mới gán CMND vào ghế
-            if (vt >= 1 && vt <= tmp->socho) {
-                strcpy(tmp->DSV[vt - 1], cmnd);
-            }
-        }
-    // --- 6. Thêm vào Danh sách liên kết ---
-    if (!Add_CB(dsCB, dsMB, tmp)) {
+        // ---- 4. thêm HK vào DSV
+        tmp->sove = 0;
+        if (!Add_CB(dsCB, dsMB, tmp)) {
         delete[] tmp->sbDich;
         for (int i = 0; i < tmp->socho; i++) {
             delete[] tmp->DSV[i];
         }
         delete[] tmp->DSV;
         delete tmp; 
-    }
-    f >> ws;    
+        return false;
+        }
+        // --- 5. Đọc danh sách vé (nếu có)---
+        while (true) {
+            int seatNumber;
+            // Dọn dẹp khoảng trắng để peek đúng ký tự tiếp theo
+            f >> ws; 
+
+            // Kiểm tra xem có phải là số không trước khi đọc
+            if (!isdigit(f.peek())) break; 
+
+            if (!(f >> seatNumber)) {
+                f.clear(); // Xóa lỗi nếu lỡ đọc nhầm
+                break;
+            }
+
+            if (seatNumber <= 0) break; 
+
+            f.ignore(); // bỏ qua '|'
+            char CMND[cmnd_max];
+            f.getline(CMND, cmnd_max); 
+
+            int len = strlen(CMND);
+            if(len > 0 && CMND[len-1] == '\r') CMND[len-1] = '\0';
+
+            Book_Ticket(dsCB, dsHK, tmp->maCB, CMND, seatNumber);
+        }
+        f.clear(); // Đảm bảo trạng thái file ổn định
+        f >> ws;   // Nhảy đến ký tự đầu tiên của chuyến bay tiếp theo
     }
     f.close();
     return true;
@@ -238,23 +244,21 @@ bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
             << temp->sbDich << '|'
             << temp->trangThai << '|'
             << temp->soHieuMB << '|';
-        // Đếm số vé đã bán
-        f << temp->sove << '\n';
+        // Đếm số vé có thể bán
+        f << temp->socho << '\n';
         // Ghi danh sách vé (vị trí | CMND)
-        if(temp->sove > 0) {    
-            int d=0;
-            for (int i = 0; i < temp->socho; i++) {
-                if (strcmp(temp->DSV[i], "0") != 0) {
-                    f << (i + 1) << '|' << temp->DSV[i];
-                    d++;
-                    if(d<temp->sove||temp->next!=NULL) f << '\n';
-                }
+        for (int i = 0; i < temp->socho; i++) {
+            if (strcmp(temp->DSV[i], "\0") != 0 && strcmp(temp->DSV[i], "") != 0) {
+                f << (i + 1) << '|' << temp->DSV[i] << '\n';
             }
-        }else{
-            if(temp->next!=NULL) f << '\n';
         }
+
+        // --- 3. Luôn ghi số 0 để làm "điểm dừng" cho mỗi chuyến bay ---
+        f << 0 << '\n';
+
         temp = temp->next;
     }
+
     f.close();
     return true;
 }
@@ -308,17 +312,16 @@ bool Set_Data_CB(CB &CB, const char *path_file_CB){
         << CB.sbDich << '|'
         << CB.trangThai << '|'
         << CB.soHieuMB << '|'
-        << CB.socho << '|';
-    // Đếm số vé đã bán
-    f << CB.sove << '\n';
+        << CB.socho << '|';;
     // Ghi danh sách vé (vị trí | CMND)
     if(CB.sove > 0) {    
         for (int i = 0; i < CB.socho; i++) {
-            if (strcmp(CB.DSV[i], "0") != 0) {
+            if (strcmp(CB.DSV[i], "\0") != 0) {
                 f << (i + 1) << '|' << CB.DSV[i]<< '\n';
             }
         }
     }
+    f << 0 << '\n'; // Điểm dừng cho chuyến bay này
     f.close();
     return true;
 }

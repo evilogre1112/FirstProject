@@ -24,7 +24,7 @@ string time_now();
  * @param time_str chuỗi thời gian cần chuyển đổi
  * @return đối tượng DateTime đã được chuyển đổi, nếu có lỗi sẽ trả về DateTime với tất cả các trường bằng 0
  */
-DateTime time_now(string time_str);
+DateTime StringtoTime(string time_str);
 /**
  * @brief  đưa về Thứ của ngày tháng năm muốn xét 
  * @param dt là chứa ngày tháng năm theo form dd/mt/yyyy hh:mm tính Thứ của ngày tháng năm muốn xét 
@@ -80,7 +80,7 @@ string DrawDateTimePicker(int start_x, int start_y);
  * @param path_file_MB đường dẫn file chuyến bay
  * @return true nếu lấy thành công
  */
-bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB);
+bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_CB);
 /**
  * @brief đọc file máy bay
  * @param dsMB danh sách máy bay
