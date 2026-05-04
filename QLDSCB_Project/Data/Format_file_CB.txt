@@ -8,7 +8,7 @@ ve ngoi|< mỗi dòng 1cmnd>
 .
 .
 .
-mã_chuyến_bayn|giờ_khởi_hành|ngày_khởi_hành|sân_bay_đích|trạng_thái|số_hiệu_máy_bay|số_chỗ
+mã_chuyến_bayn|giờ_khởi_hành|ngày_khởi_hành|sân_bay_đích|trạng_thái|số_hiệu_máy_bay|số_chỗ_mở|so_ve
 ve ngoi|< mỗi dòng 1cmnd>
 
 Chú thích : mã chuyến bay: Gồm 1 chuỗi tối đa 15 chữ và số
@@ -18,9 +18,9 @@ Chú thích : mã chuyến bay: Gồm 1 chuỗi tối đa 15 chữ và số
             sân_bay_đích: chuỗi kí tự chứa max
             trạng thái: số chuyến bay đang [0,1,2,3]
             số hiệu máy bay: chuỗi kí tự tối đa 15
-            số chỗ :là 1 số 500
             ve ngoi : là vị trí ngồi cảu khách
             so_ve: là so vé dã bán ra
+            số_chỗ_mở :là số chỗ của máy bay có thể bán
 
 VD:
 CB001|14:30|2026/03/24|Da Nang|1|VN-A123|300|3

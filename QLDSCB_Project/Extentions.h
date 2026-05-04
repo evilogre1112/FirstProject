@@ -26,8 +26,8 @@ string time_now();
  */
 DateTime time_now(string time_str);
 /**
- * @brief  đưa về thứ cảu ngày đó
- * @param dt là chứa ngày tháng năm
+ * @brief  đưa về Thứ của ngày tháng năm muốn xét 
+ * @param dt là chứa ngày tháng năm theo form dd/mt/yyyy hh:mm tính Thứ của ngày tháng năm muốn xét 
  * @return thứ dày tiên trong tháng đó
  *          0 là chủ nhật
  *          1 là thứ 2
@@ -36,8 +36,8 @@ DateTime time_now(string time_str);
  */
 int Get_Weekday(DateTime dt);
 /**
- * @brief  đưa về thứ cảu ngày đó
- * @param time_str là chứa ngày tháng năm
+ * @brief  đưa về Thứ của ngày tháng năm muốn xét 
+ * @param time_str là chứa ngày tháng năm muốn tính thứ "dd/mt/yyyy hh:mm" Thứ của ngày tháng năm muốn xét 
  * @return thứ dày tiên trong tháng đó
  *          0 là chủ nhật
  *          1 là thứ 2
