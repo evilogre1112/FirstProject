@@ -59,6 +59,19 @@ string subOptions4[5] = {
     "In Danh Sách",
     "Quay Lại"
 };
+static listMB* pDsMB = nullptr;
+static listCB* pDsCB = nullptr;
+static listHK* pDsHK = nullptr;
+
+#define dsMB (*pDsMB)
+#define dsCB (*pDsCB)
+#define dsHK (*pDsHK)
+
+void TruyenThamSo(listMB &A, listCB& B , listHK &C){
+    pDsMB = &A ;
+    pDsCB = &B ;
+    pDsHK = &C ; 
+}
 
 string* Menus[] = {
         subOptions1,
@@ -220,6 +233,22 @@ int whereY() {
 #endif
 }
 
+void DrawCelender(int x , int y){
+    string s = time_now() ;
+    int year = GetYearFromStr(s);
+    int month = GetMonthFromStr(s);
+    int day = GetDayFromStr(s);
+    int hours = GetHourFromStr(s);
+    int minute = GetMinuteFromStr(s);
+    int Days_In_Month = daysInMonth(month, year);
+    string label[] = {"Mon","Tue","Wed","Thur","Fri","Sat","Sun"};
+    int padding = 10;
+    int size = 7 ;
+    for(int i = 0 ; i < 7;i++){
+        Gotoxy(x+padding*i,0);
+        cout << label[i];
+    }
+}
 
 string TranFormSatus(int st){
      string SelectedColors[] = {RED, GREEN, YELLOW, CYAN};
@@ -1393,8 +1422,8 @@ void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage) {
     }
 }
 
-void OnlyPrint_List_MB(listMB& dsMB){
-     Render_MB_Page(dsMB, 0, 15);
+void OnlyPrint_List_MB(listMB& A){
+     Render_MB_Page(A, 0, 15);
 }
 
 bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]){
@@ -1849,10 +1878,10 @@ void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage) {
     }
 }
 
-bool MODE2_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
-bool MODE3_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
+bool MODE2_CB(listCB& A, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
+bool MODE3_CB(listCB& A, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
 
-void OnlyPrint_List_CB(listCB& dsCB){
+void OnlyPrint_List_CB(listCB& A){
      Render_CB_Page(dsCB, 0, 15);
 }
 
@@ -2516,3 +2545,4 @@ void MainScreen(){
         }
     }
 }
+

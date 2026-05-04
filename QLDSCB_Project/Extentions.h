@@ -51,7 +51,27 @@ int GetMinuteFromStr(const string &datetimeStr);
 // Hàm chuyển đổi DateTime thành chuỗi định dạng "DD/MM/YYYY HH:MM"
 string ToStringDate(DateTime dt);
 
-string DrawDateTimePicker(int start_x, int start_y);
+DateTime time_now(string time_str);
+/**
+ * @brief  đưa về Thứ của ngày tháng năm muốn xét 
+ * @param dt là chứa ngày tháng năm theo form dd/mt/yyyy hh:mm tính Thứ của ngày tháng năm muốn xét 
+ * @return thứ dày tiên trong tháng đó
+ *          0 là chủ nhật
+ *          1 là thứ 2
+ *          ...
+ *          6 là thứ 7
+ */
+int Get_Weekday(DateTime dt);
+/**
+ * @brief  đưa về Thứ của ngày tháng năm muốn xét 
+ * @param time_str là chứa ngày tháng năm muốn tính thứ "dd/mt/yyyy hh:mm" Thứ của ngày tháng năm muốn xét 
+ * @return thứ dày tiên trong tháng đó
+ *          0 là chủ nhật
+ *          1 là thứ 2
+ *          ...
+ *          6 là thứ 7
+ */
+int Get_Weekday(string time_str);
 
 //=========== các hàm đọc dữ liệu ===========//
 /**

@@ -427,3 +427,28 @@ string ToStringDate(DateTime dt) {
        
     return ss.str();
 }
+int Get_Weekday(DateTime dt){
+    int d = dt.dd;
+    int m = dt.mt;
+    int y = dt.yy;
+    // Quy tắc Zeller: Tháng 1 và 2 được coi là tháng 13 và 14 của năm trước
+    if(m<3) {
+        m+=12;
+        y--;
+    }
+    int K = y % 100; // Năm trong thế kỷ
+    int J = y / 100; // Thế kỷ
+
+    // Công thức Zeller: h là thứ tính từ Thứ 7 (0=Sat, 1=Sun, ...)
+    int h = (d + (13 * (m + 1)) / 5 + K + K / 4 + J / 4 - 2 * J) % 7;
+
+    // Chuyển đổi để h = 0 là Chủ Nhật, h = 6 là Thứ 7
+    // Do kết quả phép chia dư % trong C++ với số âm có thể khác toán học, 
+    // ta thêm +7 trước khi chia dư lần nữa cho chắc chắn.
+    return (h + 6) % 7;
+}
+
+int Get_Weekday(string time_str){
+    DateTime dt = time_now(time_str);
+    return Get_Weekday(dt);
+}
