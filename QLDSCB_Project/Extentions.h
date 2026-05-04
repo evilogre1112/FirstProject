@@ -25,6 +25,26 @@ string time_now();
  * @return đối tượng DateTime đã được chuyển đổi, nếu có lỗi sẽ trả về DateTime với tất cả các trường bằng 0
  */
 DateTime time_now(string time_str);
+/**
+ * @brief  đưa về thứ cảu ngày đó
+ * @param dt là chứa ngày tháng năm
+ * @return thứ dày tiên trong tháng đó
+ *          0 là chủ nhật
+ *          1 là thứ 2
+ *          ...
+ *          6 là thứ 7
+ */
+int Get_Weekday(DateTime dt);
+/**
+ * @brief  đưa về thứ cảu ngày đó
+ * @param time_str là chứa ngày tháng năm
+ * @return thứ dày tiên trong tháng đó
+ *          0 là chủ nhật
+ *          1 là thứ 2
+ *          ...
+ *          6 là thứ 7
+ */
+int Get_Weekday(string time_str);
 
 //=========== các hàm đọc dữ liệu ===========//
 /**

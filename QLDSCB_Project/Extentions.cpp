@@ -36,6 +36,31 @@ DateTime time_now(string time_str){
     dt.set_mm(mm);
     return dt;
 }
+int Get_Weekday(DateTime dt){
+    int d = dt.dd;
+    int m = dt.mt;
+    int y = dt.yy;
+    // Quy tắc Zeller: Tháng 1 và 2 được coi là tháng 13 và 14 của năm trước
+    if(m<3) {
+        m+=12;
+        y--;
+    }
+    int K = y % 100; // Năm trong thế kỷ
+    int J = y / 100; // Thế kỷ
+
+    // Công thức Zeller: h là thứ tính từ Thứ 7 (0=Sat, 1=Sun, ...)
+    int h = (d + (13 * (m + 1)) / 5 + K + K / 4 + J / 4 - 2 * J) % 7;
+
+    // Chuyển đổi để h = 0 là Chủ Nhật, h = 6 là Thứ 7
+    // Do kết quả phép chia dư % trong C++ với số âm có thể khác toán học, 
+    // ta thêm +7 trước khi chia dư lần nữa cho chắc chắn.
+    return (h + 6) % 7;
+}
+
+int Get_Weekday(string time_str){
+    DateTime dt = time_now(time_str);
+    return Get_Weekday(dt);
+}
 
 //=========== các hàm đọc dữ liệu ===========//
 
@@ -84,16 +109,9 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB, const char *path_file_CB) {
         f.getline(tmp->soHieuMB, soHieuMB_max, '|');
             
             
-        // --- 2. Lấy Số Chỗ từ Danh Sách Máy Bay ---
-        int indexMB = Find_MB(dsMB, tmp->soHieuMB);
+        //--- 2 lấy số chỗ mở trên chuyến bay đó phải nhỏ hơn hoặc bằng so ghế
+        f >> tmp->socho; f.ignore();
         
-        if (indexMB == -1) {
-            tmp->socho = 0 ; // Không tìm thấy máy bay thì cho số chỗ = 0
-        } else {
-            // Lấy trực tiếp số chỗ thực tế của chiếc máy bay đó
-            tmp->socho = dsMB.list[indexMB]->socho;
-        }
-
         // --- 3. Cấp phát mảng vé ---
         tmp->DSV = new char*[tmp->socho];
         for (int i = 0; i < tmp->socho; i++) {
@@ -281,7 +299,7 @@ bool Set_Data_CB(CB &CB, const char *path_file_CB){
     // mở file với chế dộ thêm cuói file
     ofstream f(path_file_CB, ios::app);
     if(!f.is_open()) return false;
-    f << '\n' <<CB.maCB << '|'
+    f << CB.maCB << '|'
         << setfill('0') << setw(2) << CB.ngayKH.hh << ':'
         << setfill('0') << setw(2) << CB.ngayKH.mm << '|'
         << setfill('0') << setw(2) << CB.ngayKH.dd << '/'
@@ -289,17 +307,15 @@ bool Set_Data_CB(CB &CB, const char *path_file_CB){
         << setfill('0') << setw(4) << CB.ngayKH.yy << '|'
         << CB.sbDich << '|'
         << CB.trangThai << '|'
-        << CB.soHieuMB << '|';
+        << CB.soHieuMB << '|'
+        << CB.socho << '|';
     // Đếm số vé đã bán
     f << CB.sove << '\n';
     // Ghi danh sách vé (vị trí | CMND)
     if(CB.sove > 0) {    
-        int d=0;
         for (int i = 0; i < CB.socho; i++) {
             if (strcmp(CB.DSV[i], "0") != 0) {
-                f << (i + 1) << '|' << CB.DSV[i];
-                d++;
-                if(d<CB.sove) f << '\n';
+                f << (i + 1) << '|' << CB.DSV[i]<< '\n';
             }
         }
     }
