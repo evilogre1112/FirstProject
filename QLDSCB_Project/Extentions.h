@@ -17,7 +17,11 @@ using namespace std;
  * @param dt đối tượng DateTime cần chuyển đổi
  * @return con trỏ đến chuỗi đã được cấp phát động, cần giải phóng sau khi sử dụng
  */
-
+string Time(DateTime dt);
+/**
+ * @brief lấy thời gian hiện tại và trả về dưới dạng chuỗi định dạng dd/mm/yyyy hh:mm
+ * @return chuỗi thời gian hiện tại
+ */
 string time_now();
 /**
  * @brief chuyển đổi chuỗi định dạng dd/mm/yyyy hh:mm thành DateTime
@@ -45,6 +49,38 @@ int Get_Weekday(DateTime dt);
  *          6 là thứ 7
  */
 int Get_Weekday(string time_str);
+/**
+ * @brief so sánh hai thời gian
+ * @param Time1 chuỗi thời gian thứ nhất
+ * @param Time2 chuỗi thời gian thứ hai
+ * @return 1 nếu Time1 lớn hơn Time2, -1 nếu Time1 nhỏ hơn Time2, 0 nếu bằng nhau
+ */
+int IsGreaterTime(string Time1, string Time2);
+/**
+ * @brief tính 24 giờ tiếp theo của một ngày cho trước là chuỗi
+ * @param dt đối tượng DateTime
+ * @return chuỗi thời gian của ngày tiếp theo
+ */
+string NextDay(DateTime dt);
+/**
+ * @brief tính 24 giờ tiếp theo của một ngày cho trước là chuỗi
+ * @param time_str chuỗi thời gian
+ * @return chuỗi thời gian của ngày tiếp theo
+ */
+string NextDay(string time_str);
+/**
+ * @brief tính 24 giờ tiếp theo của một ngày cho trước là DateTime
+ * @param dt đối tượng DateTime
+ * @return đối tượng DateTime của ngày tiếp theo
+ */
+DateTime nextDay(DateTime dt);
+/**
+ * @brief tính 24 giờ tiếp theo của một ngày cho trước là DateTime
+ * @param time_str chuỗi thời gian
+ * @return đối tượng DateTime của ngày tiếp theo
+ */
+DateTime nextDay(string time_str);
+
 
 int getFirstDayOfWeek(int month, int year) ;
 
@@ -68,10 +104,9 @@ int GetYearFromStr(const string &datetimeStr);
 int GetHourFromStr(const string &datetimeStr);
 // Hàm lấy Phút (MM) - Cắt 2 ký tự từ vị trí 14
 int GetMinuteFromStr(const string &datetimeStr);
-// Hàm chuyển đổi DateTime thành chuỗi định dạng "DD/MM/YYYY HH:MM"
-string ToStringDate(DateTime dt);
 
 string DrawDateTimePicker(int start_x, int start_y);
+string ToStringDate(DateTime dt);
 
 //=========== các hàm đọc dữ liệu ===========//
 /**

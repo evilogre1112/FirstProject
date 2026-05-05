@@ -11,15 +11,18 @@
 
 using namespace std;
 
-string time_now() {
+string TimeToString(DateTime dt){
     char buffer[20]; 
+    snprintf(buffer, sizeof(buffer), "%02d/%02d/%04d %02d:%02d", 
+             dt.get_dd(), dt.get_mt(), dt.get_yy(), 
+             dt.get_hh(), dt.get_mm());
+             
+    return string(buffer);
+}
+string time_now() { 
     DateTime now;
     now.time_now(); // Cập nhật giờ hiện tại vào đối tượng DateTime
-    snprintf(buffer, sizeof(buffer), "%02d/%02d/%04d %02d:%02d", 
-             now.get_dd(), now.get_mt(), now.get_yy(), 
-             now.get_hh(), now.get_mm());
-             
-    return string(buffer); 
+    return TimeToString(now); 
 }
 DateTime StringtoTime(string time_str){
     DateTime dt;
@@ -56,7 +59,31 @@ int Get_Weekday(DateTime dt){
     // ta thêm +7 trước khi chia dư lần nữa cho chắc chắn.
     return (h + 6) % 7;
 }
-
+string NextDay(DateTime dt){
+    dt.dd++;
+    // Kiểm tra nếu ngày vượt quá số ngày của tháng
+    int daysInCurrentMonth = daysInMonth(dt.mt, dt.yy);
+    if (dt.dd > daysInCurrentMonth) {
+        dt.dd = 1;
+        dt.mt++;
+        // Kiểm tra nếu tháng vượt quá 12
+        if (dt.mt > 12) {
+            dt.mt = 1;
+            dt.yy++;
+        }
+    }
+    return TimeToString(dt);
+}
+string NextDay(string time_str){
+    DateTime dt = StringtoTime(time_str);
+    return NextDay(dt);
+}
+DateTime nextDay(DateTime dt){
+    return StringtoTime(NextDay(dt));
+}
+DateTime nextDay(string time_str){
+    return StringtoTime(NextDay(time_str));
+}
 int Get_Weekday(string time_str){
     DateTime dt = StringtoTime(time_str);
     return Get_Weekday(dt);
