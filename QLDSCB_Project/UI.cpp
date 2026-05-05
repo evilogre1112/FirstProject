@@ -233,21 +233,49 @@ int whereY() {
 #endif
 }
 
-void DrawCelender(int x , int y){
+void DrawCelender(int x , int y,int rowpadding , int colpadding){
+    string label[] = {"Sun","Mon","Tue","Wed","Thur","Fri","Sat"};
+    int size = 7 ;
     string s = time_now() ;
+    int lens = visualLength(s);
+    Gotoxy(x + (rowpadding*7)/2 - lens/2 , y);
+    cout << s ; 
     int year = GetYearFromStr(s);
     int month = GetMonthFromStr(s);
-    int day = GetDayFromStr(s);
+    int Today = GetDayFromStr(s);
     int hours = GetHourFromStr(s);
     int minute = GetMinuteFromStr(s);
     int Days_In_Month = daysInMonth(month, year);
-    string label[] = {"Mon","Tue","Wed","Thur","Fri","Sat","Sun"};
-    int padding = 10;
-    int size = 7 ;
-    for(int i = 0 ; i < 7;i++){
-        Gotoxy(x+padding*i,0);
+   
+    // dd/mtmt/yyyy hh:mm
+    DateTime a ;
+    a.set_dd(1);
+    a.set_mt(month);
+    a.set_yy(year);
+    a.set_hh(0);
+    a.set_mm(0);
+    int FirstDayOfMonth = Get_Weekday(a);
+    for(int i = 0 ; i < 7; i++){
+        Gotoxy(x + rowpadding * i, y + 2);
         cout << label[i];
     }
+    for(int Day = 1 ; Day <= Days_In_Month;Day++){
+        Gotoxy(x+rowpadding*((FirstDayOfMonth + Day-1)%7),y+ ((FirstDayOfMonth+ Day-1)/7)*colpadding+5);
+        if(Day < Today) cout << GRAY ;
+            cout << Day ;
+        if(Day < Today) cout << RESET ;
+    }
+    int max_rows = (FirstDayOfMonth + Days_In_Month - 1) / 7;
+    Gotoxy(x,y+ colpadding*max_rows+7);
+    cout << "Giờ" ;
+    Gotoxy(x + 5,y+ colpadding*max_rows+6);
+    SmallBox(string(12,' ') + AD, 15,1);
+    Gotoxy(x + 5 + 15 + 5,y+ colpadding*max_rows+7);
+    cout << "Phút" ;
+    Gotoxy(x + 5 + 15 + 5 + 5,y+ colpadding*max_rows+6);
+    SmallBox(string(12,' ') + AD, 15,1);
+    Gotoxy(x,y+ colpadding*max_rows+10);
+    SmallBox("Dùng mũi tên để chọn, ESC để thoát",x + (rowpadding * 7)/2,3,string(YELLOW));
 }
 
 string TranFormSatus(int st){

@@ -27,8 +27,9 @@ int main(){
     Sort_CB(dsCB);
     int slMB = dsMB.slMB ;
     Sort_MB(dsMB,0,slMB-1);
-    TruyenThamSo(dsMB,dsCB,dsHK);
-    MainScreen();
+    DrawCelender(30,0,10,3);
+    //TruyenThamSo(dsMB,dsCB,dsHK);
+    //MainScreen();
     cin.ignore();
     return 0;
 }

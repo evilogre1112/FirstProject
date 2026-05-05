@@ -196,7 +196,7 @@ void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LE
 
 void TruyenThamSo(listMB &A, listCB& B , listHK &C);
 
-void DrawCelender(int x, int y);
+void DrawCelender(int x, int y,int rowpadding , int colpadding);
 
 string TranFormSatus(int st);
 string TranFormGender(int st);
