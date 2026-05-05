@@ -81,6 +81,16 @@ int Get_Weekday(string time_str){
     DateTime dt = StringtoTime(time_str);
     return Get_Weekday(dt);
 }
+int IsGreaterTime(string Time1, string Time2){
+    DateTime dt1 = StringtoTime(Time1); 
+    DateTime dt2 = StringtoTime(Time2); 
+    if (dt1.yy != dt2.yy) return dt1.yy > dt2.yy ? 1 : -1;   
+    if (dt1.mt != dt2.mt) return dt1.mt > dt2.mt ? 1 : -1;
+    if (dt1.dd != dt2.dd) return dt1.dd > dt2.dd ? 1 : -1;
+    if (dt1.hh != dt2.hh) return dt1.hh > dt2.hh ? 1 : -1;
+    if (dt1.mm != dt2.mm) return dt1.mm > dt2.mm ? 1 : -1;
+    return 0; // Nếu tất cả các trường đều bằng nhau
+}
 
 //=========== các hàm đọc dữ liệu ===========//
 
