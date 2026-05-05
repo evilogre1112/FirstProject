@@ -11,11 +11,12 @@
 
 using namespace std ;
 
-listMB dsMB ;
-listCB dsCB ;
-listHK dsHK ;
+
 
 int main(){
+    listMB dsMB ;
+    listCB dsCB ;
+    listHK dsHK ;
     #ifdef _WIN32
         SetConsoleOutputCP(CP_UTF8);
     #endif
@@ -26,6 +27,7 @@ int main(){
     Sort_CB(dsCB);
     int slMB = dsMB.slMB ;
     Sort_MB(dsMB,0,slMB-1);
+    TruyenThamSo(dsMB,dsCB,dsHK);
     MainScreen();
     cin.ignore();
     return 0;
