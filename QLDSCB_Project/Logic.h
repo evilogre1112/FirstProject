@@ -202,6 +202,12 @@ bool Cancel_CB(listCB &dsCB, listMB &dsMB, char* const maCB);
  */
 void Init_Tickets(CB* newCB, int soCho);
 
+/**
+ *@brief    Thực hiện cập nhật toàn bộ trạng thái của chuyến bay
+ *@param    dsCB    Danh sách chuyến bay
+ */
+void realTimeUpdateCB(listCB &dsCB, listHK &dsHK);
+
 // --- CÂU C: ĐẶT VÉ ---
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)
 
@@ -346,7 +352,7 @@ listMB Get_Flight_Stats (listMB &dsMB);
  */
 listMB Find_MB_OnRage(listMB &dsMB, char* const query);
 listCB Find_CB_OnRage(listCB &dsCB, char* const query);
-listHK Find_HK_OnRage(listHK &dsHK, char* const query);
+HK** Find_HK_OnRage(listHK &dsHK, char* const query, int &sltk);
 
 // -- Các gói kiểm tra --
 
