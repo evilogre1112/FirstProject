@@ -558,6 +558,34 @@ void Init_Tickets(CB *newCB, int soCho) {
     }
 }
 
+void realTimeUpdateCB(listCB &dsCB, listHK &dsHK) {
+    CB* tempCB = dsCB.head;
+    string currTime = time_now();
+    DateTime Now = StringtoTime(currTime);
+    while (tempCB != NULL) {
+        DateTime TimeCB = tempCB->ngayKH;
+        if (ss_ngay(TimeCB, Now) <= 60 && isNotPastTime(TimeCB, Now)) {
+            tempCB->trangThai = 2; // Chỉ còn ít hơn một tiếng trước khởi hành, không nhận đặt thêm vé
+            tempCB = tempCB->next;
+            continue;
+        }
+        if (ss_ngay(TimeCB, Now) > 180 && !isNotPastTime(TimeCB, Now)) {
+            tempCB->trangThai = 3; // Chuyến bay đã bay được hơn 3 tiếng => Coi như đã hoàn tất chuyến
+            for (int i = 0; i < tempCB->socho; i++) {
+                if (tempCB->DSV[i][0] != '\0') {
+                    HK* tempHK = Find_HK_At_List(dsHK, tempCB->DSV[i]);
+                    delMarkHK(tempHK, tempCB->maCB);
+                }
+                delete[] tempCB->DSV[i];
+            }
+            delete[] tempCB->DSV;
+            tempCB->DSV = NULL;
+            tempCB->socho = 0;
+        }
+        tempCB = tempCB->next;
+    }
+}
+
 HK* Find_HK_At_List(listHK &dsHK, char* const cmnd) {
     HK* temp = dsHK.goc;
     while(temp != NULL) {
@@ -817,9 +845,25 @@ listCB Find_CB_OnRage(listCB &dsCB, char* const query) {
     return A;
 }
 
-listHK Find_HK_OnRage(listHK &dsHK, char* const query) {
-    listHK A;
-    return A;
+HK** Find_HK_OnRage(listHK &dsHK, char* const query, int &sltk) {
+    if (dsHK.goc == NULL) return NULL;
+    HK** result = new HK* [dsHK.slHK];
+    Stack <HK*> st;
+    HK* curr = dsHK.goc;
+    sltk = 0;
+    while (!st.isEmpty() || curr !=  NULL) {
+        while (curr != NULL) {
+            st.push(curr);
+            curr = curr->left;
+        }
+        curr = st.pop();
+        if (curr != NULL && cmp_prefix(curr->cmnd, query)) {
+            result[sltk] = curr;
+            sltk++;
+        }
+        curr = curr->right;
+    }
+    return result;
 }
 
 // -- Các gói kiểm tra --
@@ -917,7 +961,6 @@ string Can_Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmn
 
 void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB) {
     int index = Find_MB(SubDsMB, soHieuMB);
-    delete SubDsMB.list[index];
     for (int i = index; i < SubDsMB.slMB - 1; i++) {
         SubDsMB.list[i] = SubDsMB.list[i + 1];
     }
