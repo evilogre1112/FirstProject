@@ -11,18 +11,11 @@
 
 using namespace std;
 
-string TimeToString(DateTime dt){
-    char buffer[20]; 
-    snprintf(buffer, sizeof(buffer), "%02d/%02d/%04d %02d:%02d", 
-             dt.get_dd(), dt.get_mt(), dt.get_yy(), 
-             dt.get_hh(), dt.get_mm());
-             
-    return string(buffer);
-}
+
 string time_now() { 
     DateTime now;
     now.time_now(); // Cập nhật giờ hiện tại vào đối tượng DateTime
-    return TimeToString(now); 
+    return ToStringDate(now); 
 }
 DateTime StringtoTime(string time_str){
     DateTime dt;
@@ -72,7 +65,7 @@ string NextDay(DateTime dt){
             dt.yy++;
         }
     }
-    return TimeToString(dt);
+    return ToStringDate(dt);
 }
 string NextDay(string time_str){
     DateTime dt = StringtoTime(time_str);

@@ -10,9 +10,6 @@
 using namespace std;
 
 extern int TotalWidth;
-extern listMB dsMB ;
-extern listCB dsCB ;
-extern listHK dsHK ;
 
 
 #define boxWidth 60
@@ -196,6 +193,10 @@ void SmallBox(string text, int Width = 5, int Height = 40, string color = WHITE)
  * @param color Màu sắc của hộp
  */
 void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Width = 15, int Height = 5, string color = WHITE);
+
+void TruyenThamSo(listMB &A, listCB& B , listHK &C);
+
+void DrawCelender(int x, int y);
 
 string TranFormSatus(int st);
 string TranFormGender(int st);

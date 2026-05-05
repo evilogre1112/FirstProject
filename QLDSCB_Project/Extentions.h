@@ -15,9 +15,9 @@ using namespace std;
 /**
  * @brief chuyển đổi DateTime thành chuỗi định dạng dd/mm/yyyy hh:mm
  * @param dt đối tượng DateTime cần chuyển đổi
- * @return con trỏ đến chuỗi đã được cấp phát động, cần giải phóng sau khi sử dụng
+ * @return chuỗi thời gian đã được chuyển đổi
  */
-string Time(DateTime dt);
+string ToStringDate(DateTime dt);
 /**
  * @brief lấy thời gian hiện tại và trả về dưới dạng chuỗi định dạng dd/mm/yyyy hh:mm
  * @return chuỗi thời gian hiện tại
@@ -106,7 +106,7 @@ int GetHourFromStr(const string &datetimeStr);
 int GetMinuteFromStr(const string &datetimeStr);
 
 string DrawDateTimePicker(int start_x, int start_y);
-string ToStringDate(DateTime dt);
+
 
 //=========== các hàm đọc dữ liệu ===========//
 /**
