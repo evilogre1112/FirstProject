@@ -302,7 +302,7 @@ HK **Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK);
  * @return          Danh sách chuyến bay theo ngày và địa chỉ (mảng con trỏ)
  * @note            UI có trách nhiệm delete[] mảng này sau khi in xong.
  */
-CB** Search_CB(CB* const dsCB ,const DateTime& date,const char* address, int& sldsCB);
+CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sldsCB);
 
 // -- CÂU G: IN DANH SÁCH VÉ TRỐNG --
 
@@ -314,7 +314,7 @@ CB** Search_CB(CB* const dsCB ,const DateTime& date,const char* address, int& sl
  * @return          Danh sách vé trống
  * @note            UI có trách nhiệm delete[] mảng này sau khi in xong để tránh rò rỉ bộ nhớ.
  */
-int* Get_Empty_Seats(CB* const dsCB ,const char* maCB, int &sldsVT);
+int* Get_Empty_Seats(listCB &dsCB, char* const maCB, int &sldsVT);
 
 // -- CÂU H: THỐNG KÊ LƯỢT BAY --
 
@@ -333,7 +333,7 @@ void Sort_SLB(listMB& dsMB, int l, int r);
 /**
  * @brief       Thống kê số lần thực hiện chuyến bay của từng máy bay có trong hệ thống
  * @return      Trả về mảng MB chứa Số lượng máy bay giảm dần và Mã hiệu máy bay tăng dần
- * @note        UI có trách nhiệm delete[] mảng này sau khi in xong.
+ * @note        Không cần delete vì ds trỏ vào ds gốc
  */
 listMB Get_Flight_Stats (listMB &dsMB);
 
