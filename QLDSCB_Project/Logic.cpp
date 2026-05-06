@@ -558,6 +558,34 @@ void Init_Tickets(CB *newCB, int soCho) {
     }
 }
 
+void realTimeUpdateCB(listCB &dsCB, listHK &dsHK) {
+    CB* tempCB = dsCB.head;
+    string currTime = time_now();
+    DateTime Now = StringtoTime(currTime);
+    while (tempCB != NULL) {
+        DateTime TimeCB = tempCB->ngayKH;
+        if (ss_ngay(TimeCB, Now) <= 60 && isNotPastTime(TimeCB, Now)) {
+            tempCB->trangThai = 2; // Chỉ còn ít hơn một tiếng trước khởi hành, không nhận đặt thêm vé
+            tempCB = tempCB->next;
+            continue;
+        }
+        if (ss_ngay(TimeCB, Now) > 180 && !isNotPastTime(TimeCB, Now)) {
+            tempCB->trangThai = 3; // Chuyến bay đã bay được hơn 3 tiếng => Coi như đã hoàn tất chuyến
+            for (int i = 0; i < tempCB->socho; i++) {
+                if (tempCB->DSV[i][0] != '\0') {
+                    HK* tempHK = Find_HK_At_List(dsHK, tempCB->DSV[i]);
+                    delMarkHK(tempHK, tempCB->maCB);
+                }
+                delete[] tempCB->DSV[i];
+            }
+            delete[] tempCB->DSV;
+            tempCB->DSV = NULL;
+            tempCB->socho = 0;
+        }
+        tempCB = tempCB->next;
+    }
+}
+
 HK* Find_HK_At_List(listHK &dsHK, char* const cmnd) {
     HK* temp = dsHK.goc;
     while(temp != NULL) {
@@ -674,7 +702,7 @@ int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber) 
     return 0;
 }
 
-HK **Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK) {
+HK** Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK) {
     CB* tempCB = Find_CB(dsCB, maCB);
     if (tempCB == NULL) return NULL; // chuyen bay khong ton tai
     if (tempCB->trangThai == 0 || tempCB->trangThai == 3) return NULL; // chuyen bay khong con hoat dong
@@ -692,12 +720,33 @@ HK **Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK) {
     return dsHKCB;
 }
 
-CB** Search_CB(CB* const dsCB ,const DateTime& date,const char* address, int& sldsCB) {
-    return nullptr;
+CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sldsCB) {
+    if (dsCB.head == NULL) return NULL; // dsCB khong co thong tin
+    CB** result = new CB* [dsCB.slCB];
+    sldsCB = 0;
+    CB* temp = dsCB.head;
+    while (temp != NULL) {
+        if (ss_ngay(temp->ngayKH, date) == 0 && ss_str(address, temp->sbDich) == 0) {
+            result[sldsCB] = temp;
+            sldsCB++;
+        }
+        temp = temp->next;
+    }
+    return result;
 }
 
-int* Get_Empty_Seats(CB* const dsCB ,const char* maCB, int &sldsVT) {
-    return nullptr;
+int* Get_Empty_Seats(listCB &dsCB, char* const maCB, int &sldsVT) {
+    CB* temp = Find_CB(dsCB, maCB);
+    if (temp == NULL) return NULL; // CB khong ton tai
+    int* result = new int [temp->socho];
+    sldsVT = 0;
+    for (int i = 0; i < temp->socho; i++) {
+        if (temp->DSV[i][0] == '\0') {
+            result[sldsVT] = i + 1;
+            sldsVT++;
+        }
+    }
+    return result;
 }
 
 int ss_SLB(MB* a, MB* b) {
@@ -739,9 +788,7 @@ listMB Get_Flight_Stats (listMB &dsMB) {
     listMB flight_Statics = listMB();
     flight_Statics.slMB = dsMB.slMB;
     for (int i = 0; i < dsMB.slMB; i++) {
-        flight_Statics.list[i] = new MB();
-        *flight_Statics.list[i] = *dsMB.list[i];
-        flight_Statics.list[i]->dsHD.head = NULL; // Khong copy dsMark de dam bao dsMark cua MB an toan
+        flight_Statics.list[i] = dsMB.list[i];
     }
     Sort_SLB(flight_Statics, 0, flight_Statics.slMB - 1);
     return flight_Statics;
@@ -758,9 +805,7 @@ listMB Find_MB_OnRage(listMB& dsMB, char* const query) {
         strcpy(temp, dsMB.list[i]->soHieuMB);
         to_lower(temp);
         if (cmp_prefix(temp, prefix)) {
-            A.list[A.slMB] = new MB();
-            *A.list[A.slMB] = *dsMB.list[i];
-            A.list[A.slMB]->dsHD.head = NULL; // Khong copy dsMark de dam bao dsMark cua MB an toan
+            A.list[A.slMB] = dsMB.list[i];
             A.slMB++;
         }
     }
@@ -800,9 +845,25 @@ listCB Find_CB_OnRage(listCB &dsCB, char* const query) {
     return A;
 }
 
-listHK Find_HK_OnRage(listHK &dsHK, char* const query) {
-    listHK A;
-    return A;
+HK** Find_HK_OnRage(listHK &dsHK, char* const query, int &sltk) {
+    if (dsHK.goc == NULL) return NULL;
+    HK** result = new HK* [dsHK.slHK];
+    Stack <HK*> st;
+    HK* curr = dsHK.goc;
+    sltk = 0;
+    while (!st.isEmpty() || curr !=  NULL) {
+        while (curr != NULL) {
+            st.push(curr);
+            curr = curr->left;
+        }
+        curr = st.pop();
+        if (curr != NULL && cmp_prefix(curr->cmnd, query)) {
+            result[sltk] = curr;
+            sltk++;
+        }
+        curr = curr->right;
+    }
+    return result;
 }
 
 // -- Các gói kiểm tra --
@@ -900,7 +961,6 @@ string Can_Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmn
 
 void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB) {
     int index = Find_MB(SubDsMB, soHieuMB);
-    delete SubDsMB.list[index];
     for (int i = index; i < SubDsMB.slMB - 1; i++) {
         SubDsMB.list[i] = SubDsMB.list[i + 1];
     }
