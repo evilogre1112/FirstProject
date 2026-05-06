@@ -558,7 +558,7 @@ void Init_Tickets(CB *newCB, int soCho) {
     }
 }
 
-void realTimeUpdateCB(listCB &dsCB, listHK &dsHK) {
+void realTimeUpdateCB(listCB &dsCB, listHK &dsHK, listMB &dsMB) {
     CB* tempCB = dsCB.head;
     string currTime = time_now();
     DateTime Now = StringtoTime(currTime);
@@ -569,8 +569,8 @@ void realTimeUpdateCB(listCB &dsCB, listHK &dsHK) {
             tempCB = tempCB->next;
             continue;
         }
-        if (ss_ngay(TimeCB, Now) > 180 && !isNotPastTime(TimeCB, Now)) {
-            tempCB->trangThai = 3; // Chuyến bay đã bay được hơn 3 tiếng => Coi như đã hoàn tất chuyến
+        if (ss_ngay(TimeCB, Now) > 120 && !isNotPastTime(TimeCB, Now)) {
+            tempCB->trangThai = 3; // Chuyến bay đã bay được hơn 2 tiếng => Coi như đã hoàn tất chuyến
             for (int i = 0; i < tempCB->socho; i++) {
                 if (tempCB->DSV[i][0] != '\0') {
                     HK* tempHK = Find_HK_At_List(dsHK, tempCB->DSV[i]);
@@ -581,6 +581,9 @@ void realTimeUpdateCB(listCB &dsCB, listHK &dsHK) {
             delete[] tempCB->DSV;
             tempCB->DSV = NULL;
             tempCB->socho = 0;
+            int index = Find_MB(dsMB, tempCB->soHieuMB);
+            dsMB.list[index]->SLB++;
+            delMarkMB(dsMB.list[index], tempCB->maCB);
         }
         tempCB = tempCB->next;
     }
