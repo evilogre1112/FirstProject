@@ -91,6 +91,28 @@ int IsGreaterTime(string Time1, string Time2){
     if (dt1.mm != dt2.mm) return dt1.mm > dt2.mm ? 1 : -1;
     return 0; // Nếu tất cả các trường đều bằng nhau
 }
+string LastDay(DateTime dt){
+    dt.dd--;
+    if (dt.dd < 1) {
+        dt.mt--;
+        if (dt.mt < 1) {
+            dt.mt = 12;
+            dt.yy--;
+        }
+        dt.dd = daysInMonth(dt.mt, dt.yy);
+    }
+    return ToStringDate(dt);
+}
+string LastDay(string time_str){
+    DateTime dt = StringtoTime(time_str);
+    return LastDay(dt);
+}
+DateTime lastDay(DateTime dt){
+    return StringtoTime(LastDay(dt));
+}
+DateTime lastDay(string time_str){
+    return StringtoTime(LastDay(time_str));
+}
 
 //=========== các hàm đọc dữ liệu ===========//
 

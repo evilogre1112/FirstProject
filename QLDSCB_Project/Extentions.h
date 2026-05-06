@@ -81,8 +81,30 @@ DateTime nextDay(DateTime dt);
  * @return đối tượng DateTime của ngày tiếp theo
  */
 DateTime nextDay(string time_str);
-
-
+/**
+ * @brief tính 24 giờ trước của một ngày cho trước là DateTime
+ * @param dt đối tượng DateTime
+ * @return chuỗi thời gian của ngày trước
+ */
+string LastDay(DateTime dt);
+/**
+ * @brief tính 24 giờ trước của một ngày cho trước là chuỗi
+ * @param time_str chuỗi thời gian
+ * @return chuỗi thời gian của ngày trước
+ */
+string LastDay(string time_str);
+/**
+ * @brief tính 24 giờ trước của một ngày cho trước là DateTime
+ * @param dt đối tượng DateTime
+ * @return đối tượng DateTime của ngày trước
+ */
+DateTime lastDay(DateTime dt);
+/**
+ * @brief tính 24 giờ trước của một ngày cho trước là DateTime
+ * @param time_str chuỗi thời gian
+ * @return đối tượng DateTime của ngày trước
+ */
+DateTime lastDay(string time_str);
 int getFirstDayOfWeek(int month, int year) ;
 
 bool isNotPastTime(const DateTime& t, const DateTime& cur);
