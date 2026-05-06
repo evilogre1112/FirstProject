@@ -90,6 +90,7 @@ int MenusSize[] = {
 int TotalWidth = 0;
 
 NavKey GetNavKey(int &ch) {
+    ch = 0;
 #ifdef _WIN32
     ch = _getch();
     if (ch == 224 || ch == 0) {
@@ -247,6 +248,7 @@ int whereY() {
 }
 void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString){
     if (rowpadding < 4) rowpadding = 4;
+    
     string label[] = {"Sun","Mon","Tue","Wed","Thur","Fri","Sat"};
     int size = 7 ;
     int lens = visualLength(DateString);
@@ -263,7 +265,6 @@ void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateSt
     int realMonth = GetMonthFromStr(nowStr);
     int realYear = GetYearFromStr(nowStr);
     int realToday = GetDayFromStr(nowStr);
-   
     // dd/mtmt/yyyy hh:mm
     DateTime a ;
     a.set_dd(1);
@@ -434,6 +435,7 @@ NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateSt
     Gotoxy(minX, textY);
     if (timeFocus == 2) cout << YELLOW; else cout << RESET;
     cout << (M < 10 ? "0" : "") << M << RESET;
+
    
     DateTime ChossenDay = StringtoTime(DateString);
     
@@ -508,15 +510,38 @@ NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateSt
             else if (key == NAV_UNKNOWN && tolower(ch) == 'd') {
                 ChossenDay.set_dd(Days_In_Month); 
                 DateString = NextDay(ChossenDay); 
-                return NAV_ENTER; 
+                return NAV_RIGHT; 
             }
             else if (key == NAV_UNKNOWN && tolower(ch) == 'a') {
-                string prevMonthStr = LastDay(DateString); 
+               int current_d = ChossenDay.get_dd(); 
+                int m = ChossenDay.get_mt() - 1;
+                int y = ChossenDay.get_yy();
                 
-                // Chỉ cho lùi nếu tháng trước KHÔNG phải là quá khứ
-                if (IsGreaterTime(time_now(), prevMonthStr) != 1) { 
+                if (m < 1) { m = 12; y--; }
+                
+                int maxDays = daysInMonth(m, y);
+                if (current_d > maxDays) current_d = maxDays;
+                
+                DateTime temp = ChossenDay;
+                temp.set_dd(current_d);
+                temp.set_mt(m);
+                temp.set_yy(y);
+                
+                string prevMonthStr = ToStringDate(temp); 
+                
+                // Kiểm tra xem ngày tính ra có bị rơi vào quá khứ không?
+                if (IsGreaterTime(time_now(), prevMonthStr) == 1) { 
+                    // Nếu lùi về TRÚNG tháng hiện tại ngoài đời -> Bẻ nó về đúng ngày hôm nay
+                    if (m == realMonth && y == realYear) {
+                        temp.set_dd(realToday);
+                        DateString = ToStringDate(temp);
+                        return NAV_LEFT;
+                    }
+                    // Còn nếu lùi về hụt qua hẳn tháng trước (ví dụ tháng 4) -> Bị chặn, không làm gì cả
+                } else {
+                    // Tương lai hợp lệ -> Nhảy lịch bình thường
                     DateString = prevMonthStr;
-                    return NAV_ENTER;
+                    return NAV_LEFT;
                 }
             }else if( key == NAV_ESC){
                 DateString = ""; 
@@ -1354,22 +1379,35 @@ NavKey CustomerAddCB() {
             action = InputString(inputs[0], inputX, formY + 2, maCB_max, '_', false);//
         } else if (currentField == 1) {
           string old = inputs[1];
-            NavKey k;
+            NavKey k = NAV_LEFT;
+            bool dateError = false; //Kiểm tra lỗi ngày quá khứ
             
-            // Vòng lặp do-while để giữ Lịch không bị tắt khi ấn A/D đổi tháng
-            do {
+            // Vòng lặp do-while giữ Lịch không bị tắt khi đổi tháng HOẶC khi chọn sai ngày
+            while (k == NAV_LEFT || k == NAV_RIGHT || dateError){
                 ClearRegion(startX + width + 3, 1, TotalWidth - width-3, 13); // Xóa sạch không gian trước khi vẽ
                 k = DrawCalendar(startX + width + 3, 1, 5, 1, inputs[1]);
-            } while (k == NAV_ENTER); 
-            
-            ClearRegion(startX + width + 3, 1, 45, 20); // Dọn Lịch đi sau khi chốt ngày hoặc hủy
-            
+                
+                dateError = false; // Reset cờ mỗi lần vẽ lại lịch
+                
+                // Nếu người dùng nhấn ENTER để chốt ngày, ta tiến hành kiểm tra
+                if (k == NAV_ENTER) {
+                    // Nếu thời gian hiện tại LỚN HƠN thời gian vừa chọn -> Lỗi quá khứ
+                    if (IsGreaterTime(time_now(), inputs[1]) == 1) { 
+                        Gotoxy(startX+1, formY + 20);
+                        string u = "Lỗi: Thời gian khởi hành không được ở trong quá khứ! Bấm phím bất kỳ..." ;
+                        SmallBox(u,false,true,false,false,width-2,3,RED);
+                        _getch();
+                        ClearRegion(startX+1, formY + 20, width-2, 3);
+                        dateError = true; // Bật cờ lỗi để vòng lặp while quay lại mở Lịch
+                    }
+                }
+            }
             if (k == NAV_ESC) {
                 inputs[1] = old;      // Phục hồi ngày cũ
                 action = NAV_UNKNOWN; // Ép giữ con trỏ lại ô này
             } else {
                 Gotoxy(inputX + 1, formY + 2 + (currentField * 3));
-                cout << inputs[1] << string(10, ' ');
+                cout << inputs[1] ;
                 action = NAV_DOWN;    // Tự động nhảy xuống ô Sân bay đến
             }
         } else if (currentField == 2) {
@@ -1403,9 +1441,8 @@ NavKey CustomerAddCB() {
                         return NAV_ESC;
                     }else if(action == NAV_ENTER){
                         inputs[3] = s ;
-                        to_string(tmp.list[idx]->socho);
-                        Gotoxy(inputX, formY + 3 + (size - 1) * 3);
-                        cout << inputs[4] ; 
+                        inputs[4] = to_string(tmp.list[idx]->socho);
+                        RedrawInput(inputs[4],inputX, formY + 3 + (size - 1) * 3,3,' ',true,false)  ; 
                         ClearRegion(inputX+40, formY + 2 + currentField*3+3, 12, items*2-1);
                         break;
                     }

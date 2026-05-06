@@ -27,8 +27,6 @@ int main(){
     Sort_CB(dsCB);
     int slMB = dsMB.slMB ;
     Sort_MB(dsMB,0,slMB-1);
-    string DateString = time_now();
-    //DrawCalendar(30,0,5,1,DateString);
     TruyenThamSo(dsMB,dsCB,dsHK);
     MainScreen();
     cin.ignore();
