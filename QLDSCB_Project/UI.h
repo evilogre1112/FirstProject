@@ -98,7 +98,6 @@ enum NavKey {
 };
 
 
-
 struct LineInfo {
     int byteCount;   // Số byte để dùng trong substr()
     int visualWidth; // Độ dài hiển thị thực tế để tính căn giữa
@@ -111,7 +110,11 @@ struct LineInfo {
  * @return int Chiều rộng của terminal tính bằng số cột ký tự
  */
 int GetTerminalWidth();
-
+/**
+ * @brief Hàm này dùng để đo chiều dài của terminal hiện tại, tương thích với cả Windows và UNIX (Linux/macOS)
+ * @return int Chiều dài của terminal tính bằng số cột ký tự
+ */
+int GetTerminalHeight() ;
 /**
  * @brief Xoá màn hình, tương thích với cả Windows và UNIX (Linux/macOS)
  */
@@ -196,7 +199,9 @@ void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LE
 
 void TruyenThamSo(listMB &A, listCB& B , listHK &C);
 
-void DrawCelender(int x, int y,int rowpadding , int colpadding);
+void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString);
+NavKey DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString);
+int SmallListShMB( string& res, int &index, int width , int height , int x, int y, int items, listMB& A,int X, int Y, int w , int h);
 
 string TranFormSatus(int st);
 string TranFormGender(int st);

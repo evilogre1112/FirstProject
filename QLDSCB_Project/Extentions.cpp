@@ -91,7 +91,7 @@ int IsGreaterTime(string Time1, string Time2){
     if (dt1.mm != dt2.mm) return dt1.mm > dt2.mm ? 1 : -1;
     return 0; // Nếu tất cả các trường đều bằng nhau
 }
-
+string LastDay(string time_str){return "0";}
 //=========== các hàm đọc dữ liệu ===========//
 
 

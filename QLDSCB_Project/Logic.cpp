@@ -917,7 +917,6 @@ string Can_Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmn
 
 void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB) {
     int index = Find_MB(SubDsMB, soHieuMB);
-    delete SubDsMB.list[index];
     for (int i = index; i < SubDsMB.slMB - 1; i++) {
         SubDsMB.list[i] = SubDsMB.list[i + 1];
     }

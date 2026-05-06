@@ -27,9 +27,10 @@ int main(){
     Sort_CB(dsCB);
     int slMB = dsMB.slMB ;
     Sort_MB(dsMB,0,slMB-1);
-    DrawCelender(30,0,10,3);
-    //TruyenThamSo(dsMB,dsCB,dsHK);
-    //MainScreen();
+    string DateString = time_now();
+    //DrawCalendar(30,0,5,1,DateString);
+    TruyenThamSo(dsMB,dsCB,dsHK);
+    MainScreen();
     cin.ignore();
     return 0;
 }

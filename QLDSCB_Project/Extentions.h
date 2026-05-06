@@ -76,11 +76,11 @@ string NextDay(string time_str);
  */
 DateTime nextDay(DateTime dt);
 /**
- * @brief tính 24 giờ tiếp theo của một ngày cho trước là DateTime
+ * @brief tính 24 giờ về sau theo của một ngày cho trước là DateTime
  * @param time_str chuỗi thời gian
  * @return đối tượng DateTime của ngày tiếp theo
  */
-DateTime nextDay(string time_str);
+string LastDay(string time_str);
 
 
 int getFirstDayOfWeek(int month, int year) ;
