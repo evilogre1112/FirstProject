@@ -153,7 +153,13 @@ bool Get_Data_MB(listMB &dsMB, const char *path_file_MB);
  * @return true nếu lấy thành công
  */
 bool Get_Data_HK(listHK &dsHK, const char *path_file_HK);
-
+/**
+* @brief đọc dữ liệu sân bay đích từ file
+* @param dsSBD danh sách sân bay đích
+* @param path_file_SBD đường dẫn file sân bay đích
+* @return true nếu lấy thành công
+*/
+bool Get_Data_SBD(listSBD &dsSBD, const char *path_file_SBD);
 //=========== các hàm ghi hết dữ liệu ===========//
 
 /**
