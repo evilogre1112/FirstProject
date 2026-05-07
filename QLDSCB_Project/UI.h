@@ -210,7 +210,6 @@ NavKey GetNavKey(int &ch);
 NavKey GetNavKey();
 
 int GetKey(int chosen,int count);
-int SubMenu(string options[], int length);
 int MainMenuOptionInBoard(string options[], int length);
 
 NavKey CustomerAddMB();
