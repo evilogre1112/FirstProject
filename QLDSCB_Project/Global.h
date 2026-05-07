@@ -29,9 +29,11 @@ const int ho_max=50;
 const int ten_max=14;
 const int sbDich_max=50;
 const int socho_max=600;
+const int slSBD_max=30;
 static const char* path_file_CB = "Data/DSCB.txt";
 static const char* path_file_MB = "Data/DSMB.txt";
 static const char* path_file_HK = "Data/DSHK.txt";
+static const char* path_file_SBD = "Data/DSSBD.txt";
 
 
 //---- cấu trúc stack cho mọi data dùng danh sách liên kết ----//
@@ -147,7 +149,17 @@ struct listMB {
     void Clear();
     listMB();
 };
-
+//=============cấu trúc sân bay đích=================
+struct SBD{
+    char sbDich[sbDich_max];
+    char tinh[sbDich_max];
+    SBD();
+};
+struct listSBD{
+    int slSBD;
+    SBD* list[slSBD_max];
+    listSBD();
+};
 
 // --- cấu trúc hành khách cây nhị phân ---
 struct HK{

@@ -281,6 +281,33 @@ bool Get_Data_HK(listHK &dsHK, const char *path_file_HK) {
     f.close();
     return true;
 }
+bool Get_Data_SBD(listSBD &dsSBD, const char *path_file_SBD){
+    ifstream f(path_file_SBD);
+    if(!f.is_open()) return false;
+    dsSBD.slSBD=0;
+    char tempSBD[sbDich_max];
+    while(dsSBD.slSBD < slSBD_max && f.getline(tempSBD, sbDich_max, '|')){        
+        //đọc đến cuối file
+        if (strlen(tempSBD) == 0) continue;
+            // Nếu dòng rỗng, bỏ qua
+        SBD* tmp =new SBD();                          //tạo ô nhớ chứa SBD
+        strcpy(tmp->sbDich, tempSBD);
+        // --- tên sân bay đích----
+        if(strlen(tmp->sbDich)== 0){
+            delete tmp;
+            break;
+        }
+        //---tinh thanh----
+        f.getline(tmp->tinh, sbDich_max);
+        
+        dsSBD.list[dsSBD.slSBD] = tmp;
+        dsSBD.slSBD++;
+    }
+
+    f.close();
+    return true;
+}
+
 // ============== các hàm ghi hết dữ liệu ==============
 bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
     ofstream f(path_file_CB);

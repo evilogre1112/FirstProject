@@ -1,0 +1,10 @@
+cấu trúc của file SBD theo 1 hàng được quy định như sau:
+<tên sân bay >|<tên địa chỉ>
+<tên sân bay >|<tên địa chỉ>
+....
+<tên sân bay >|<tên địa chỉ>
+chú thích : tên sân bay : là sân bay đích tại việt nam
+            tên địa chỉ là nơi nó tạo lạc
+vd:
+Nội Bài|Hà Nội
+Tân Sơn Nhất|Hồ Chí Minh
