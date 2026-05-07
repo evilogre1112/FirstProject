@@ -6,6 +6,11 @@
 #include "Logic.h"
 #include "Extentions.h"
 // Chỉ thêm windows.h nếu đang chạy trên Windows
+#ifndef _WIN32
+static int currentCursorX = 0;
+static int currentCursorY = 0;
+#endif
+
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
     #include <windows.h>
@@ -181,8 +186,9 @@ void ClearScreen() {
 #ifdef _WIN32
     system("cls");
 #else
-    // Các hệ điều hành dựa trên UNIX (Linux, macOS)
     system("clear");
+    currentCursorX = 0;
+    currentCursorY = 0;
 #endif
 }
 void Gotoxy(int x, int y) {
@@ -192,34 +198,13 @@ void Gotoxy(int x, int y) {
         hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleCursorPosition(hConsoleOutput, Cursor_an_Pos);
 #else
+        currentCursorX = x; // Lưu lại vết con trỏ
+        currentCursorY = y;
         printf("\033[%d;%dH", y + 1, x + 1); 
+        fflush(stdout);     // Ép terminal nhả bộ đệm và vẽ ngay lập tức
 #endif
 }
 
-#ifndef _WIN32
-void getCursorPosMac(int &x, int &y) {
-    struct termios oldt, newt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-    write(STDOUT_FILENO, "\033[6n", 4);
-    char buf[32];
-    int i = 0;
-    while (i < sizeof(buf) - 1) {
-        if (read(STDIN_FILENO, &buf[i], 1) != 1) break;
-        if (buf[i] == 'R') break;
-        i++;
-    }
-    buf[i] = '\0';
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    int rows, cols;
-    if (sscanf(buf, "\033[%d;%d", &rows, &cols) == 2) {
-        x = cols - 1; y = rows - 1;
-    }
-}
-#endif
 
 // Lấy tọa độ X hiện tại của con trỏ
 int whereX() {
@@ -228,9 +213,7 @@ int whereX() {
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     return csbi.dwCursorPosition.X;
 #else
-    int x, y;
-    getCursorPosMac(x, y);
-    return x;
+    return currentCursorX; 
 #endif
 }
 
@@ -241,9 +224,7 @@ int whereY() {
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     return csbi.dwCursorPosition.Y;
 #else
-    int x, y;
-    getCursorPosMac(x, y);
-    return y;
+    return currentCursorY;
 #endif
 }
 void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString){
@@ -2240,7 +2221,7 @@ bool MODE2_CB(listCB& A, bool isEditing, int index, int current_Row, int current
 bool MODE3_CB(listCB& A, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
 
 void OnlyPrint_List_CB(listCB& A){
-     Render_CB_Page(dsCB, 0, 15);
+     Render_CB_Page(A, 0, 15);
 }
 
 NavKey It_Sub_List_CB(listCB& SubList,int mod){
