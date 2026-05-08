@@ -214,7 +214,7 @@ int MainMenuOptionInBoard(string options[], int length);
 
 NavKey CustomerAddMB();
 NavKey CustomerAddCB();
-void CustomerAddHK();
+NavKey CustomerAddHK();
 
 void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[]);
 
