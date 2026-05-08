@@ -1574,34 +1574,26 @@ NavKey CustomerAddCB() {
     return NAV_ESC;
 }
 
-void CustomerAddHK() {
+NavKey CustomerAddHK() {
     int width = 80;
     int startX = (GetTerminalWidth() - width) / 2;
     int formY = 6;
-
-    if (dsHK.slHK >= slHK_max) {
-        ClearScreen();
-        Gotoxy(startX, 10);
-        cout << RED << "Lỗi: Danh sách hành khách đã đầy" << RESET;
-        _getch();
-        return; 
-    }
 
     ClearScreen();
     Gotoxy(startX, 2);
     SmallBox("THÊM HÀNH KHÁCH MỚI", (int)width, (int)3, (string)YELLOW);
     
     Gotoxy(startX, formY);
-    SmallBox("", true, true, true, true, width, 14, WHITE);
+    SmallBox("", true, true, true, true, width, 10, WHITE);
 
     string labels[] = {"CMND", "Họ", "Tên", "Phái"};
     int labelX = startX + 5;
     int inputX = startX + 25;
     string gap(5, ' '); // Khoảng cách giữa 2 lựa chọn
     for (int i = 0; i < 4; i++) {
-        Gotoxy(labelX, formY + 2 + (i * 4));
+        Gotoxy(labelX, formY + 2 + (i * 2));
         cout << labels[i];
-        Gotoxy(inputX, formY + 2 + (i * 4));
+        Gotoxy(inputX, formY + 2 + (i * 2));
         if(i != 3){
             cout << string(50, '_'); 
         }else{
@@ -1613,7 +1605,7 @@ void CustomerAddHK() {
        
     }
 
-    Gotoxy(startX, formY + 17);
+    Gotoxy(startX, formY + 13);
     SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
 
     // --- LOGIC NHẬP LIỆU VÀ ĐIỀU HƯỚNG ---
@@ -1628,16 +1620,16 @@ void CustomerAddHK() {
         if (currentField == 0) {
             action = InputString(inputs[0], inputX, formY + 2, cmnd_max, '_', true);
         } else if (currentField == 1) {
-            action = InputString(inputs[1], inputX, formY + 6, ho_max, '_', false);
+            action = InputString(inputs[1], inputX, formY + 4, ho_max, '_', false);
         } else if (currentField == 2) {
-            action = InputString(inputs[2], inputX, formY + 10, ten_max, '_', false); 
+            action = InputString(inputs[2], inputX, formY + 6, ten_max, '_', false); 
         }else if (currentField == 3){
-            action = InputGender(gender, inputX, formY + 14); 
+            action = InputGender(gender, inputX, formY + 8); 
         }
 
         if (action == NAV_ESC){
             ClearScreen();
-            return; 
+            return NAV_ESC; 
         } 
         else if (action == NAV_UP) { 
             currentField = (currentField == 0) ? 3 : currentField - 1;
@@ -1648,7 +1640,7 @@ void CustomerAddHK() {
             // --- KIỂM TRA ĐÃ ĐIỀN ĐỦ 3 MỤC CHƯA ---
             if (!inputs[0].empty() && !inputs[1].empty() && !inputs[2].empty()) {
 
-                Gotoxy(startX, formY + 15);
+                Gotoxy(startX, formY + 13);
                 SmallBox("Xác nhận thêm hành khách này? (ENTER: Đồng ý - ESC: Quay lại sửa)", (int)width, (int)3, (string)YELLOW);
                 
                 bool isConfirm = false;
@@ -1664,13 +1656,13 @@ void CustomerAddHK() {
                 }
 
                 if (!isConfirm) {
-                    Gotoxy(startX, formY + 15);
+                    Gotoxy(startX, formY + 13);
                     SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
                     continue; 
                 }
 
                 // --- TIẾN HÀNH LƯU ---
-                Gotoxy(startX, formY + 15);
+                Gotoxy(startX, formY + 13);
                 SmallBox("ĐANG LƯU DỮ LIỆU...", (int)width, (int)3, (string)GREEN);
 
                 HK* NewHK = new HK;
@@ -1680,18 +1672,20 @@ void CustomerAddHK() {
                 
 
                 if(Add_HK(dsHK, ho, ten, cmnd, gender)) {
-                    Gotoxy(startX + 20, formY + 18);
+                    Gotoxy(startX + 20, formY + 16);
                     cout << YELLOW << "Đã lưu thành công! Nhấn phím bất kỳ để thoát." << RESET;
                     _getch();
                     ClearScreen();
-                    return; 
+                    return NAV_ESC; 
                 } else {
-                    Gotoxy(startX + 15, formY + 16);
-                    cout << RED << "Lỗi: CMND [" << inputs[0] << "] đã tồn tại! Bấm phím bất kỳ..." << RESET;
+                    Gotoxy(startX + 5, formY + 10);
+                    string t = "Lỗi: CMND [" + inputs[0] + "] đã tồn tại! Bấm phím bất kỳ...";
+                    cout << RED << t << RESET;
                     delete NewHK;
                     _getch(); 
+                    ClearRegion(startX + 5, formY + 10, visualLength(t), 1);
                     
-                    Gotoxy(startX, formY + 15);
+                    Gotoxy(startX, formY + 13);
                     SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
                     currentField = 0; // Trùng mã thì đưa về ô đầu tiên để sửa
                 }
@@ -1702,9 +1696,11 @@ void CustomerAddHK() {
                     currentField++; // Nếu đang ở trên thì tự xuống dòng
                 } else {
                     // Nếu đang ở dòng cuối cùng (Số chỗ) mà vẫn có dòng trống ở trên
-                    Gotoxy(startX + 5, formY + 12);
-                    cout << RED << "Lỗi: Không được để trống bất kỳ trường nào! Bấm phím bất kỳ..." << RESET;
+                    Gotoxy(startX + 5, formY + 10);
+                    string t = "Lỗi: Không được để trống bất kỳ trường nào! Bấm phím bất kỳ...";
+                    cout << RED << t << RESET;
                     _getch();
+                    ClearRegion(startX + 5, formY + 10, visualLength(t), 1);
                     
                     for (int i = 0; i < 3; i++) {
                         if (inputs[i].empty()) {
@@ -2272,7 +2268,7 @@ NavKey It_Sub_List_CB(listCB& SubList,int mod){
         int currentPage = 0 ;
         int current_Row = 0;
         while(true){
-            int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 chuyến bay
+            const int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 chuyến bay
             int startIndex = currentPage * itemsPerPage;
             int endIndex = startIndex + itemsPerPage;
             int rowOnScreen = 0 ;   
@@ -2396,7 +2392,7 @@ void It_list_CB(int mod, string res){
     int current_Row = 0;
     while(true){
          // Thiết lập thông số phân trang
-        int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 CB
+        const int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 CB
         int startIndex = currentPage * itemsPerPage;
         int endIndex = startIndex + itemsPerPage;
         
