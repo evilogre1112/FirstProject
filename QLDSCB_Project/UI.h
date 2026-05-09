@@ -201,6 +201,7 @@ void TruyenThamSo(listMB &A, listCB& B , listHK &C);
 
 void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString);
 NavKey DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString);
+
 int SmallListShMB( string& res, int &index, int width , int height , int x, int y, int items, listMB& A,int X, int Y, int w , int h);
 
 string TranFormSatus(int st);
@@ -250,6 +251,11 @@ void Menu_QuanLyHanhKhach();
 void Menu_TraCuuChuyenBay();
 void Menu_ThongKeLuotBay();
 void Menu_InDanhSachHanhKhach();
+
+// Các hàm Ui hiển thị trước
+void ViewQLMB();
+void ViewQLCB();
+void ViewQLHK();
 
 void Router_B(int mainMenuIdx, function<void()> func_1 = [](){}, 
                   function<void()> func_2 = [](){}, 
