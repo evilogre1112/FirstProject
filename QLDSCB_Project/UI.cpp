@@ -696,7 +696,7 @@ int InputStatus(int &result, int x, int y) {
 
 
 // Trả về: 0 (ESC), 1 (ENTER), 2 (UP), 3 (DOWN)
-int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers, bool isCenter, bool isHighlight, bool isUppercase) {
+int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers, bool isCenter, bool isHighlight, bool isUppercase,bool isonlychar) {
     // Vẽ lần đầu tiên
     RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
 
@@ -720,16 +720,29 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
             }
         } 
         else if (result.length() < maxLength) {
-            // Ràng buộc ký tự
-            if (onlyNumbers && !isdigit(ch)) continue; 
-            if (ch != ' ' && ch != '-' && !isalnum(ch)) continue; 
-            if (!onlyNumbers && !isprint(ch)) continue;
             if (result.empty() && ch == ' ') continue;
 
-            // XỬ LÝ VIẾT HOA THEO BIẾN ĐIỀU KHIỂN
-            char finalChar = (isUppercase) ? (char)toupper(ch) : (char)ch;
+            // Phân loại xử lý dựa trên bảng mã ASCII (0-127) và UTF-8 (>= 128)
+            if ((unsigned char)ch < 128) {
+                // VÙNG ASCII (Ký tự tiếng Anh, số, dấu)
+                
+                // Ràng buộc số và chữ
+                if (onlyNumbers && !isdigit(ch)) continue; 
+                if (isonlychar && isdigit(ch)) continue;
+                
+                if (ch != ' ' && ch != '-' && !isalnum(ch)) continue; 
 
-            result += finalChar;
+                char finalChar = (isUppercase) ? (char)toupper(ch) : (char)ch;
+                result += finalChar;
+
+            } else {
+                // UTF-8 (Byte của tiếng Việt có dấu, ký tự đặc biệt)
+               
+                if (onlyNumbers) continue; // Nếu chỉ nhập số thì chặn luôn các ký tự UTF-8
+                
+                result += (char)ch;
+            }
+
             RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
         }
     }

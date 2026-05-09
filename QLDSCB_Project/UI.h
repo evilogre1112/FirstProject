@@ -152,13 +152,6 @@ int countLinesNeeded(const string& text, int innerWidth) ;
 void Gotoxy(int x, int y);
 
 /**
- * @brief Hàm này dùng để lấy vị trí con trỏ hiện tại trên macOS/Linux bằng cách đọc chuỗi ANSI trả về từ terminal
- * @param x Tham chiếu để lưu giá trị X của con trỏ
- * @param y Tham chiếu để lưu giá trị Y của con trỏ
- */
-void getCursorPosMac(int &x, int &y);
-
-/**
  * @brief Hàm này sẽ trả về vị trí con trỏ hiện tại
  * @return int Giá trị X của con trỏ hiện tại.
  */
@@ -202,7 +195,9 @@ void TruyenThamSo(listMB &A, listCB& B , listHK &C);
 void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString);
 NavKey DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString);
 
+void UiThongTinMB(int x,int y , int width, int height,string s);
 int SmallListShMB( string& res, int &index, int width , int height , int x, int y, int items, listMB& A,int X, int Y, int w , int h);
+void UiSmallListShMB(int width, int max_items, int x, int y, listMB& A);
 
 string TranFormSatus(int st);
 string TranFormGender(int st);
@@ -230,7 +225,7 @@ bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
 bool MODE2_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
 bool MODE3_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
 
-void Book_Ticket();
+void BookTicket();
 
 NavKey It_Sub_List_CB(listCB& SubList,int mod);
 void OnlyPrint_List_CB(listCB& dsCB);
@@ -245,7 +240,7 @@ void RunInNewTab(NavKey (*func)());
 
 void RedrawInput(const string &result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight);
 int InputStatus(int &result, int x, int y);
-int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false);
+int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false,bool isonlychar = true);
 
 void Menu_QuanLyMayBay();
 void Menu_QuanLyChuyenBay();
