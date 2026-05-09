@@ -15,9 +15,10 @@ using namespace std ;
 
 
 int main(){
-    listMB dsMB ;
+    listMB dsMB;
     listCB dsCB ;
     listHK dsHK ;
+    listSBD dsSBD;
     #ifdef _WIN32
         SetConsoleOutputCP(CP_UTF8);
     #else
@@ -25,6 +26,7 @@ int main(){
     #endif
     TotalWidth = GetTerminalWidth();
     Get_Data_MB(dsMB,path_file_MB);
+    Get_Data_SBD(dsSBD, path_file_SBD);
     Get_Data_HK(dsHK,path_file_HK);
     Get_Data_CB(dsCB,dsMB,dsHK, path_file_CB);
     Sort_CB(dsCB);

@@ -276,93 +276,100 @@ markList::markList() {
     head = NULL;
 }
 
-    // ---- cấu trúc hành khách ----//
-    HK::HK(){
-        ho =NULL;
-        ten =NULL;
-        cmnd = NULL;
-        phai = false;
-        left = right = NULL;
-        dsDatVe.head = NULL;
-    }
+// ---- cấu trúc hành khách ----//
+HK::HK(){
+    ho =NULL;
+    ten =NULL;
+    cmnd = NULL;
+    phai = false;
+    left = right = NULL;
+    dsDatVe.head = NULL;
+}
 
-    bool HK::set_cmnd(char *new_cmnd){
-        if(new_cmnd ==NULL) return false;
-        int n = strlen(new_cmnd);
-        for(int i = 0; i < n; i++)
-            if(new_cmnd[i] < '0' || new_cmnd[i] > '9') return false;
-        //giải phóng bộ nhớ nếu có
-        if(this->cmnd!= NULL)  delete[] this->cmnd;
-        // cấp lại bộ nhớ mới'
-        this->cmnd= new char[n+1];
-        //dùng strncpy để sao chép an toàn
-        strncpy(this->cmnd, new_cmnd,n);
-        this->cmnd[n]='\0';
-        return true;           
-    }
+bool HK::set_cmnd(char *new_cmnd){
+    if(new_cmnd ==NULL) return false;
+    int n = strlen(new_cmnd);
+    for(int i = 0; i < n; i++)
+        if(new_cmnd[i] < '0' || new_cmnd[i] > '9') return false;
+    //giải phóng bộ nhớ nếu có
+    if(this->cmnd!= NULL)  delete[] this->cmnd;
+    // cấp lại bộ nhớ mới'
+    this->cmnd= new char[n+1];
+    //dùng strncpy để sao chép an toàn
+    strncpy(this->cmnd, new_cmnd,n);
+    this->cmnd[n]='\0';
+    return true;           
+}
 
-    bool HK::set_ho(char *new_ho){
-        if(new_ho ==NULL) return false;
-        int n = strlen(new_ho);
-        for(int i = 0; i < n; i++)
-            if(new_ho[i] >= '0' && new_ho[i] <= '9') return false;
-        //giải phóng bộ nhớ nếu có
-        if(this->ho!= NULL)  delete[] this->ho;
-        // cấp lại bộ nhớ mới'
-        this->ho= new char[n+1];
-        //dùng strncpy để sao chép an toàn
-        strncpy(this->ho, new_ho,n);
-        this->ho[n]='\0';
-        return true;
-    }
+bool HK::set_ho(char *new_ho){
+    if(new_ho ==NULL) return false;
+    int n = strlen(new_ho);
+    for(int i = 0; i < n; i++)
+        if(new_ho[i] >= '0' && new_ho[i] <= '9') return false;
+    //giải phóng bộ nhớ nếu có
+    if(this->ho!= NULL)  delete[] this->ho;
+    // cấp lại bộ nhớ mới'
+    this->ho= new char[n+1];
+    //dùng strncpy để sao chép an toàn
+    strncpy(this->ho, new_ho,n);
+    this->ho[n]='\0';
+    return true;
+}
 
-    bool HK::set_ten(char *new_ten){
-       if(new_ten ==NULL) return false;
-        int n = strlen(new_ten);
-        for(int i = 0; i < n; i++)
-            if(new_ten[i] >= '0' && new_ten[i] <= '9') return false;
-        //giải phóng bộ nhớ nếu có
-        if(this->ten!= NULL)  delete[] this->ten;
-        // cấp lại bộ nhớ mới'
-        this->ten= new char[n+1];
-        //dùng strncpy để sao chép an toàn
-        strncpy(this->ten, new_ten,n);
-        this->ten[n]='\0';
-        return true;
-    }
+bool HK::set_ten(char *new_ten){
+    if(new_ten ==NULL) return false;
+    int n = strlen(new_ten);
+    for(int i = 0; i < n; i++)
+        if(new_ten[i] >= '0' && new_ten[i] <= '9') return false;
+    //giải phóng bộ nhớ nếu có
+    if(this->ten!= NULL)  delete[] this->ten;
+    // cấp lại bộ nhớ mới'
+    this->ten= new char[n+1];
+    //dùng strncpy để sao chép an toàn
+    strncpy(this->ten, new_ten,n);
+    this->ten[n]='\0';
+    return true;
+}
 
-    char* HK::get_cmnd(){
-        return cmnd;
-    }
+char* HK::get_cmnd(){
+    return cmnd;
+}
 
-    char* HK::get_ho()
-    {
-        return ho;
-    }
+char* HK::get_ho()
+{
+    return ho;
+}
 
-    char* HK::get_ten(){
-        return ten;
-    }
+char* HK::get_ten(){
+    return ten;
+}
 //--------------------------------------------------
-    bool HK::set_phai(bool gt){
-        phai = gt;
-        return true;
-    }
+bool HK::set_phai(bool gt){
+    phai = gt;
+    return true;
+}
 
-    bool HK::get_phai(){
-        return phai;
-    }
+bool HK::get_phai(){
+    return phai;
+}
 
-    HK::~HK(){
-        delete[] ho;
-        delete[] ten;
-        delete[] cmnd;
-    }
-
-
-    listHK::listHK(){
-        slHK = 0;
-        goc = NULL;
-    }
+HK::~HK(){
+    delete[] ho;
+    delete[] ten;
+    delete[] cmnd;
+}
 
 
+listHK::listHK(){
+    slHK = 0;
+    goc = NULL;
+}
+SBD::SBD(){
+    sbDich[0] = '\0';
+    tinh[0] = '\0';
+}
+listSBD::listSBD(){
+    slSBD = 0;
+    for(int i=0; i<slSBD_max; i++)
+        this->list[i] = NULL;
+}

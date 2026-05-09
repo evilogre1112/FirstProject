@@ -205,8 +205,10 @@ void Init_Tickets(CB* newCB, int soCho);
 /**
  *@brief    Thực hiện cập nhật toàn bộ trạng thái của chuyến bay
  *@param    dsCB    Danh sách chuyến bay
+ *@param    dsHK    Danh sách hành khách
+ *@param    dsMB    Danh sách máy bay
  */
-void realTimeUpdateCB(listCB &dsCB, listHK &dsHK);
+void realTimeUpdateCB(listCB &dsCB, listHK &dsHK, listMB &dsMB);
 
 // --- CÂU C: ĐẶT VÉ ---
 // Tương tác giữa Cây BST (Hành khách) và Danh sách liên kết (Chuyến bay)

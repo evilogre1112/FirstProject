@@ -1,0 +1,22 @@
+Nội Bài|Hà Nội
+Tân Sơn Nhất|Hồ Chí Minh
+Đà Nẵng|Đà Nẵng
+Vân Đồn|Quảng Ninh
+Cát Bi|Hải Phòng
+Điện Biên Phủ|Điện Biên
+Thọ Xuân|Thanh Hóa
+Vinh|Nghệ An
+Đồng Hới|Quảng Bình
+Phú Bài|Thừa Thiên Huế
+Chu Lai|Quảng Nam
+Phù Cát|Bình Định
+Tuy Hòa|Phú Yên
+Cam Ranh|Khánh Hòa
+Pleiku|Gia Lai
+Buôn Ma Thuột|Đắk Lắk
+Liên Khương|Lâm Đồng
+Cần Thơ|Cần Thơ
+Rạch Giá|Kiên Giang
+Phú Quốc|Kiên Giang
+Cà Mau|Cà Mau
+Côn Đảo|Bà Rịa - Vũng Tàu
