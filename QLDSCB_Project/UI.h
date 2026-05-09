@@ -190,14 +190,20 @@ void SmallBox(string text, int Width = 5, int Height = 40, string color = WHITE)
  */
 void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Width = 15, int Height = 5, string color = WHITE);
 
-void TruyenThamSo(listMB &A, listCB& B , listHK &C);
+void TruyenThamSo(listMB &A, listCB& B , listHK &C, listSBD &D);
 
 void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString);
 NavKey DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString);
 
+// Chọn 1 danh sách nhỏ theo shMB, khối hàm hiển thị danh sách nhỏ của MB
 void UiThongTinMB(int x,int y , int width, int height,string s);
-int SmallListShMB( string& res, int &index, int width , int height , int x, int y, int items, listMB& A,int X, int Y, int w , int h);
+int  SmallListShMB( string& res, int &index, int width , int x, int y, int items, listMB& A,int X, int Y, int w , int h);
 void UiSmallListShMB(int width, int max_items, int x, int y, listMB& A);
+
+// Chọn 1 danh sách nhỏ theo mã CB, khối hàm hiển thị danh sách nhỏ của CB
+int SmallListMCB( string& res, CB* &thisCB, int width , int x, int y, int items, listCB &A);
+void UiSmallListMCB(int width, int max_items, int x, int y, listCB& A);
+
 
 string TranFormSatus(int st);
 string TranFormGender(int st);
@@ -218,11 +224,12 @@ void UiFindMB(string& res, NavKey key, int& ch, listMB& A,int x, int y);
 void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
 void OnlyPrint_List_MB(listMB& dsMB);
 NavKey It_Sub_List_MB(listMB& dsMB,int mod);
+void It_list_MB(int mode, string res = "");
 
 bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
 bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
 
-bool MODE2_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
+bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
 bool MODE3_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
 
 void BookTicket();
@@ -232,7 +239,6 @@ void OnlyPrint_List_CB(listCB& dsCB);
 
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage);
-void It_list_MB(int mode, string res = "");
 void It_list_CB(int mod,string res = "");
 
 void RunInNewTab(void (*func)() = [](){});
