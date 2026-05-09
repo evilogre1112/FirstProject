@@ -15,7 +15,7 @@ using namespace std ;
 
 
 int main(){
-    listMB dsMB ;
+    listMB dsMB;
     listCB dsCB ;
     listHK dsHK ;
     listSBD dsSBD;

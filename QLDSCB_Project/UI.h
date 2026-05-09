@@ -214,7 +214,7 @@ int MainMenuOptionInBoard(string options[], int length);
 
 NavKey CustomerAddMB();
 NavKey CustomerAddCB();
-NavKey CustomerAddHK();
+NavKey CustomerAddHK(string cmnd);
 
 void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[]);
 
@@ -228,6 +228,8 @@ bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
 
 bool MODE2_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
 bool MODE3_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
+
+void Book_Ticket();
 
 NavKey It_Sub_List_CB(listCB& SubList,int mod);
 void OnlyPrint_List_CB(listCB& dsCB);
