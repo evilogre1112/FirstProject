@@ -728,8 +728,30 @@ CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sld
     CB** result = new CB* [dsCB.slCB];
     sldsCB = 0;
     CB* temp = dsCB.head;
+    bool validDate = true;
+    bool validAddress = true;
+    if (date.dd == 0 && date.hh == 0 && date.mm == 0 && date.mt == 0 && date.yy == 0) validDate = false;
+    if (address[0] == '\0') validAddress = false;
     while (temp != NULL) {
-        if (ss_ngay(temp->ngayKH, date) == 0 && ss_str(address, temp->sbDich) == 0) {
+        if (validDate && validAddress) {
+            if (ss_ngay(temp->ngayKH, date) == 0 && ss_str(address, temp->sbDich) == 0) {
+                result[sldsCB] = temp;
+                sldsCB++;
+            }
+        }
+        else if (!validDate && validAddress) {
+            if (ss_str(address, temp->sbDich) == 0) {
+                result[sldsCB] = temp;
+                sldsCB++;
+            }
+        }
+        else if (validDate && !validAddress) {
+            if (ss_ngay(temp->ngayKH, date) == 0) {
+                result[sldsCB] = temp;
+                sldsCB++;
+            }
+        }
+        else {
             result[sldsCB] = temp;
             sldsCB++;
         }
@@ -865,6 +887,30 @@ HK** Find_HK_OnRage(listHK &dsHK, char* const query, int &sltk) {
             sltk++;
         }
         curr = curr->right;
+    }
+    return result;
+}
+
+listSBD Find_SBD_OnRage(listSBD &dsSBD, char* const query) {
+    listSBD result;
+    result.slSBD = 0;
+    char tempSB[sbDich_max];
+    char tempTinh[sbDich_max];
+    char prefix[sbDich_max];
+    strcpy(prefix, query);
+    strip_viet(prefix);
+    to_lower(prefix);
+    for (int i = 0; i < dsSBD.slSBD; i++) {
+        strcpy(tempSB, dsSBD.list[i].sbDich);
+        strcpy(tempTinh, dsSBD.list[i].tinh);
+        strip_viet(tempSB);
+        strip_viet(tempTinh);
+        to_lower(tempSB);
+        to_lower(tempTinh);
+        if (cmp_prefix(tempSB, prefix) || cmp_prefix(tempTinh, prefix)) {
+            result.list[result.slSBD] = dsSBD.list[i];
+            result.slSBD++;
+        }
     }
     return result;
 }

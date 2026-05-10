@@ -309,6 +309,7 @@ HK **Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK);
  * @param sldsCB    Logic sẽ đếm và ghi số lượng danh sách chuyến bay vào đây trước khi return.
  * @return          Danh sách chuyến bay theo ngày và địa chỉ (mảng con trỏ)
  * @note            UI có trách nhiệm delete[] mảng này sau khi in xong.
+ *                  Nêu Date được đưa vào có dạng 00/00/00 00:00 thì sẽ tìm những chuyến bay theo địa chỉ không quan tâm thời gian, ngược lại địa chỉ cũng tương tự nếu rỗng, còn nếu cả hai cùng rỗng thì sẽ trả về ds có mọi CB
  */
 CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sldsCB);
 
@@ -355,6 +356,8 @@ listMB Get_Flight_Stats (listMB &dsMB);
 listMB Find_MB_OnRage(listMB &dsMB, char* const query);
 listCB Find_CB_OnRage(listCB &dsCB, char* const query);
 HK** Find_HK_OnRage(listHK &dsHK, char* const query, int &sltk);
+listSBD Find_SBD_OnRage(listSBD &dsSBD, char* const query);
+
 
 // -- Các gói kiểm tra --
 
