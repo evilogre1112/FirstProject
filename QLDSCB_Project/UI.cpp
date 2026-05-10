@@ -2527,10 +2527,52 @@ void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage) {
 // MODE 2 là sữa 
 bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){
     string inputs[] = {"","",""}; // Edit 3 field Ngày giờ , Sân Bay đích, trạng thái
+    int ToaDoLichX = 70;
+    int ToaDoLichY = 20 ;
+    int width = 40 ;
+    inputs[0] = ToStringDate(pageNodes[index]->ngayKH) ;
+    inputs[1] = pageNodes[index]->sbDich ;
+    inputs[2] = to_string(pageNodes[index]->trangThai);
     string m = "Đang Hiệu Chỉnh - Dùng ◄/► để nhảy ô, ENTER để lưu, ESC thoát";
+    int EditField[] = {2,4,5};
+    int idx = 0 ;
     while(true){
+        int ch ;
         Gotoxy(5, 8 + itemsPerPage + 1);
         SmallBox(m,50,4,string(GRAY));
+        Gotoxy(Temp[EditField[idx] + 1] + 1, 8 + rowOnScreen);
+        cout << HIGHLIGHT << inputs[EditField[idx]] << RESET ;
+        if(idx == 1){
+            string old = inputs[1];
+            NavKey k = NAV_LEFT;
+            bool dateError = false; //Kiểm tra lỗi ngày quá khứ
+            
+            // Vòng lặp do-while giữ Lịch không bị tắt khi đổi tháng HOẶC khi chọn sai ngày
+            while (k == NAV_LEFT || k == NAV_RIGHT || dateError){
+                ClearRegion(ToaDoLichX + ToaDoLichX + 3, 1, TotalWidth - width-3, 13); // Xóa sạch không gian trước khi vẽ
+                k = DrawCalendar(ToaDoLichX + width + 3, 1, 5, 1, inputs[1]);
+                
+                dateError = false; // Reset cờ mỗi lần vẽ lại lịch
+                
+                // Nếu người dùng nhấn ENTER để chốt ngày, ta tiến hành kiểm tra
+                if (k == NAV_ENTER) {
+                    // Nếu thời gian hiện tại LỚN HƠN thời gian vừa chọn -> Lỗi quá khứ
+                    if (IsGreaterTime(time_now(), inputs[1]) == 1) { 
+                        Gotoxy(ToaDoLichX+1, ToaDoLichY + 20);
+                        string u = "Lỗi: Thời gian khởi hành không được ở trong quá khứ! Bấm phím bất kỳ..." ;
+                        SmallBox(u,false,true,false,false,width-2,3,RED);
+                        _getch();
+                        ClearRegion(ToaDoLichX+1, ToaDoLichY + 20, width-2, 3);
+                        dateError = true; // Bật cờ lỗi để vòng lặp while quay lại mở Lịch
+                    }
+                }
+        }
+        RedrawInput(inputs[EditField[idx]], Temp[idx + 1] + 1, 8 + rowOnScreen, Temp2[idx + 1] - 2, ' ', true, false);
+        _getch();
+        if(ch == NAV_ESC) return false ;
+        if(ch == NAV_LEFT) idx == 0 ? idx = 2 : idx = idx - 1 ;
+        if(ch == NAV_RIGHT)idx == 2 ? idx = 0 : idx = idx + 1 ; 
+
     }
     return true;/*Update sau*/
 }
