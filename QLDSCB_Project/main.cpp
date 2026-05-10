@@ -32,7 +32,7 @@ int main(){
     Sort_CB(dsCB);
     int slMB = dsMB.slMB ;
     Sort_MB(dsMB,0,slMB-1);
-    TruyenThamSo(dsMB,dsCB,dsHK);
+    TruyenThamSo(dsMB,dsCB,dsHK,dsSBD);
     MainScreen();
     cin.ignore();
     return 0;

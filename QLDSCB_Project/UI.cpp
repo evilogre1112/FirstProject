@@ -76,15 +76,18 @@ string subOptions5[5] = {
 static listMB* pDsMB = nullptr;
 static listCB* pDsCB = nullptr;
 static listHK* pDsHK = nullptr;
+static listSBD* pDsSBD = nullptr;
 
 #define dsMB (*pDsMB)
 #define dsCB (*pDsCB)
 #define dsHK (*pDsHK)
+#define dsSBD (*pDsSBD)
 
-void TruyenThamSo(listMB &A, listCB& B , listHK &C){
+void TruyenThamSo(listMB &A, listCB& B , listHK &C, listSBD& D){
     pDsMB = &A ;
     pDsCB = &B ;
     pDsHK = &C ; 
+    pDsSBD = &D;
 }
 
 string* Menus[] = {
@@ -696,7 +699,7 @@ int InputStatus(int &result, int x, int y) {
 
 
 // Trả về: 0 (ESC), 1 (ENTER), 2 (UP), 3 (DOWN)
-int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers, bool isCenter, bool isHighlight, bool isUppercase) {
+int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers, bool isCenter, bool isHighlight, bool isUppercase,bool isonlychar) {
     // Vẽ lần đầu tiên
     RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
 
@@ -720,16 +723,29 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
             }
         } 
         else if (result.length() < maxLength) {
-            // Ràng buộc ký tự
-            if (onlyNumbers && !isdigit(ch)) continue; 
-            if (ch != ' ' && ch != '-' && !isalnum(ch)) continue; 
-            if (!onlyNumbers && !isprint(ch)) continue;
             if (result.empty() && ch == ' ') continue;
 
-            // XỬ LÝ VIẾT HOA THEO BIẾN ĐIỀU KHIỂN
-            char finalChar = (isUppercase) ? (char)toupper(ch) : (char)ch;
+            // Phân loại xử lý dựa trên bảng mã ASCII (0-127) và UTF-8 (>= 128)
+            if ((unsigned char)ch < 128) {
+                // VÙNG ASCII (Ký tự tiếng Anh, số, dấu)
+                
+                // Ràng buộc số và chữ
+                if (onlyNumbers && !isdigit(ch)) continue; 
+                if (isonlychar && isdigit(ch)) continue;
+                
+                if (ch != ' ' && ch != '-' && !isalnum(ch)) continue; 
 
-            result += finalChar;
+                char finalChar = (isUppercase) ? (char)toupper(ch) : (char)ch;
+                result += finalChar;
+
+            } else {
+                // UTF-8 (Byte của tiếng Việt có dấu, ký tự đặc biệt)
+               
+                if (onlyNumbers) continue; // Nếu chỉ nhập số thì chặn luôn các ký tự UTF-8
+                
+                result += (char)ch;
+            }
+
             RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
         }
     }
@@ -1048,66 +1064,8 @@ void SmallBox(string text, bool ABOVE, bool UNDER, bool LEFT, bool RIGHT,int Wid
     // Đưa con trỏ về dòng cuối cùng đã vẽ để whereY() của hộp sau trả về đúng vị trí đó
     Gotoxy(startX, footerRow); 
 }
-// Hiển thị giao diện bên tay phải
-void ViewOptions(int mainMenuIdx) {
-    Gotoxy(71, 6); 
-    int startX = whereX();
-    int startY = whereY();
-    string* subOptions = Menus[mainMenuIdx];
-    int count = MenusSize[mainMenuIdx];
-    // 1. Xóa vùng cũ 
-    ClearRegion(startX+5, startY, 30, 20); 
 
-    int space = 2;
-    // 3. Vẽ nội dung ra
-    for(int i = 0 ; i < count ; i++) {
-        // con trỏ sẽ nhảy xuống dưới, nên vẫn cần Gotoxy để căn dòng
-        SmallBox(subOptions[i], true, true, true, true, 30, 1, WHITE);
-        Gotoxy(whereX(),whereY()+space);
-    }
-}
-
-void ViewQLMB(){
-    int startX = 1 ;
-    int startY = 22;
-    int lenght = MenusSize[3];
-    Gotoxy(startX,startY);
-    int space = 3 ;
-    for(int i = 0 ; i < lenght ;i++){
-        SmallBox(subOptions4[i],20,5);
-        startX = whereX();
-        Gotoxy(startX + 20 + space, startY);
-    }  
-}
-
-void ViewQLCB(){
-    int startX = 1 ;
-    int startY = 22;
-    int lenght = MenusSize[4];
-    Gotoxy(startX,startY);
-    int space = 3 ;
-    for(int i = 0 ; i < lenght ;i++){
-        SmallBox(subOptions5[i],20,5);
-        startX = whereX();
-        Gotoxy(startX + 20 + space, startY);
-    }  
-}
-
-
-void ViewQLHK(){
-    int startX = 1 ;
-    int startY = 22;
-    int lenght = MenusSize[2];
-    Gotoxy(startX,startY);
-    int space = 3 ;
-    for(int i = 0 ; i < lenght ;i++){
-        SmallBox(subOptions3[i],20,5);
-        startX = whereX();
-        Gotoxy(startX + 20 + space, startY);
-    }  
-}
-
-
+// Hàm phục vụ MB trở xuống
 
 NavKey CustomerAddMB() {
     int width = 80;
@@ -1266,7 +1224,7 @@ void UiThongTinMB(int x,int y , int width, int height,string s){
     cout << "Số chỗ: " << dsMB.list[mbIndex]->socho;
 }
 
-int SmallListShMB( string& res, int &index, int width , int height , int x, int y, int items, listMB& A,int X, int Y, int w , int h){
+int SmallListShMB( string& res, int &index, int width , int x, int y, int items, listMB& A,int X, int Y, int w , int h){
     if (A.slMB == 0) return NAV_ESC;
     items = min(items, A.slMB);
     string s ;
@@ -1319,8 +1277,9 @@ void UiSmallListShMB(int width, int max_items, int x, int y, listMB& A){
     if(A.slMB == 0) {
         Gotoxy(x+1, y + 3);
         int padding = max(0, width - 25);
-        cout << RED << "không tìm thấy máy bay nào!" << string(padding, ' ') << RESET;
-        ClearRegion(x+1, y + 4, width - 2, max_items); 
+        string u = "không tìm thấy máy bay nào!";
+        cout << RED << u << string(padding, ' ') << RESET;
+        ClearRegion(x+1, y + 4, width - 2, (max_items-1)*2); 
         return;
     }
 
@@ -1341,7 +1300,7 @@ void UiSmallListShMB(int width, int max_items, int x, int y, listMB& A){
     }
 }
 
-
+// Hàm addCB trở xuống
 
 NavKey CustomerAddCB() {
     int width = 80;
@@ -1438,12 +1397,12 @@ NavKey CustomerAddCB() {
             int items = 5 ;
             listMB tmp ;
             tmp = Find_MB_OnRage(dsMB, const_cast<char*>(s.c_str()));
-            UiSmallListShMB(15, items, inputX+40, formY + 2 + currentField*3, tmp);
+            UiSmallListShMB(15, items, inputX+26, formY + 2 + currentField*3, tmp);
             while(true){
                 Gotoxy(inputX+26+s.size(), formY + 2 + currentField*3+1);
                 int ch = 0 ;
                 NavKey key = GetNavKey(ch);
-                ClearRegion(inputX+1, formY + 2 + currentField*3+3, 30, 3);
+                ClearRegion(inputX+24, formY + 2 + currentField*3+3, 30, 3);
                 if(key == NAV_UP || key  == NAV_RIGHT){
                     ClearRegion(inputX+40, formY + 2 + currentField*3+3, 12, items*2-1);
                     action = key ;
@@ -1456,7 +1415,7 @@ NavKey CustomerAddCB() {
                 
                 if(key == NAV_DOWN && tmp.slMB > 0) {
                     int idx = 0 ;
-                    action = SmallListShMB(s,idx,15,1,inputX+40,formY + 2 + currentField*3,items,tmp,startX ,formY +18,width,7); // Hàm này hiển thị thông tin MB
+                    action = SmallListShMB(s,idx,15,inputX+26,formY + 2 + currentField*3,items,tmp,startX ,formY +18,width,7); // Hàm này hiển thị thông tin MB
                     if(action == NAV_ESC){
                         ClearRegion(inputX+1, formY + 2 + currentField*3+3, 30, 3);
                         return NAV_ESC;
@@ -1468,8 +1427,8 @@ NavKey CustomerAddCB() {
                         break;
                     }
                 }
-                UiFindMB(s, key, ch, tmp, inputX+1, formY + 2 + currentField*3+1);
-                UiSmallListShMB(15, items, inputX+40, formY + 2 + currentField*3, tmp);
+                UiFindMB(s, key, ch, tmp, inputX+26, formY + 2 + currentField*3+1);
+                UiSmallListShMB(15, items, inputX+26, formY + 2 + currentField*3, tmp);
             }
             
         }else if(currentField == 4){
@@ -1574,6 +1533,101 @@ NavKey CustomerAddCB() {
     return NAV_ESC;
 }
 
+int SmallListMCB( string& res, CB* &thisCB, int width, int x, int y, int items, listCB &A){
+    if (A.slCB == 0) return NAV_ESC;
+    items = min(items, A.slCB);
+    string s ;
+    int here = 0 ;
+    int pos_op = 0 ;
+    CB* selectedNode = nullptr;
+    CB* StartHere = A.head;
+    while(true){
+        CB* current = StartHere;
+
+        for(int i = 0 ; i < items ;i++){
+            Gotoxy(x+1,y + (i+1)*2+1);
+            if(i + here < A.slCB && current != nullptr){
+                s = string(current->maCB);
+                if (i == pos_op){
+                    s = HIGHLIGHT + s + RESET;
+                    selectedNode = current;
+                }
+                int len = visualLength(s);
+                int padding = max(0, width - len - 3);
+                cout << s + string(padding, ' ');
+                current = current->next;
+            }
+        }
+        int ch ;
+        NavKey key = GetNavKey(ch);
+        if(key == NAV_ESC) return NAV_ESC;
+        if(key == NAV_DOWN){
+            if (pos_op + here + 1 < A.slCB) { // Nếu chưa chạm đáy danh sách thật
+                if (pos_op + 1 < items) {
+                    pos_op++; // Thanh sáng dịch xuống
+                } else {
+                    here++;   // Đẩy danh sách xuống, thanh sáng giữ nguyên ở đáy
+                    StartHere = StartHere->next;
+                }
+            }
+        }else if( key == NAV_UP){
+           if (pos_op == 0) {
+                if (here > 0){
+                    here--;
+                    StartHere = A.head; 
+                    for(int i = 0 ; i < here;i++){
+                        StartHere = StartHere->next;
+                    }
+                } 
+                else return NAV_UP;   
+            } else {
+                pos_op--; 
+            }
+        }else if(key == NAV_ENTER){
+           if (selectedNode != nullptr) {
+                thisCB = selectedNode;
+                res = string(selectedNode->maCB);
+                return NAV_ENTER; 
+            }
+        }else if(key == NAV_UNKNOWN && char(ch) == 'f'){
+            return NAV_UP;
+        }
+    }
+}
+
+void UiSmallListMCB(int width, int items, int x, int y, listCB& A){
+    if (A.slCB == 0) {
+        Gotoxy(x+1, y + 3);
+        string u = "Không có chuyến bay nào!";
+        int len = visualLength(u);
+        int padding = max(0, width - len - 3);
+        cout << RED << u << string(padding, ' ') << RESET;
+        ClearRegion(x+1, y + 4, width - 2, (items-1)*2); 
+        return;
+    }
+
+    CB* current = A.head;
+    string s;
+    int renderCount = min(items, A.slCB);
+
+    for(int i = 0 ; i < renderCount ; i++){
+        Gotoxy(x+1, y + (i+1)*2+1);
+        if(current != nullptr){
+            s = string(current->maCB);
+            int len = visualLength(s);
+            int padding = max(0, width - len - 3);
+            cout << s + string(padding, ' ');
+            current = current->next;
+        }
+    }
+    
+    for(int i = renderCount; i < items; i++){
+        Gotoxy(x+1, y + (i+1)*2+1);
+        int padding = max(0, width - 3);
+        cout << string(padding, ' '); 
+    }
+}
+// Phần này của Add hành khách
 NavKey CustomerAddHK(string cmnd) {
     int width = 120;
     int startX = (GetTerminalWidth() - width) / 2;
@@ -1723,7 +1777,212 @@ NavKey CustomerAddHK(string cmnd) {
         }
     }
 }
+// Hàm này ở kế hàm CustomerAddHK nằm trong Block AddHK nên để đây, không được để lung tung ở các hàm CB
+void BookTicket() {
+    int width = 120;
+    int startX = (GetTerminalWidth() - width) / 2;
+    int formY = 2;
+    int startY = 0;
+    ClearScreen();
 
+    int height = 28;
+    Gotoxy(startX, startY);
+    SmallBox("", (int)width - 43, (int)height, (string)WHITE);
+
+    string strDate = time_now();
+    UiDrawCalendar(81, 0, 5, 1, strDate);
+
+    Gotoxy(startX + 81, startY + 15);
+    SmallBox("THÔNG TIN CHUYẾN BAY", (int)39, (int)3, (string)YELLOW);
+    Gotoxy(startX + 81, startY + 20);
+    SmallBox("", (int)39, (int)8, (string)WHITE);
+
+    Gotoxy(startX, formY + 13);
+    SmallBox("THÔNG TIN KHÁCH HÀNG", (int)width - 43, (int)3, (string)YELLOW);
+    Gotoxy(startX, formY + 16);
+    SmallBox("", true, true, true, true, width - 43, 10, WHITE);
+
+	int labelX = startX + 2;
+    int inputX = startX + 25;
+    string labels[] = { "CMND", "Ngày Giờ Khởi Hành", "Sân Bay Đích", "Chuyến Bay", "Số Ghế" };
+    
+    for (int i = 0; i <= labels->size(); i++) {
+        Gotoxy(labelX, formY + 2 * i);
+        cout << labels[i];
+        if (i == 1) continue; // Bỏ qua dòng "Ngày Giờ Khởi Hành" vì có lịch riêng
+        if (i == labels->size()) {
+            Gotoxy(inputX, formY + 2 * i);
+            cout << string(3, '_');
+            continue;
+        }
+        Gotoxy(inputX, formY + 2 * i);
+        cout << string(50, '_');
+    }
+    
+    Gotoxy(inputX - 1, formY + 1);
+    SmallBox(string(22, ' ') + DM, 25, 1);
+
+	string inputs[5] = { "", "", "", "", "" };
+    int currentField = 0;
+    int action = 0;
+    inputs[1] = time_now();
+    while (true) {
+		ClearRegion(labelX, formY + 10, 40, 1); // Xóa thông báo lỗi cũ
+        if (currentField == 0) {
+            Gotoxy(startX, formY + 13);
+            SmallBox("THÔNG TIN KHÁCH HÀNG", (int)width - 43, (int)3, (string)YELLOW);
+            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 12, '_', true ,false, false);
+			char cmnd[cmnd_max];
+            strcpy(cmnd, inputs[0].c_str());
+			HK* UIHK = Find_HK_At_List(dsHK, cmnd);
+            if (UIHK != NULL) {
+                ClearRegion(labelX, formY + 18, 73, 9);
+                string labels[] = { "CMND", "Họ", "Tên", "Phái" };
+				string datas[] = {UIHK->cmnd, UIHK->ho, UIHK->ten, UIHK->phai == 0 ? "Nam" : "Nữ"};
+                for (int i = 0; i < 4; i++) {
+                    Gotoxy(labelX, formY + 19 + (i * 2));
+                    cout << labels[i];
+                    Gotoxy(inputX, formY + 19 + (i * 2));
+                    if (i != 3) {
+                        cout <<  datas[i] << string(50 - visualLength(datas[i]), '_');
+                    }
+                    else cout << datas[i];
+                }
+            }
+        } else if (currentField == 1) {
+            
+            string old = inputs[1];
+            NavKey k = NAV_LEFT;
+            bool dateError = false; //Kiểm tra lỗi ngày quá khứ
+
+            // Vòng lặp do-while giữ Lịch không bị tắt khi đổi tháng HOẶC khi chọn sai ngày
+            while (k == NAV_LEFT || k == NAV_RIGHT || dateError) {
+                ClearRegion(81, 0, 39, 15); // Xóa sạch không gian trước khi vẽ
+                k = DrawCalendar(81, 0, 5, 1, inputs[1]);
+
+                dateError = false; // Reset cờ mỗi lần vẽ lại lịch
+
+                // Nếu người dùng nhấn ENTER để chốt ngày, ta tiến hành kiểm tra
+                if (k == NAV_ENTER) {
+                    // Nếu thời gian hiện tại LỚN HƠN thời gian vừa chọn -> Lỗi quá khứ
+                    if (IsGreaterTime(time_now(), inputs[1]) == 1) {
+                        Gotoxy(labelX, formY + 10);
+                        string u = "Lỗi: Thời gian khởi hành không được ở trong quá khứ! Bấm phím bất kỳ...";
+						cout << RED << u << RESET;
+                        _getch();
+                        ClearRegion(labelX, formY + 10, visualLength(u), 1);
+                        dateError = true; // Bật cờ lỗi để vòng lặp while quay lại mở Lịch
+                    }
+                }
+            }
+            if (k == NAV_ESC) {
+                inputs[1] = old;      // Phục hồi ngày cũ
+                action = NAV_DOWN; // Ép giữ con trỏ lại ô này
+            }
+            else {
+                Gotoxy(inputX, formY + 2 * currentField);
+				cout << inputs[currentField];
+                action = NAV_DOWN;    // Tự động nhảy xuống ô Sân bay đến
+            }
+        }
+        else if (currentField == 2) {
+            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 50, '_', false, false, false);
+        }
+        else if (currentField == 3) {
+            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 50, '_', false, false, false);
+        }
+        else if (currentField == 4) {
+            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 3, '_', true, false, false);
+        }
+
+        if (action == NAV_ESC) {
+            ClearScreen();
+            return;
+        }
+
+        if (action == NAV_UP) {
+            currentField--;
+            if (currentField < 0) {
+				currentField = 4;
+            }
+            continue;
+        }
+
+        if (action == NAV_DOWN) {
+            currentField++;
+            if (currentField > 4) {
+                currentField = 0;
+            }
+            continue;
+        }
+
+
+        if (action == NAV_ENTER) {
+            if (currentField < 5) {
+                currentField++;
+            }
+            if (currentField == 5) {
+                bool empty = false;
+                for (int i = 0; i < 5; i++) {
+                    if (inputs[i].empty()) {
+                        empty = true;
+                        Gotoxy(labelX, formY + 10);
+                        string t = "Vui lòng điền đầy đủ thông tin!";
+						cout << RED << t << RESET;
+                        currentField = i;
+                        _getch();
+                        ClearRegion(labelX, formY + 10, visualLength(t), 1); 
+                        break;
+                    }
+                }
+                if (!empty) {
+                    // Xử lý logic đặt vé ở đây
+                    if (inputs[0].size() < 12) {
+                        Gotoxy(labelX, formY + 10);
+                        string t = "Vui lòng điền một cmnd hợp lệ có đủ 12 chữ số!";
+                        cout << RED << t << RESET;
+                        currentField = 0;
+                        _getch();
+                        ClearRegion(labelX, formY + 10, visualLength(t), 1);
+                        continue;
+                    }
+                    char cmnd[cmnd_max];
+					strcpy(cmnd, inputs[0].c_str());
+                    if (Find_HK_At_List(dsHK, cmnd) == NULL) {
+                        Gotoxy(labelX, formY + 10);
+                        string t1 = "Phát hiện số cmnd mới! Vui lòng cập nhật cho số cmnd này để tiếp tục!";
+                        cout << YELLOW << t1 << RESET;
+                        Gotoxy(labelX, formY + 11);
+                        string t2 = "(Enter: Tiếp tục ESC: Quay lại)";
+                        cout << GRAY << t2 << RESET;
+						action = GetNavKey();
+                        ClearRegion(labelX, formY + 10, visualLength(t1), 1);
+                        ClearRegion(labelX, formY + 11, visualLength(t2), 1);
+                        if (action == NAV_ESC) {
+                            currentField = 0;
+                            continue;
+                        }
+                        else {
+                            action = CustomerAddHK(inputs[0]);
+                            ClearRegion(labelX, formY + 18, 73, 9);
+                            currentField = 0;
+                            continue;
+                        }
+                    }
+                    Gotoxy(labelX, formY + 10);
+                    string t = "Đặt vé thành công! Nhấn phím bất kì để tiếp tục!";
+                    cout << GREEN << t << RESET;
+                    _getch();
+                    ClearRegion(labelX, formY + 10, visualLength(t), 1);
+                }
+                continue;
+            }
+        }
+
+    }
+}
+
+// Khối hàm thực hiện In danh sách MB và các thao tác sữa xoá ở đây 
 
 void UiFindMB(string& res, NavKey key, int& ch, listMB& A, int x, int y) {
     bool isChanged = false; 
@@ -2176,6 +2435,8 @@ void It_list_MB(int mod, string res){
     
 }
 
+// Khối hàm In danh sách Chuyến Bay và các thao tác hiệu chỉnh ở đây không bao gồm các hàm thống kê đặt biệt
+
 // Truyền listCB& A (tham chiếu) để sửa trực tiếp, không dùng lệnh return
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A) {
     bool isChanged = false;
@@ -2263,212 +2524,18 @@ void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage) {
     }
 }
 
-bool MODE2_CB(listCB& A, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
+// MODE 2 là sữa 
+bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){
+    string inputs[] = {"","",""}; // Edit 3 field Ngày giờ , Sân Bay đích, trạng thái
+    string m = "Đang Hiệu Chỉnh - Dùng ◄/► để nhảy ô, ENTER để lưu, ESC thoát";
+    while(true){
+        Gotoxy(5, 8 + itemsPerPage + 1);
+        SmallBox(m,50,4,string(GRAY));
+    }
+    return true;/*Update sau*/
+}
 bool MODE3_CB(listCB& A, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
 
-void BookTicket() {
-    int width = 120;
-    int startX = (GetTerminalWidth() - width) / 2;
-    int formY = 2;
-    int startY = 0;
-    ClearScreen();
-
-    int height = 28;
-    Gotoxy(startX, startY);
-    SmallBox("", (int)width - 43, (int)height, (string)WHITE);
-
-    string strDate = time_now();
-    UiDrawCalendar(81, 0, 5, 1, strDate);
-
-    Gotoxy(startX + 81, startY + 15);
-    SmallBox("THÔNG TIN CHUYẾN BAY", (int)39, (int)3, (string)YELLOW);
-    Gotoxy(startX + 81, startY + 20);
-    SmallBox("", (int)39, (int)8, (string)WHITE);
-
-    Gotoxy(startX, formY + 13);
-    SmallBox("THÔNG TIN KHÁCH HÀNG", (int)width - 43, (int)3, (string)YELLOW);
-    Gotoxy(startX, formY + 16);
-    SmallBox("", true, true, true, true, width - 43, 10, WHITE);
-
-	int labelX = startX + 2;
-    int inputX = startX + 25;
-    string labels[] = { "CMND", "Ngày Giờ Khởi Hành", "Sân Bay Đích", "Chuyến Bay", "Số Ghế" };
-    
-    for (int i = 0; i <= labels->size(); i++) {
-        Gotoxy(labelX, formY + 2 * i);
-        cout << labels[i];
-        if (i == 1) continue; // Bỏ qua dòng "Ngày Giờ Khởi Hành" vì có lịch riêng
-        if (i == labels->size()) {
-            Gotoxy(inputX, formY + 2 * i);
-            cout << string(3, '_');
-            continue;
-        }
-        Gotoxy(inputX, formY + 2 * i);
-        cout << string(50, '_');
-    }
-    
-    Gotoxy(inputX - 1, formY + 1);
-    SmallBox(string(22, ' ') + DM, 25, 1);
-
-	string inputs[5] = { "", "", "", "", "" };
-    int currentField = 0;
-    int action = 0;
-    inputs[1] = time_now();
-    while (true) {
-		ClearRegion(labelX, formY + 10, 40, 1); // Xóa thông báo lỗi cũ
-        if (currentField == 0) {
-            Gotoxy(startX, formY + 13);
-            SmallBox("THÔNG TIN KHÁCH HÀNG", (int)width - 43, (int)3, (string)YELLOW);
-            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 12, '_', true ,false, false);
-			char cmnd[cmnd_max];
-            strcpy(cmnd, inputs[0].c_str());
-			HK* UIHK = Find_HK_At_List(dsHK, cmnd);
-            if (UIHK != NULL) {
-                ClearRegion(labelX, formY + 18, 73, 9);
-                string labels[] = { "CMND", "Họ", "Tên", "Phái" };
-				string datas[] = {UIHK->cmnd, UIHK->ho, UIHK->ten, UIHK->phai == 0 ? "Nam" : "Nữ"};
-                for (int i = 0; i < 4; i++) {
-                    Gotoxy(labelX, formY + 19 + (i * 2));
-                    cout << labels[i];
-                    Gotoxy(inputX, formY + 19 + (i * 2));
-                    if (i != 3) {
-                        cout <<  datas[i] << string(50 - visualLength(datas[i]), '_');
-                    }
-                    else cout << datas[i];
-                }
-            }
-        } else if (currentField == 1) {
-            
-            string old = inputs[1];
-            NavKey k = NAV_LEFT;
-            bool dateError = false; //Kiểm tra lỗi ngày quá khứ
-
-            // Vòng lặp do-while giữ Lịch không bị tắt khi đổi tháng HOẶC khi chọn sai ngày
-            while (k == NAV_LEFT || k == NAV_RIGHT || dateError) {
-                ClearRegion(81, 0, 39, 15); // Xóa sạch không gian trước khi vẽ
-                k = DrawCalendar(81, 0, 5, 1, inputs[1]);
-
-                dateError = false; // Reset cờ mỗi lần vẽ lại lịch
-
-                // Nếu người dùng nhấn ENTER để chốt ngày, ta tiến hành kiểm tra
-                if (k == NAV_ENTER) {
-                    // Nếu thời gian hiện tại LỚN HƠN thời gian vừa chọn -> Lỗi quá khứ
-                    if (IsGreaterTime(time_now(), inputs[1]) == 1) {
-                        Gotoxy(labelX, formY + 10);
-                        string u = "Lỗi: Thời gian khởi hành không được ở trong quá khứ! Bấm phím bất kỳ...";
-						cout << RED << u << RESET;
-                        _getch();
-                        ClearRegion(labelX, formY + 10, visualLength(u), 1);
-                        dateError = true; // Bật cờ lỗi để vòng lặp while quay lại mở Lịch
-                    }
-                }
-            }
-            if (k == NAV_ESC) {
-                inputs[1] = old;      // Phục hồi ngày cũ
-                action = NAV_DOWN; // Ép giữ con trỏ lại ô này
-            }
-            else {
-                Gotoxy(inputX, formY + 2 * currentField);
-				cout << inputs[currentField];
-                action = NAV_DOWN;    // Tự động nhảy xuống ô Sân bay đến
-            }
-        }
-        else if (currentField == 2) {
-            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 50, '_', false, false, false);
-        }
-        else if (currentField == 3) {
-            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 50, '_', false, false, false);
-        }
-        else if (currentField == 4) {
-            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 3, '_', true, false, false);
-        }
-
-        if (action == NAV_ESC) {
-            ClearScreen();
-            return;
-        }
-
-        if (action == NAV_UP) {
-            currentField--;
-            if (currentField < 0) {
-				currentField = 4;
-            }
-            continue;
-        }
-
-        if (action == NAV_DOWN) {
-            currentField++;
-            if (currentField > 4) {
-                currentField = 0;
-            }
-            continue;
-        }
-
-
-        if (action == NAV_ENTER) {
-            if (currentField < 5) {
-                currentField++;
-            }
-            if (currentField == 5) {
-                bool empty = false;
-                for (int i = 0; i < 5; i++) {
-                    if (inputs[i].empty()) {
-                        empty = true;
-                        Gotoxy(labelX, formY + 10);
-                        string t = "Vui lòng điền đầy đủ thông tin!";
-						cout << RED << t << RESET;
-                        currentField = i;
-                        _getch();
-                        ClearRegion(labelX, formY + 10, visualLength(t), 1); 
-                        break;
-                    }
-                }
-                if (!empty) {
-                    // Xử lý logic đặt vé ở đây
-                    if (inputs[0].size() < 12) {
-                        Gotoxy(labelX, formY + 10);
-                        string t = "Vui lòng điền một cmnd hợp lệ có đủ 12 chữ số!";
-                        cout << RED << t << RESET;
-                        currentField = 0;
-                        _getch();
-                        ClearRegion(labelX, formY + 10, visualLength(t), 1);
-                        continue;
-                    }
-                    char cmnd[cmnd_max];
-					strcpy(cmnd, inputs[0].c_str());
-                    if (Find_HK_At_List(dsHK, cmnd) == NULL) {
-                        Gotoxy(labelX, formY + 10);
-                        string t1 = "Phát hiện số cmnd mới! Vui lòng cập nhật cho số cmnd này để tiếp tục!";
-                        cout << YELLOW << t1 << RESET;
-                        Gotoxy(labelX, formY + 11);
-                        string t2 = "(Enter: Tiếp tục ESC: Quay lại)";
-                        cout << GRAY << t2 << RESET;
-						action = GetNavKey();
-                        ClearRegion(labelX, formY + 10, visualLength(t1), 1);
-                        ClearRegion(labelX, formY + 11, visualLength(t2), 1);
-                        if (action == NAV_ESC) {
-                            currentField = 0;
-                            continue;
-                        }
-                        else {
-                            action = CustomerAddHK(inputs[0]);
-                            ClearRegion(labelX, formY + 18, 73, 9);
-                            currentField = 0;
-                            continue;
-                        }
-                    }
-                    Gotoxy(labelX, formY + 10);
-                    string t = "Đặt vé thành công! Nhấn phím bất kì để tiếp tục!";
-                    cout << GREEN << t << RESET;
-                    _getch();
-                    ClearRegion(labelX, formY + 10, visualLength(t), 1);
-                }
-                continue;
-            }
-        }
-
-    }
-}
 
 void OnlyPrint_List_CB(listCB& A){
      Render_CB_Page(A, 0, 15);
@@ -2589,7 +2656,7 @@ void It_list_CB(int mod, string res){
     int size = 6 ;
     int Temp[] = {10,20,50,80,90,105};
     int Temp2[] ={10,30,30,10,15,10};
-    string typemode[] = {"In danh sách","Hiệu Chỉnh", "Huỷ Chuyến"};
+    string typemode[] = {"In danh sách","Hiệu Chỉnh/Huỷ Chuyến"};
    
     string headers[] = {"STT","Mã Chuyến Bay", "Ngày Khởi Hành", "Số Vé","Sân bay đích","Status"};
     PrintHeader(res, mod, "Danh Sách Chuyến Bay", size, headers,typemode, Temp, Temp2);
@@ -2744,6 +2811,8 @@ void It_list_CB(int mod, string res){
                 if(mod == 0){
                     Gotoxy(5, 8 + itemsPerPage + 1);
                     SmallBox("Đây Là Chế Độ In Danh Sách, Bạn Chỉ Có Quyền Xem Ở Chế Độ Này",50,4,string(RED));
+                }if(mod == 1){
+                    bool isedited = MODE2_CB( pageNodes, index,current_Row,currentPage,rowOnScreen,itemsPerPage,Temp,Temp2 ); 
                 }
             }else if (ch == NAV_ESC){
                 return ;
@@ -2753,7 +2822,7 @@ void It_list_CB(int mod, string res){
     
 }
 
-
+// Phần này thống kê đặc biệt không được để các hàm in danh sách thường ở gần đây
 void StatiscalMB(){
     listMB dsMB_Stat = Get_Flight_Stats(dsMB);
     int field = 5 ;
@@ -2843,6 +2912,68 @@ void StatiscalMB(){
     }
 
 }
+
+// Phần của các Router và Hàm đồ hoạ giao diện nhìn cơ bản ở đây
+
+// Hiển thị giao diện bên tay phải
+void ViewOptions(int mainMenuIdx) {
+    Gotoxy(71, 6); 
+    int startX = whereX();
+    int startY = whereY();
+    string* subOptions = Menus[mainMenuIdx];
+    int count = MenusSize[mainMenuIdx];
+    // 1. Xóa vùng cũ 
+    ClearRegion(startX+5, startY, 30, 20); 
+
+    int space = 2;
+    // 3. Vẽ nội dung ra
+    for(int i = 0 ; i < count ; i++) {
+        // con trỏ sẽ nhảy xuống dưới, nên vẫn cần Gotoxy để căn dòng
+        SmallBox(subOptions[i], true, true, true, true, 30, 1, WHITE);
+        Gotoxy(whereX(),whereY()+space);
+    }
+}
+
+void ViewQLMB(){
+    int startX = 1 ;
+    int startY = 22;
+    int lenght = MenusSize[3];
+    Gotoxy(startX,startY);
+    int space = 3 ;
+    for(int i = 0 ; i < lenght ;i++){
+        SmallBox(subOptions4[i],20,5);
+        startX = whereX();
+        Gotoxy(startX + 20 + space, startY);
+    }  
+}
+
+void ViewQLCB(){
+    int startX = 1 ;
+    int startY = 22;
+    int lenght = MenusSize[4];
+    Gotoxy(startX,startY);
+    int space = 3 ;
+    for(int i = 0 ; i < lenght ;i++){
+        SmallBox(subOptions5[i],20,5);
+        startX = whereX();
+        Gotoxy(startX + 20 + space, startY);
+    }  
+}
+
+
+void ViewQLHK(){
+    int startX = 1 ;
+    int startY = 22;
+    int lenght = MenusSize[2];
+    Gotoxy(startX,startY);
+    int space = 3 ;
+    for(int i = 0 ; i < lenght ;i++){
+        SmallBox(subOptions3[i],20,5);
+        startX = whereX();
+        Gotoxy(startX + 20 + space, startY);
+    }  
+}
+
 
 void Router_B(int mainIdx, function<void()> func_1, 
                   function<void()> func_2, 
@@ -3102,4 +3233,3 @@ void MainScreen(){
         }
     }
 }
-
