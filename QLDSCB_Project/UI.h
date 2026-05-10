@@ -203,6 +203,7 @@ void UiSmallListShMB(int width, int max_items, int x, int y, listMB& A);
 // Chọn 1 danh sách nhỏ theo mã CB, khối hàm hiển thị danh sách nhỏ của CB
 int SmallListMCB( string& res, CB* &thisCB, int width , int x, int y, int items, listCB &A);
 void UiSmallListMCB(int width, int max_items, int x, int y, listCB& A);
+void UiThongTinCB(int x,int y , int width, int height,string& MCB);
 
 
 string TranFormSatus(int st);

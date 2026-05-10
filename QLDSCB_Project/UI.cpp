@@ -1533,6 +1533,19 @@ NavKey CustomerAddCB() {
     return NAV_ESC;
 }
 
+void UiThongTinCB(int x,int y , int width, int height,string& MCB){
+    int formY = y ;
+    int startX = x ;
+    ClearRegion(startX + width+1, formY+4, width/2-2, height-4);
+    Gotoxy(startX + width+2, formY+4);
+    CB* ThisCB = Find_CB(dsCB, const_cast<char*>(MCB.c_str()));
+    cout << "Mã Chuyến Bay: " << ThisCB->maCB;
+    Gotoxy(startX + width+2, formY+6);
+    cout << "Số Hiệu Máy Bay: " << ThisCB->soHieuMB;
+    Gotoxy(startX + width+2, formY+8);
+    cout << "Số vé mở: " << ThisCB->socho;
+}
+
 int SmallListMCB( string& res, CB* &thisCB, int width, int x, int y, int items, listCB &A){
     if (A.slCB == 0) return NAV_ESC;
     items = min(items, A.slCB);
@@ -2562,8 +2575,8 @@ void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage) {
 // MODE 2 là sữa 
 bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){
     string inputs[] = {"","",""}; // Edit 3 field Ngày giờ , Sân Bay đích, trạng thái
-    int ToaDoLichX = 70;
-    int ToaDoLichY = 20 ;
+    int ToaDoLichX = 40;
+    int ToaDoLichY = 0 ;
     int width = 40 ;
     inputs[0] = ToStringDate(pageNodes[index]->ngayKH) ;
     inputs[1] = pageNodes[index]->sbDich ;
@@ -2575,32 +2588,12 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
         int ch ;
         Gotoxy(5, 8 + itemsPerPage + 1);
         SmallBox(m,50,4,string(GRAY));
-        Gotoxy(Temp[EditField[idx] + 1] + 1, 8 + rowOnScreen);
-        cout << HIGHLIGHT << inputs[EditField[idx]] << RESET ;
-        if(idx == 1){
-            string old = inputs[1];
+        RedrawInput(inputs[idx],Temp[EditField[idx]] + 1, 8 + rowOnScreen,Temp2[EditField[idx]]-2,' ',true,true);
+        _getch();
+        if(idx == 0){
+            string old = inputs[0];
             NavKey k = NAV_LEFT;
             bool dateError = false; //Kiểm tra lỗi ngày quá khứ
-            
-            // Vòng lặp do-while giữ Lịch không bị tắt khi đổi tháng HOẶC khi chọn sai ngày
-            while (k == NAV_LEFT || k == NAV_RIGHT || dateError){
-                ClearRegion(ToaDoLichX + ToaDoLichX + 3, 1, TotalWidth - width-3, 13); // Xóa sạch không gian trước khi vẽ
-                k = DrawCalendar(ToaDoLichX + width + 3, 1, 5, 1, inputs[1]);
-                
-                dateError = false; // Reset cờ mỗi lần vẽ lại lịch
-                
-                // Nếu người dùng nhấn ENTER để chốt ngày, ta tiến hành kiểm tra
-                if (k == NAV_ENTER) {
-                    // Nếu thời gian hiện tại LỚN HƠN thời gian vừa chọn -> Lỗi quá khứ
-                    if (IsGreaterTime(time_now(), inputs[1]) == 1) { 
-                        Gotoxy(ToaDoLichX+1, ToaDoLichY + 20);
-                        string u = "Lỗi: Thời gian khởi hành không được ở trong quá khứ! Bấm phím bất kỳ..." ;
-                        SmallBox(u,false,true,false,false,width-2,3,RED);
-                        _getch();
-                        ClearRegion(ToaDoLichX+1, ToaDoLichY + 20, width-2, 3);
-                        dateError = true; // Bật cờ lỗi để vòng lặp while quay lại mở Lịch
-                    }
-                }
         }
         RedrawInput(inputs[EditField[idx]], Temp[idx + 1] + 1, 8 + rowOnScreen, Temp2[idx + 1] - 2, ' ', true, false);
         _getch();
@@ -2611,6 +2604,7 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
     }
     return true;/*Update sau*/
 }
+
 bool MODE3_CB(listCB& A, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
 
 
