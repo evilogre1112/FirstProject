@@ -290,7 +290,7 @@ bool Get_Data_SBD(listSBD &dsSBD, const char *path_file_SBD){
         //đọc đến cuối file
         if (strlen(tempSBD) == 0) continue;
             // Nếu dòng rỗng, bỏ qua
-        SBD* tmp =new SBD();                          //tạo ô nhớ chứa SBD
+        SBD* tmp = new SBD();                          //tạo ô nhớ chứa SBD
         strcpy(tmp->sbDich, tempSBD);
         // --- tên sân bay đích----
         if(strlen(tmp->sbDich)== 0){
@@ -300,7 +300,7 @@ bool Get_Data_SBD(listSBD &dsSBD, const char *path_file_SBD){
         //---tinh thanh----
         f.getline(tmp->tinh, sbDich_max);
         
-        dsSBD.list[dsSBD.slSBD] = tmp;
+        dsSBD.list[dsSBD.slSBD] = *tmp;
         dsSBD.slSBD++;
     }
 
