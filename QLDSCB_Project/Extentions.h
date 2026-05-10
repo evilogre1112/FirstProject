@@ -13,6 +13,12 @@
 
 using namespace std;
 
+
+/**
+ * @brief Chuyển chuỗi s có dấu đặc bgieetj sáng chuỗi không dấu bth
+ * @param s chuỗi cần đổi
+ */
+void strip_viet(char *s);
 /**
  * @brief chuyển đổi DateTime thành chuỗi định dạng dd/mm/yyyy hh:mm
  * @param dt đối tượng DateTime cần chuyển đổi
