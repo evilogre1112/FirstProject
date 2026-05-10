@@ -1674,9 +1674,9 @@ NavKey CustomerAddHK(string cmnd) {
         if (currentField == 0) {
             action = InputString(inputs[0], inputX, formY + 16, cmnd_max - 1, '_', true);
         } else if (currentField == 1) {
-            action = InputString(inputs[1], inputX, formY + 18, ho_max, '_', false);
+            action = InputString(inputs[1], inputX, formY + 18, ho_max, '_', false, false, false, false, true);
         } else if (currentField == 2) {
-            action = InputString(inputs[2], inputX, formY + 20, ten_max, '_', false); 
+            action = InputString(inputs[2], inputX, formY + 20, ten_max, '_', false, false, false, false, true);
         }else if (currentField == 3){
             action = InputGender(gender, inputX, formY + 22); 
         }
@@ -1779,6 +1779,7 @@ NavKey CustomerAddHK(string cmnd) {
 }
 // Hàm này ở kế hàm CustomerAddHK nằm trong Block AddHK nên để đây, không được để lung tung ở các hàm CB
 void BookTicket() {
+    start:
     int width = 120;
     int startX = (GetTerminalWidth() - width) / 2;
     int formY = 2;
@@ -1831,10 +1832,40 @@ void BookTicket() {
         if (currentField == 0) {
             Gotoxy(startX, formY + 13);
             SmallBox("THÔNG TIN KHÁCH HÀNG", (int)width - 43, (int)3, (string)YELLOW);
-            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 12, '_', true ,false, false);
+            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 12, '_', true, false, false, false, false);
+            if (inputs[0].size() < 12) {
+                Gotoxy(labelX, formY + 10);
+                string t = "Vui lòng điền một cmnd hợp lệ có đủ 12 chữ số!";
+                cout << RED << t << RESET;
+                currentField = 0;
+                _getch();
+                ClearRegion(labelX, formY + 10, visualLength(t), 1);
+                continue;
+            }
 			char cmnd[cmnd_max];
             strcpy(cmnd, inputs[0].c_str());
 			HK* UIHK = Find_HK_At_List(dsHK, cmnd);
+            if (UIHK == NULL) {
+                Gotoxy(labelX, formY + 10);
+                string t1 = "Phát hiện số cmnd mới! Vui lòng cập nhật cho số cmnd này để tiếp tục!";
+                cout << YELLOW << t1 << RESET;
+                Gotoxy(labelX, formY + 11);
+                string t2 = "(Enter: Tiếp tục ESC: Quay lại)";
+                cout << GRAY << t2 << RESET;
+                action = GetNavKey();
+                ClearRegion(labelX, formY + 10, visualLength(t1), 1);
+                ClearRegion(labelX, formY + 11, visualLength(t2), 1);
+                if (action == NAV_ESC) {
+                    currentField = 0;
+                    continue;
+                }
+                else {
+                    action = CustomerAddHK(inputs[0]);
+                    ClearRegion(labelX, formY + 18, 73, 9);
+                    currentField = 0;
+                    continue;
+                }
+            }
             if (UIHK != NULL) {
                 ClearRegion(labelX, formY + 18, 73, 9);
                 string labels[] = { "CMND", "Họ", "Tên", "Phái" };
@@ -1843,10 +1874,7 @@ void BookTicket() {
                     Gotoxy(labelX, formY + 19 + (i * 2));
                     cout << labels[i];
                     Gotoxy(inputX, formY + 19 + (i * 2));
-                    if (i != 3) {
-                        cout <<  datas[i] << string(50 - visualLength(datas[i]), '_');
-                    }
-                    else cout << datas[i];
+                    cout << "[ " << datas[i] << string(30 - visualLength(datas[i]), '_') << " ]";
                 }
             }
         } else if (currentField == 1) {
@@ -1886,13 +1914,15 @@ void BookTicket() {
             }
         }
         else if (currentField == 2) {
-            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 50, '_', false, false, false);
+            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 50, '_', false, false, false, false, true);
         }
         else if (currentField == 3) {
-            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 50, '_', false, false, false);
+            CB* tempCB;
+            action = SmallListMCB(inputs[currentField], tempCB, 30, inputX, formY + 2 * currentField - 2, 3, dsCB);
+            
         }
         else if (currentField == 4) {
-            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 3, '_', true, false, false);
+            action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 3, '_', true, false, false, false, false);
         }
 
         if (action == NAV_ESC) {
@@ -1970,10 +2000,15 @@ void BookTicket() {
                         }
                     }
                     Gotoxy(labelX, formY + 10);
-                    string t = "Đặt vé thành công! Nhấn phím bất kì để tiếp tục!";
+                    string t = "Đặt vé thành công! (ENTER: Tiếp Tục | ESC: Thoát)";
                     cout << GREEN << t << RESET;
-                    _getch();
+					action = GetNavKey();
+                    if (action == NAV_ESC) {
+                        ClearScreen();
+                        return;
+                    }
                     ClearRegion(labelX, formY + 10, visualLength(t), 1);
+                    goto start;
                 }
                 continue;
             }
