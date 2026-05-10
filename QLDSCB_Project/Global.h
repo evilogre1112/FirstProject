@@ -157,7 +157,7 @@ struct SBD{
 };
 struct listSBD{
     int slSBD;
-    SBD* list[slSBD_max];
+    SBD list[slSBD_max];
     listSBD();
 };
 

@@ -370,6 +370,8 @@ SBD::SBD(){
 }
 listSBD::listSBD(){
     slSBD = 0;
-    for(int i=0; i<slSBD_max; i++)
-        this->list[i] = NULL;
+    for(int i=0; i<slSBD_max; i++){
+        this->list[i].sbDich[0] = '\0';
+        this->list[i].tinh[0] = '\0';
+    }
 }
