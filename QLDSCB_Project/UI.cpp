@@ -1533,7 +1533,20 @@ NavKey CustomerAddCB() {
     return NAV_ESC;
 }
 
-int SmallListMCB( string& res, CB* &thisCB, int width, int x, int y, int items, listCB &A){
+void UiThongTinCB(int x,int y , int width, int height,string MCB){
+    int formY = y ;
+    int startX = x ;
+    ClearRegion(startX + width+1, formY+4, width/2-2, height-4);
+    Gotoxy(startX + width+2, formY+4);
+    CB* ThisCB = Find_CB(dsCB, const_cast<char*>(MCB.c_str()));
+    cout << "Mã Chuyến Bay: " << ThisCB->maCB;
+    Gotoxy(startX + width+2, formY+6);
+    cout << "Số Hiệu Máy Bay: " << ThisCB->soHieuMB;
+    Gotoxy(startX + width+2, formY+8);
+    cout << "Số vé mở: " << ThisCB->socho;
+}
+
+int SmallListMCB( string& res, CB* &thisCB, int width, int x, int y, int items, listCB &A,int X, int Y, int w , int h){
     if (A.slCB == 0) return NAV_ESC;
     items = min(items, A.slCB);
     string s ;
@@ -1558,6 +1571,7 @@ int SmallListMCB( string& res, CB* &thisCB, int width, int x, int y, int items, 
                 current = current->next;
             }
         }
+        if(w != - 1 && h != -1) UiThongTinCB(X,Y,w,h,string(selectedNode->maCB));
         int ch ;
         NavKey key = GetNavKey(ch);
         if(key == NAV_ESC) return NAV_ESC;
@@ -1917,8 +1931,7 @@ void BookTicket() {
             action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 50, '_', false, false, false, false, true);
         }
         else if (currentField == 3) {
-            CB* tempCB;
-            action = SmallListMCB(inputs[currentField], tempCB, 30, inputX, formY + 2 * currentField - 2, 3, dsCB);
+          
             
         }
         else if (currentField == 4) {
@@ -2562,13 +2575,36 @@ void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage) {
 // MODE 2 là sữa 
 bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){
     string inputs[] = {"","",""}; // Edit 3 field Ngày giờ , Sân Bay đích, trạng thái
+    int ToaDoLichX = 40;
+    int ToaDoLichY = 0 ;
+    int width = 40 ;
+    inputs[0] = ToStringDate(pageNodes[index]->ngayKH) ;
+    inputs[1] = pageNodes[index]->sbDich ;
+    inputs[2] = to_string(pageNodes[index]->trangThai);
     string m = "Đang Hiệu Chỉnh - Dùng ◄/► để nhảy ô, ENTER để lưu, ESC thoát";
+    int EditField[] = {2,4,5};
+    int idx = 0 ;
     while(true){
+        int ch ;
         Gotoxy(5, 8 + itemsPerPage + 1);
         SmallBox(m,50,4,string(GRAY));
+        RedrawInput(inputs[idx],Temp[EditField[idx]] + 1, 8 + rowOnScreen,Temp2[EditField[idx]]-2,' ',true,true);
+        _getch();
+        if(idx == 0){
+            string old = inputs[0];
+            NavKey k = NAV_LEFT;
+            bool dateError = false; //Kiểm tra lỗi ngày quá khứ
+        }
+        RedrawInput(inputs[EditField[idx]], Temp[idx + 1] + 1, 8 + rowOnScreen, Temp2[idx + 1] - 2, ' ', true, false);
+        _getch();
+        if(ch == NAV_ESC) return false ;
+        if(ch == NAV_LEFT) idx == 0 ? idx = 2 : idx = idx - 1 ;
+        if(ch == NAV_RIGHT)idx == 2 ? idx = 0 : idx = idx + 1 ; 
+
     }
     return true;/*Update sau*/
 }
+
 bool MODE3_CB(listCB& A, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
 
 
