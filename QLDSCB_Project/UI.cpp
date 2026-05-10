@@ -1533,7 +1533,7 @@ NavKey CustomerAddCB() {
     return NAV_ESC;
 }
 
-void UiThongTinCB(int x,int y , int width, int height,string& MCB){
+void UiThongTinCB(int x,int y , int width, int height,string MCB){
     int formY = y ;
     int startX = x ;
     ClearRegion(startX + width+1, formY+4, width/2-2, height-4);
@@ -1546,7 +1546,7 @@ void UiThongTinCB(int x,int y , int width, int height,string& MCB){
     cout << "Số vé mở: " << ThisCB->socho;
 }
 
-int SmallListMCB( string& res, CB* &thisCB, int width, int x, int y, int items, listCB &A){
+int SmallListMCB( string& res, CB* &thisCB, int width, int x, int y, int items, listCB &A,int X, int Y, int w , int h){
     if (A.slCB == 0) return NAV_ESC;
     items = min(items, A.slCB);
     string s ;
@@ -1571,6 +1571,7 @@ int SmallListMCB( string& res, CB* &thisCB, int width, int x, int y, int items, 
                 current = current->next;
             }
         }
+        if(w != - 1 && h != -1) UiThongTinCB(X,Y,w,h,string(selectedNode->maCB));
         int ch ;
         NavKey key = GetNavKey(ch);
         if(key == NAV_ESC) return NAV_ESC;
@@ -1930,8 +1931,7 @@ void BookTicket() {
             action = InputString(inputs[currentField], inputX, formY + 2 * currentField, 50, '_', false, false, false, false, true);
         }
         else if (currentField == 3) {
-            CB* tempCB;
-            action = SmallListMCB(inputs[currentField], tempCB, 30, inputX, formY + 2 * currentField - 2, 3, dsCB);
+          
             
         }
         else if (currentField == 4) {
