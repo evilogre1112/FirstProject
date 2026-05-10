@@ -11,8 +11,32 @@
 
 using namespace std;
 
+void strip_viet(char *s) {
+    char *r = s;   // đọc
+    char *w = s;   // ghi
 
-string time_now() { 
+    while (*r) {
+        bool hit = false;
+        for (int i = 0; viet_vowels[i].acc; i++) {
+            size_t len = strlen(viet_vowels[i].acc);
+            if (strncmp(r, viet_vowels[i].acc, len) == 0) {
+                *w = viet_vowels[i].plain;
+                w++;
+                r += len;
+                hit = true;
+                break;
+            }
+        }
+        if (!hit) { // ký tự bình thường, giữ nguyên
+            *w = *r;
+            w++;
+            r++;
+        }
+    }
+    *w = '\0';
+}
+
+string time_now() {
     DateTime now;
     now.time_now(); // Cập nhật giờ hiện tại vào đối tượng DateTime
     return ToStringDate(now); 
