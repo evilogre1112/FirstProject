@@ -782,11 +782,6 @@ int InputGender(int &result, int x, int y) {
     }
 }
 
-#include <iostream>
-#include <string>
-
-using namespace std;
-
 int InputDateTime(string &result, int x, int y, char placeholder, bool isCenter, bool isHighlight, int errX, int errY) {
     int maxLength = 16; 
 
