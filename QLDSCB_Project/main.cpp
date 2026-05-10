@@ -1,6 +1,8 @@
 //Hạn chế sử dụng bits/stdc++.h, tốn bộ nhớ
 #ifdef _WIN32
 #include <windows.h> 
+#else
+#include <clocale>
 #endif
 #include <iostream>
 #include <iomanip>
@@ -12,14 +14,15 @@
 using namespace std ;
 
 
-
 int main(){
-    listMB dsMB ;
+    listMB dsMB;
     listCB dsCB ;
     listHK dsHK ;
     listSBD dsSBD;
     #ifdef _WIN32
         SetConsoleOutputCP(CP_UTF8);
+    #else
+        setlocale(LC_ALL, "en_US.UTF-8");
     #endif
     TotalWidth = GetTerminalWidth();
     Get_Data_MB(dsMB,path_file_MB);
