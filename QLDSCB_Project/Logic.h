@@ -413,6 +413,24 @@ string Can_Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB);
  */
 string Can_Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai);
 
+/**
+ * @brief               Thực hiện đặt vé (ghi CMND vào chỗ ngồi) trên một chuyến bay cụ thể
+ * @param dsCB          Danh sách chuyến bay
+ * @param maCB          Mã chuyến bay
+ * @param CMND          Số chứng minh nhân dân của hành khách
+ * @param seatNumber    Số thứ tự ghế khách chọn (từ 1 đến Số chỗ)
+ * @return            Trả về mã lỗi
+ * @note       1 CB không tồn tại
+ *             2 Hành khách không tồn tại
+ *             3 Hành khách đã đặt vé
+ *             4 Chuyến bay hết vé hoặc không còn hoạt động
+ *             5 Đã có khách đặt ghế tại seatNumber
+ *             6 Đăng ký chuyến sai thời gian quy định
+ *				7 Số ghế không hợp lệ
+ *             0 Hành khách đặt vé thành công
+ */
+string Can_Book_Ticket(listCB& dsCB, listHK& dsHK, char* const maCB, char* const CMND, int seatNumber);
+
 // =============================================================== //
 
 /**
