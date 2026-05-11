@@ -187,7 +187,7 @@ bool CB::set_maCB(char ma[maCB_max])
     return true;
 }
 
-bool CB::set_ngayHK(int h, int m, int y, int mmt, int d){
+bool CB::set_ngayKH(int h, int m, int y, int mmt, int d){
     bool check = true;  
     check &= this->ngayKH.set_yy(y);
     check &= this->ngayKH.set_mt(mmt);
