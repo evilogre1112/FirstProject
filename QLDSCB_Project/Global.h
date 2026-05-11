@@ -146,7 +146,7 @@ struct CB{
     CB();                             // ko tham số
     CB(int sc);
     bool set_maCB(char ma[maCB_max]);
-    bool set_ngayHK(int h, int m, int y, int mmt, int d);   //nhập vào theo giờ, phút, năm, tháng, ngày.
+    bool set_ngayKH(int h, int m, int y, int mmt, int d);   //nhập vào theo giờ, phút, năm, tháng, ngày.
     bool set_sbDich(char *sbd);
     bool set_trangThai(int i);
     bool set_soHieuMB(char *shmb);

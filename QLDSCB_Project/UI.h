@@ -245,10 +245,12 @@ void It_list_CB(int mod,string res = "");
 void RunInNewTab(void (*func)() = [](){});
 void RunInNewTab(NavKey (*func)());
 
-void RedrawInput(const string &result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight);
+void RedrawInput(string result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight,string SugestionStr = "");
 int InputStatus(int &result, int x, int y);
 int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false,bool isonlychar = true);
-int InputDateTime(string &result, int x, int y,int maxLength, char placeholder, bool isCenter, bool isHighlight, int errX, int errY) ;
+int InputDateTime(string &result, int x, int y,int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false, int errX =-1, int errY=-1) ;
+int InputStringSBD(string &result, int x, int y, int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false);
+
 
 void Menu_QuanLyMayBay();
 void Menu_QuanLyChuyenBay();

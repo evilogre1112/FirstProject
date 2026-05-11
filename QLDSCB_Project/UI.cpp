@@ -638,7 +638,7 @@ int visualLength(const string& s) {
 }
 
 // Hàm bổ trợ để vẽ lại nội dung nhập liệu (hỗ trợ căn giữa)
-void RedrawInput(const string &result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight) {
+void RedrawInput(string result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight,string SugestionStr) {
     // 1. Xóa sạch vùng nhập liệu cũ bằng placeholder
     Gotoxy(x, y);
     if (isHighlight) cout << HIGHLIGHT; // Bật màu nền nếu cần
@@ -648,7 +648,7 @@ void RedrawInput(const string &result, int x, int y, int maxLength, char placeho
     // 2. Tính toán vị trí x bắt đầu in dựa trên visualLength 
     int printX = x;
     if (isCenter) {
-        int vLen = visualLength(result); 
+        int vLen = visualLength(result + SugestionStr); 
         printX = x + (maxLength - vLen) / 2;
     }
 
@@ -656,7 +656,12 @@ void RedrawInput(const string &result, int x, int y, int maxLength, char placeho
     Gotoxy(printX, y);
     if (isHighlight) cout << HIGHLIGHT;
     cout << result;
+    if (SugestionStr != "") {
+        cout << GRAY << SugestionStr << RESET;
+        if (isHighlight) cout << HIGHLIGHT;
+    }
     if (isHighlight) cout << RESET;
+    Gotoxy(printX + visualLength(result), y);
 }
 
 int InputStatus(int &result, int x, int y) {
@@ -785,7 +790,7 @@ int InputGender(int &result, int x, int y) {
 int InputDateTime(string &result, int x, int y, int maxLength , char placeholder, bool isCenter, bool isHighlight, int errX, int errY) {
     string errMsg = "";
     RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-    ClearRegion(errX, errY, 60, 1);
+    if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1);
 
     while (true) {
         int ch;
@@ -795,18 +800,18 @@ int InputDateTime(string &result, int x, int y, int maxLength , char placeholder
         if (key == NAV_ENTER) {
             if (result.length() < 16) {
                 errMsg = "Lỗi: Vui lòng nhập đầy đủ thời gian (dd/mm/yyyy hh:mm)!";
-                ClearRegion(errX, errY, 60, 1);
+                if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1);
                 Gotoxy(errX, errY);
                 cout << errMsg;
                 RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
                 continue; 
             }
-            ClearRegion(errX, errY, 60, 1);
+             if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1);
             return key;
         }
 
         if (key != NAV_UNKNOWN && key != NAV_BACK) {
-            ClearRegion(errX, errY, 60, 1);
+             if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1);
             return key;
         }
 
@@ -819,7 +824,7 @@ int InputDateTime(string &result, int x, int y, int maxLength , char placeholder
                 if (!result.empty()) {
                     result.pop_back();
                 }
-                ClearRegion(errX, errY, 60, 1); 
+                if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1); 
                 RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
             }
             continue;
@@ -937,7 +942,7 @@ int InputDateTime(string &result, int x, int y, int maxLength , char placeholder
             }
 
             // Xử lý hiển thị hoặc nạp ký tự
-            if (!errMsg.empty()) {
+            if (!errMsg.empty() && errX != -1 && errY != -1) {
                 ClearRegion(errX, errY, 60, 1);
                 Gotoxy(errX, errY);
                 cout << RED << errMsg << RESET;
@@ -945,7 +950,7 @@ int InputDateTime(string &result, int x, int y, int maxLength , char placeholder
                 continue; 
             }
 
-            ClearRegion(errX, errY, 60, 1); 
+             if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1); 
             
             result += (char)ch;
 
@@ -962,6 +967,82 @@ int InputDateTime(string &result, int x, int y, int maxLength , char placeholder
         }
     }
 }
+
+int InputStringSBD(string &result, int x, int y, int maxLength, char placeholder, bool isCenter, bool isHighlight) {
+    // Vẽ lần đầu tiên
+    bool isonlychar = true ;
+    bool isUppercase = false ;
+    string u = "";
+    RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
+
+    while (true) {
+        int ch;
+        NavKey key = GetNavKey(ch); 
+        bool isChanged = false;
+        if(key == NAV_ENTER){
+            result += u ;
+            return key ;
+        }
+        if (key != NAV_UNKNOWN && key != NAV_BACK) return key;
+
+        if (key == NAV_BACK) {
+            if (!result.empty()) {
+                unsigned char c = (unsigned char)result.back();
+                if (c >= 0x80) {
+                    while (!result.empty() && ((unsigned char)result.back() & 0xc0) == 0x80) {
+                        result.pop_back();
+                    }
+                }
+                if (!result.empty()) result.pop_back();
+                
+               isChanged = true;
+            }
+        } 
+        else if (result.length() < maxLength) {
+            if (result.empty() && ch == ' ') continue;
+
+            // Phân loại xử lý dựa trên bảng mã ASCII (0-127) và UTF-8 (>= 128)
+            if ((unsigned char)ch < 128) {
+                // VÙNG ASCII (Ký tự tiếng Anh, số, dấu)
+                
+                // Ràng buộc số và chữ
+                if (isonlychar && isdigit(ch)) continue;
+                
+                if (ch != ' ' && ch != '-' && !isalnum(ch)) continue; 
+
+                char finalChar = (isUppercase) ? (char)toupper(ch) : (char)ch;
+                result += finalChar;
+
+            } else {
+                // UTF-8 (Byte của tiếng Việt có dấu, ký tự đặc biệt)
+                result += (char)ch;
+            }
+            isChanged = true;
+           
+        }
+        if (isChanged) {
+            if (result.empty()) {
+                u = "";
+            } else {
+                listSBD tmp = Find_SBD_OnRage(dsSBD, const_cast<char*>(result.c_str()));
+                
+                if (tmp.slSBD > 0) {
+                    string match = tmp.list[0].sbDich;
+                    if (match.length() >= result.length()) {
+                        u = match.substr(result.length());
+                    } else {
+                        u = "";
+                    }
+                } else {
+                    u = "";
+                }
+            }
+        }
+        RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight,u);
+       
+    }
+}
+
 
 // Hàm này trả về số byte và độ dài hiển thị của một dòng con trong chuỗi text bắt đầu từ startByte, với độ rộng tối đa maxWidth
 LineInfo getLineInfo(const string& text, int startByte, int maxWidth) {
@@ -1402,6 +1483,7 @@ NavKey CustomerAddCB() {
     int inputX = startX + 25;
     string gap(5, ' '); // Khoảng cách giữa 2 lựa chọn
     int size = 4 ;
+    string o = "Hãy Chọn Máy Bay";
     // Đổi khoảng cách từ (i * 4) thành (i * 2)
     for (int i = 0; i < size; i++) {
        
@@ -1420,7 +1502,7 @@ NavKey CustomerAddCB() {
             Gotoxy(inputX + 5, formY + 3 + (i * 3));
             cout << labels[i];
             Gotoxy(inputX+25, formY + 2 + (i * 3));
-            SmallBox(string(22,' ') + AD, 25,1);
+            SmallBox(o + string(22-visualLength(o),' ') + AD, 25,1);
         }
     }
     Gotoxy(labelX,formY + 3 + (size - 1) * 3);
@@ -1476,6 +1558,8 @@ NavKey CustomerAddCB() {
             // Tham số TRUE cuối cùng sẽ chặn toàn bộ các ký tự không phải là số
             action = InputString(inputs[2], inputX, formY + 8, sbDich_max, '_', false); 
         }else if (currentField == 3){
+            Gotoxy(inputX+25, formY + 2 + (currentField * 3));
+            SmallBox(string(22,' ') + AD, 25,1);
             int items = 5 ;
             listMB tmp ;
             tmp = Find_MB_OnRage(dsMB, const_cast<char*>(s.c_str()));
@@ -1484,8 +1568,10 @@ NavKey CustomerAddCB() {
                 Gotoxy(inputX+26+s.size(), formY + 2 + currentField*3+1);
                 int ch = 0 ;
                 NavKey key = GetNavKey(ch);
-                ClearRegion(inputX+24, formY + 2 + currentField*3+3, 30, 3);
+                ClearRegion(inputX+24, formY + 2 + currentField*3+3, 30, items*2-1);
                 if(key == NAV_UP || key  == NAV_RIGHT){
+                    Gotoxy(inputX+25, formY + 2 + (currentField * 3));
+                    SmallBox(o + string(22-visualLength(o),' ') + AD, 25,1);
                     ClearRegion(inputX+40, formY + 2 + currentField*3+3, 12, items*2-1);
                     action = key ;
                     break;
@@ -1499,13 +1585,15 @@ NavKey CustomerAddCB() {
                     int idx = 0 ;
                     action = SmallListShMB(s,idx,15,inputX+26,formY + 2 + currentField*3,items,tmp,startX ,formY +18,width,7); // Hàm này hiển thị thông tin MB
                     if(action == NAV_ESC){
-                        ClearRegion(inputX+1, formY + 2 + currentField*3+3, 30, 3);
+                        ClearRegion(inputX+1, formY + 2 + currentField*3+3, 30, items*2-1);
                         return NAV_ESC;
                     }else if(action == NAV_ENTER){
                         inputs[3] = s ;
                         inputs[4] = to_string(tmp.list[idx]->socho);
+                        Gotoxy(inputX+25, formY + 2 + (currentField * 3));
+                        SmallBox(o + string(22-visualLength(o),' ') + AD, 25,1);
                         RedrawInput(inputs[4],inputX, formY + 3 + (size - 1) * 3,3,' ',true,false)  ; 
-                        ClearRegion(inputX+40, formY + 2 + currentField*3+3, 12, items*2-1);
+                        ClearRegion(inputX+24, formY + 2 + currentField*3+3, 12, items*2-1);
                         break;
                     }
                 }
@@ -2656,6 +2744,8 @@ void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage) {
 
 // MODE 2 là sữa 
 bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){
+    string m = "Đang Hiệu Chỉnh - Dùng ◄/► để nhảy ô, ENTER để lưu, ESC thoát";
+    string u = "";
     string inputs[] = {"","",""}; // Edit 3 field Ngày giờ , Sân Bay đích, trạng thái
     int ToaDoBoxX = 5 ;
     int ToaDoBoxY = 24 ;
@@ -2664,39 +2754,91 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
     int ToaDoLichX = 40;
     int ToaDoLichY = 0 ;
     int width = 40 ;
-    string Colors[] = {RED,GREEN,YELLOW,CYAN};
+    string Colors[] = {RED,GREEN,YELLOW};
     inputs[0] = ToStringDate(pageNodes[index]->ngayKH) ;
     inputs[1] = pageNodes[index]->sbDich ;
     inputs[2] = to_string(pageNodes[index]->trangThai);
-    string m = "Đang Hiệu Chỉnh - Dùng ◄/► để nhảy ô, ENTER để lưu, ESC thoát";
+    int thiscolors = pageNodes[index]->trangThai;
+    if(pageNodes[index]->trangThai == 0){
+        u = "Không thể chỉnh sữa chuyến đã huỷ";
+        Gotoxy(ToaDoBoxX, ToaDoBoxY);
+        SmallBox(u,WidthPerBox,HeightPerBox,string(RED));
+        _getch();
+        return false ;
+    }if(IsGreaterTime(time_now(),inputs[0]) == 1){
+        u = "Không thể chỉnh sữa sau ngày giờ khởi hành";
+        Gotoxy(ToaDoBoxX, ToaDoBoxY);
+        SmallBox(u,WidthPerBox,HeightPerBox,string(RED));
+        _getch();
+        return false ;
+    }if(pageNodes[index]->sove > 0){
+        u = "Không thể chỉnh sữa khi chuyến bay đã có khách";
+        Gotoxy(ToaDoBoxX, ToaDoBoxY);
+        SmallBox(u,WidthPerBox,HeightPerBox,string(RED));
+        _getch();
+        return false ;
+    }
     int EditField[] = {2,4,5};
     int idx = 0 ;
     int ch = 0 ;
-    int thiscolors = 1;
+
+    Gotoxy(ToaDoBoxX, ToaDoBoxY);
+    SmallBox(m,WidthPerBox,HeightPerBox,string(GRAY));
     while(true){
         int ch ;
-        Gotoxy(ToaDoBoxX, ToaDoBoxY);
-        SmallBox(m,WidthPerBox,HeightPerBox,string(GRAY));
+    
         if(idx == 0){
             ch = InputDateTime(inputs[idx],Temp[EditField[idx]]+1, 8 + rowOnScreen,Temp2[EditField[idx]]-2,' ',true,true, 6,22);
+            RedrawInput(inputs[idx], Temp[EditField[idx]]+1, 8 + rowOnScreen, Temp2[EditField[idx]]-2, ' ', true, false);
         }
-   
+        if(idx == 1){
+            ch = InputStringSBD(inputs[idx],Temp[EditField[idx]]+1, 8 + rowOnScreen,Temp2[EditField[idx]]-2,' ',true, true);
+            RedrawInput(inputs[idx], Temp[EditField[idx]]+1, 8 + rowOnScreen, Temp2[EditField[idx]]-2, ' ', true, false);
+        }
         if(ch == NAV_ESC) return false ;
-        if(ch == NAV_LEFT) idx == 0 ? idx = 2 : idx = idx - 1 ;
-        if(ch == NAV_RIGHT)idx == 2 ? idx = 0 : idx = idx + 1 ; 
+        if(ch == NAV_LEFT) idx == 0 ? idx = 1 : idx = idx - 1 ;
+        if(ch == NAV_RIGHT)idx == 1 ? idx = 0 : idx = idx + 1 ; 
         if(ch == NAV_UP){
-            thiscolors = (thiscolors + 1)%4;
+            thiscolors = (thiscolors + 1)%3;
             string stat = Colors[thiscolors] + SQ + RESET;
+            inputs[2] = to_string(thiscolors);
             RedrawInput(stat, Temp[5] + 1, 8 + rowOnScreen, Temp2[5] - 2, ' ', true, false);
         }
         if ( ch == NAV_DOWN){
-            thiscolors = (abs(thiscolors - 1))%4;
+            thiscolors = (abs(thiscolors +2))%3;
             string stat = Colors[thiscolors] + SQ + RESET;
+            inputs[2] = to_string(thiscolors);
             RedrawInput(stat, Temp[5] + 1, 8 + rowOnScreen, Temp2[5] - 2, ' ', true, false);
         }
-        RedrawInput(inputs[idx], Temp[EditField[idx]]+1, 8 + rowOnScreen, Temp2[EditField[idx]]-2, ' ', true, false);
+        if( ch == NAV_ENTER){
+            Gotoxy(ToaDoBoxX, ToaDoBoxY); 
+            SmallBox("Bạn Có Chắc Muốn Sửa Máy Bay Này Chứ? Nhấn ENTER Để Xác Nhận, Phím Bất Kỳ Để Hủy", WidthPerBox,HeightPerBox, string(YELLOW));
+            NavKey k = GetNavKey();
+            if( k != NAV_ENTER){
+                Gotoxy(ToaDoBoxX, ToaDoBoxY);
+                SmallBox(m, WidthPerBox, HeightPerBox, string(GRAY));
+                continue ;
+            }
+            CB* tmp = pageNodes[index];
+            int y = GetYearFromStr(inputs[0]);
+            int d = GetDayFromStr(inputs[0]);
+            int mt = GetMonthFromStr(inputs[0]);
+            int mi = GetMinuteFromStr(inputs[0]);
+            int h = GetHourFromStr(inputs[0]);
+            tmp->set_ngayKH(h,mi,y,mt,d);
+            tmp->set_sbDich(const_cast<char*>(inputs[1].c_str()));
+            tmp->set_trangThai(stoi(inputs[2]));
+            Update_CB(dsCB,dsMB,tmp->maCB,tmp);
+            Gotoxy(ToaDoBoxX, ToaDoBoxY); 
+            SmallBox("Đã Chỉnh sữa thành công, bất kì để tiếp tục, Esc để thoát", WidthPerBox,HeightPerBox, string(GREEN));
+            int t = GetNavKey();
+            if(t == NAV_ESC){return true;}
+            Gotoxy(ToaDoBoxX, ToaDoBoxY); 
+            SmallBox(m,WidthPerBox,HeightPerBox,string(GRAY));
+            return true;
+        }
     }
-    return true;/*Update sau*/
+ 
 }
 
 bool MODE3_CB(listCB& A, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){return true;/*Update sau*/}
@@ -2979,6 +3121,8 @@ void It_list_CB(int mod, string res){
                     SmallBox("Đây Là Chế Độ In Danh Sách, Bạn Chỉ Có Quyền Xem Ở Chế Độ Này",50,4,string(RED));
                 }if(mod == 1){
                     bool isedited = MODE2_CB( pageNodes, index,current_Row,currentPage,rowOnScreen,itemsPerPage,Temp,Temp2 ); 
+                    if(isedited) break ;
+
                 }
             }else if (ch == NAV_ESC){
                 return ;
