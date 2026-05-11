@@ -902,16 +902,13 @@ listSBD Find_SBD_OnRage(listSBD &dsSBD, char* const query) {
     char tempTinh[sbDich_max];
     char prefix[sbDich_max];
     strcpy(prefix, query);
-    strip_viet(prefix);
     to_lower(prefix);
     for (int i = 0; i < dsSBD.slSBD; i++) {
         strcpy(tempSB, dsSBD.list[i].sbDich);
         strcpy(tempTinh, dsSBD.list[i].tinh);
-        strip_viet(tempSB);
-        strip_viet(tempTinh);
         to_lower(tempSB);
         to_lower(tempTinh);
-        if (cmp_prefix(tempSB, prefix) || cmp_prefix(tempTinh, prefix)) {
+        if (cmp_prefix(tempSB, prefix)) {
             result.list[result.slSBD] = dsSBD.list[i];
             result.slSBD++;
         }
@@ -949,7 +946,8 @@ string Can_Edit_MB(listMB &dsMB, listCB &dsCB, char* const soHieuMB, MB* infoUpd
     markCB* tnode = dsMB.list[index]->dsHD.head;
     if (temp != NULL) { // Có chuyến bay đang sử dụng máy bay này
         while (tnode != NULL) {
-            if (infoUpdate->socho < tnode->mark->socho) return "1"; // Không cho đổi nếu số vé mở bán lớn hơn số chỗ khi thay đổi
+			string maCB = tnode->mark->maCB;
+            if (infoUpdate->socho < tnode->mark->socho) return "1" + maCB; // Không cho đổi nếu số vé mở bán lớn hơn số chỗ khi thay đổi
             tnode = tnode->next;
         }
     }
@@ -1006,6 +1004,31 @@ string Can_Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmn
         else {
             return "1"; // Bi trung cmnd
         }
+    }
+    return "0";
+}
+
+string Can_Book_Ticket(listCB& dsCB, listHK& dsHK, char* const maCB, char* const CMND, int seatNumber) {
+    int res = Is_Ticket_Booked(dsCB, dsHK, maCB, CMND);
+    if (res != -3) {
+		if (res == -1) return "1"; // ma chuyen bay khong ton tai trong he thong
+		if (res == -2) return "2"; // hanh khach khong ton tai trong he thong
+        if (res == 0) return "3"; // Hanh khach da dat ve
+    }
+    CB* tempCB = Find_CB(dsCB, maCB);
+    if (seatNumber <= 0 || seatNumber > tempCB->socho) {
+        return "7"; // so ghe khong hop le
+    }
+    if (tempCB->trangThai != 1) return "4"; // Chuyen bay da het ve hoac khong con hoat dong
+    if (tempCB->DSV[seatNumber - 1][0] != '\0') return "5"; // da co khach dat ghe nay;
+    HK* tempHK = Find_HK_At_List(dsHK, CMND);
+    markCB* tempMark;
+    tempMark = tempHK->dsDatVe.head;
+    while (tempMark != NULL) {
+        if (ss_ngay(tempMark->mark->ngayKH, tempCB->ngayKH) < 1440) {
+			return "6"; // dang ky chuyen bay sai thoi gian quy dinh;
+        }
+		tempMark = tempMark->next;
     }
     return "0";
 }
