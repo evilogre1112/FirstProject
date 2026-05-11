@@ -267,6 +267,7 @@ int Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const C
  *             -4 Chuyến bay hết vé hoặc không còn hoạt động
  *             -5 Đã có khách đặt ghế tại seatNumber
  *             -6 Đăng ký chuyến sai thời gian quy định
+ *				-7 Số ghế không hợp lệ
  *             0 Hành khách đặt vé thành công
  */
 int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber);
