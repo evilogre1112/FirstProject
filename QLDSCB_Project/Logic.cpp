@@ -552,6 +552,7 @@ int Status_CB(listCB &dsCB, char* const maCB) {
 void Init_Tickets(CB *newCB, int soCho) {
     if (newCB->DSV != NULL) return;
     newCB->DSV = new char*[soCho];
+	newCB->socho = soCho;
     for (int i = 0; i < soCho; i++) {
         newCB->DSV[i] = new char[cmnd_max];
         newCB->DSV[i][0] = '\0';
@@ -674,6 +675,9 @@ int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, 
         return res;
     }
     CB* tempCB = Find_CB(dsCB, maCB);
+    if (seatNumber <= 0 || seatNumber > tempCB->socho) {
+        return -7; // so ghe khong hop le
+    }
     if (tempCB->trangThai != 1) return -4; // Chuyen bay da het ve hoac khong con hoat dong
     if (tempCB->DSV[seatNumber - 1][0] != '\0') return -5; // da co khach dat ghe nay;
     HK* tempHK = Find_HK_At_List(dsHK, CMND);
