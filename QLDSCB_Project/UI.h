@@ -248,7 +248,7 @@ void RunInNewTab(NavKey (*func)());
 void RedrawInput(const string &result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight);
 int InputStatus(int &result, int x, int y);
 int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false,bool isonlychar = true);
-int InputDateTime(string &result, int x, int y, char placeholder, bool isCenter, bool isHighlight, int errX, int errY) ;
+int InputDateTime(string &result, int x, int y,int maxLength, char placeholder, bool isCenter, bool isHighlight, int errX, int errY) ;
 
 void Menu_QuanLyMayBay();
 void Menu_QuanLyChuyenBay();
