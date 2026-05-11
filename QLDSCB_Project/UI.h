@@ -201,8 +201,9 @@ int  SmallListShMB( string& res, int &index, int width , int x, int y, int items
 void UiSmallListShMB(int width, int max_items, int x, int y, listMB& A);
 
 // Chọn 1 danh sách nhỏ theo mã CB, khối hàm hiển thị danh sách nhỏ của CB
-int SmallListMCB( string& res, CB* &thisCB, int width , int x, int y, int items, listCB &A);
+int SmallListMCB( string& res, CB* &thisCB, int width , int x, int y, int items, listCB &A,int X, int Y, int w , int h);
 void UiSmallListMCB(int width, int max_items, int x, int y, listCB& A);
+void UiThongTinCB(int x,int y , int width, int height,string MCB);
 
 
 string TranFormSatus(int st);
@@ -247,6 +248,7 @@ void RunInNewTab(NavKey (*func)());
 void RedrawInput(const string &result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight);
 int InputStatus(int &result, int x, int y);
 int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false,bool isonlychar = true);
+int InputDateTime(string &result, int x, int y, char placeholder, bool isCenter, bool isHighlight, int errX, int errY) ;
 
 void Menu_QuanLyMayBay();
 void Menu_QuanLyChuyenBay();
