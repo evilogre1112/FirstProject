@@ -205,6 +205,9 @@ int SmallListMCB( string& res, CB* &thisCB, int width , int x, int y, int items,
 void UiSmallListMCB(int width, int max_items, int x, int y, listCB& A);
 void UiThongTinCB(int x,int y , int width, int height,string MCB);
 
+// Chọn 1 danh sách nhỏ theo mã só chỗ của chuyến bay, khối hàm hiển thị danh sách nhỏ của số chỗ
+int SmallListSoCho(string& res, listCB &dsSubCB, CB*& thisCB, int width, int x, int y, int items);
+
 
 string TranFormSatus(int st);
 string TranFormGender(int st);
