@@ -548,3 +548,23 @@ string ToStringDate(DateTime dt) {
        
     return ss.str();
 }
+HK** duyet_HK(listHK& dsHK) {
+    if (dsHK.goc == NULL || dsHK.slHK <= 0) {
+        return NULL;
+    }
+    HK** arr = new HK*[dsHK.slHK];
+    int index = 0; 
+    Stack<HK*> st;
+    HK* curr = dsHK.goc;
+    while (curr != NULL || !st.isEmpty()) {
+        // Bước 4a: Đi sâu nhất về nhánh bên trái
+        while (curr != NULL) {
+            st.push(curr);     
+            curr = curr->left; // Tiến sang trái
+        }
+        curr = st.pop();
+        arr[index++] = curr;
+        curr = curr->right;
+    }
+    return arr;
+}

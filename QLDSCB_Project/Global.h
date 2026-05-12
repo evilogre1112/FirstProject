@@ -141,7 +141,7 @@ struct CB{
     char soHieuMB[soHieuMB_max];      // số hiệu máy bay
     int socho;                        // số chỗ trên máy bay
     int sove;                         // số vé đã đặt trên chuyến bay đó
-    char **DSV;                       // mảng cấp phát động chứa cmnd chảu khách hàng 3 kí tự cuối chứa vị trí vé
+    char **DSV;                       // mảng cấp phát động chứa cmnd chảu khách hàng đặt ve
     CB* next;                         // chứa địa chỉ contro tiếp theo
     CB();                             // ko tham số
     CB(int sc);

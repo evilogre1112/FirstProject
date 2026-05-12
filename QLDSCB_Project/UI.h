@@ -204,6 +204,9 @@ int SmallListMCB( string& res, CB* &thisCB, int width , int x, int y, int items,
 void UiSmallListMCB(int width, int max_items, int x, int y, listCB& A);
 void UiThongTinCB(int x,int y , int width, int height,string MCB);
 
+// Chọn 1 danh sách nhỏ theo mã só chỗ của chuyến bay, khối hàm hiển thị danh sách nhỏ của số chỗ
+int SmallListSoCho(string& res, listCB &dsSubCB, CB*& thisCB, int width, int x, int y, int items);
+
 
 string TranFormSatus(int st);
 string TranFormGender(int st);
@@ -218,7 +221,7 @@ NavKey CustomerAddMB();
 NavKey CustomerAddCB();
 NavKey CustomerAddHK(string cmnd);
 
-void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[],int ResX = 50 , int FindX = 10,int ModeX =90);
+void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[],int ResX = 50 , int FindX = 10,int ModeX =90, int ResY = 4);
 
 void UiFindMB(string& res, NavKey key, int& ch, listMB& A,int x, int y);
 void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
@@ -238,9 +241,13 @@ void OnlyPrint_List_CB(listCB& dsCB,int size, int Temp[],int Temp2[],int Bin[] )
 
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage,int size, int Temp[], int Temp2[],int Bin[]);
-void Render_CB_Page(CB** CBSearch, int slCB,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
+void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
 void It_list_CB(int mod,string res = "");
 void FindCBOnTimeAndPlace(string res="");
+
+void UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems);
+void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage);
+void It_list_HK(int mod, string res);
 
 void RunInNewTab(void (*func)() = [](){});
 void RunInNewTab(NavKey (*func)());

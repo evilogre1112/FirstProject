@@ -734,7 +734,8 @@ CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sld
     CB* temp = dsCB.head;
     bool validDate = true;
     bool validAddress = true;
-    if (date.dd == 0 && date.hh == 0 && date.mm == 0 && date.mt == 0 && date.yy == 0) validDate = false;
+    DateTime nullDate = DateTime();
+    if (ss_ngay(nullDate, date) == 0) validDate = false;
     if (address[0] == '\0') validAddress = false;
     while (temp != NULL) {
         if (validDate && validAddress) {

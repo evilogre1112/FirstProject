@@ -56,11 +56,11 @@ void listMB::Clear() {
 }
 
 DateTime::DateTime (){
-    hh=0;
-    mm=0;
+    hh=00;
+    mm=00;
     dd=1;
     mt=1;
-    yy=0;
+    yy=1;
 }
 
 int DateTime::get_hh()const{
@@ -244,7 +244,7 @@ bool CB::set_socho(int c) {
     this->DSV = new char*[c];
     for (int i = 0; i < c; i++) {
         this->DSV[i] = new char[cmnd_max];
-        strcpy(this->DSV[i], "0");
+        strcpy(this->DSV[i], "\0");
     }
 
     return true;
