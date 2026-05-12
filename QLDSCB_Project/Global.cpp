@@ -108,7 +108,7 @@ bool DateTime::set_mt(int t){
 }
 
 bool DateTime::set_yy(int y){
-    if (y >= 0) { // Giới hạn năm hợp lý
+    if (y >= 1) { // Giới hạn năm hợp lý
         yy = y;
         return true;
     }
