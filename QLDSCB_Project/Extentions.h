@@ -217,7 +217,7 @@ bool Set_Data_HK(HK &HK, const char *path_file_HK);
 /**
  * @brief Hàm duyệt danh sách Hành Khách theo LNR dùng Stack (Khử đệ quy)
  * @param dsHK Cấu trúc danh sách hành khách chứa node gốc (goc) và số lượng (slHK)
- * @return Mảng các con trỏ HK** đã được sắp xếp theo thứ tự CMND (hoặc tiêu chí cây BST của bạn)
+ * @return Mảng các con trỏ HK** đã được sắp xếp theo thứ tự CMND 
  */
 HK** duyet_HK(listHK& dsHK);
 #endif

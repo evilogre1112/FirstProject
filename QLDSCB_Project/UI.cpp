@@ -3463,16 +3463,13 @@ void UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems) {
         isChanged = true;
     }
 
-    // Nếu có sự thay đổi từ khóa, cập nhật lại mảng dữ liệu
     if (isChanged) {
-        if (arrHK != NULL) delete[] arrHK; // Giải phóng mảng kết quả cũ
+        if (arrHK != NULL) delete[] arrHK; 
         
         if (res.empty()) {
-            // Nếu xóa trắng từ khóa thì lấy lại toàn bộ danh sách
             arrHK = duyet_HK(dsHK);
             totalItems = dsHK.slHK;
         } else {
-            // Nếu có từ khóa thì dùng hàm tìm kiếm theo tiền tố
             arrHK = Find_HK_OnRage(dsHK, const_cast<char*>(res.c_str()), totalItems);
         }
     }
@@ -3520,7 +3517,6 @@ void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage)
         Gotoxy(Temp[3], 8 + rowOnScreen); SmallBox(s_phai, false, false, true, true, Temp2[3], 1);
     }
     
-    // Vẽ phần 3 chấm ở cuối bảng (nếu cần thiết cho UI)
     for(int i = 0 ; i < 4 ; i++){
         Gotoxy(Temp[i], 8 + rowOnScreen + 1);
         SmallBox("...", false, false, true, true, Temp2[i], 1, GRAY);
@@ -3547,10 +3543,10 @@ void It_list_HK(int mod, string res = "") {
         int startIndex = currentPage * itemsPerPage;
         int endIndex = min(startIndex + itemsPerPage, totalItems);
         int itemsOnThisPage = max(0, endIndex - startIndex);
+        int totalPages = max(1, (totalItems + itemsPerPage - 1) / itemsPerPage);
         
         Render_HK_Page(arrHK, totalItems, currentPage, itemsPerPage);
         
-        int totalPages = max(1, (totalItems + itemsPerPage - 1) / itemsPerPage);
         string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát.";
         Gotoxy(35, 8 + itemsPerPage + 1);
         SmallBox(m, 50, 4, string(GRAY));
@@ -3577,7 +3573,7 @@ void It_list_HK(int mod, string res = "") {
 
                 NavKey ch = GetNavKey();
 
-                // Trả lại màu bình thường khi rời đi
+                // Trả lại màu bình thường khi con trỏ rời đi
                 Gotoxy(35, 8 + itemsPerPage + 1);
                 SmallBox(m, 50, 4, string(GRAY)); 
                 for(int i = 0; i < 4; i++){
@@ -3590,7 +3586,6 @@ void It_list_HK(int mod, string res = "") {
                         rowOnScreen--;
                     } else {
                         // VÀO THANH TÌM KIẾM
-                        bool backToMain = false;
                         while(true) {
                             Gotoxy(20 + res.length(), 4);
                             int inputChar = 0;
@@ -3600,24 +3595,30 @@ void It_list_HK(int mod, string res = "") {
 
                             // Nhấn DOWN để rời khỏi thanh tìm kiếm
                             if(key == NAV_DOWN && totalItems > 0) {
-                                backToMain = true;
-                                break;
+                                break; // Chỉ thoát vòng gõ phím
                             }
                             
                             int oldItems = totalItems;
                             UiFindHK(res, key, inputChar, arrHK, totalItems);
 
-                            // ĐIỂM FIX LỖI: Chỉ reset trang về 0 nếu người dùng CÓ GÕ PHÍM làm thay đổi kết quả lọc
                             if (oldItems != totalItems || key == NAV_BACK || (isdigit(inputChar) && key == NAV_UNKNOWN)) {
                                 currentPage = 0; 
+                                
+                                startIndex = currentPage * itemsPerPage;
+                                endIndex = min(startIndex + itemsPerPage, totalItems);
+                                itemsOnThisPage = max(0, endIndex - startIndex);
+                                totalPages = max(1, (totalItems + itemsPerPage - 1) / itemsPerPage);
+                                
                                 Render_HK_Page(arrHK, totalItems, currentPage, itemsPerPage);
+                                
+                                m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát.";
+                                Gotoxy(35, 8 + itemsPerPage + 1);
+                                SmallBox(m, 50, 4, string(GRAY));
                             }
                         }
-                        if (backToMain) {
-                            // CHỈ đưa con trỏ về dòng đầu tiên, GIỮ NGUYÊN currentPage
-                            current_Row = 0; 
-                            break; 
-                        }
+                        
+                        // KHI RỜI THANH TÌM KIẾM BẰNG PHÍM DOWN:
+                        rowOnScreen = 0; 
                     }
                 } 
                 else if (ch == NAV_DOWN) {
@@ -3626,7 +3627,7 @@ void It_list_HK(int mod, string res = "") {
                         if (currentPage + 1 < totalPages) currentPage++;
                         else currentPage = 0;
                         current_Row = 0;
-                        break;
+                        break; // Nhảy trang thì break ra để render lại trang mới là hợp lý
                     }
                 } 
                 else if (ch == NAV_RIGHT) {

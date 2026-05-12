@@ -549,28 +549,21 @@ string ToStringDate(DateTime dt) {
     return ss.str();
 }
 HK** duyet_HK(listHK& dsHK) {
-    // 1. Kiểm tra nếu danh sách rỗng
     if (dsHK.goc == NULL || dsHK.slHK <= 0) {
         return NULL;
     }
-    // 2. Cấp phát mảng con trỏ với kích thước chính xác dựa vào slHK
     HK** arr = new HK*[dsHK.slHK];
-    int index = 0; // Biến đếm vị trí chèn vào mảng
-    // 3. Khởi tạo Stack chứa các con trỏ HK*
+    int index = 0; 
     Stack<HK*> st;
     HK* curr = dsHK.goc;
-    // 4. Quá trình duyệt cây LNR bằng Stack
     while (curr != NULL || !st.isEmpty()) {
         // Bước 4a: Đi sâu nhất về nhánh bên trái
         while (curr != NULL) {
-            st.push(curr);     // Lưu node hiện tại vào Stack
+            st.push(curr);     
             curr = curr->left; // Tiến sang trái
         }
-        // Bước 4b: Pop node trên cùng ra để xử lý
         curr = st.pop();
-        // Lưu địa chỉ node vào mảng kết quả
         arr[index++] = curr;
-        // Bước 4c: Chuyển hướng sang nhánh bên phải
         curr = curr->right;
     }
     return arr;
