@@ -242,6 +242,10 @@ void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage);
 void It_list_CB(int mod,string res = "");
 
+void UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems);
+void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage);
+void It_list_HK(int mod, string res);
+
 void RunInNewTab(void (*func)() = [](){});
 void RunInNewTab(NavKey (*func)());
 
