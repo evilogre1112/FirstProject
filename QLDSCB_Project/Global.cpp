@@ -56,11 +56,11 @@ void listMB::Clear() {
 }
 
 DateTime::DateTime (){
-    hh=12;
+    hh=00;
     mm=00;
     dd=1;
     mt=1;
-    yy=2026;
+    yy=1;
 }
 
 int DateTime::get_hh()const{
