@@ -980,7 +980,8 @@ int InputStringSBD(string &result, int x, int y, int maxLength, char placeholder
         NavKey key = GetNavKey(ch); 
         bool isChanged = false;
         if(key == NAV_ENTER){
-            result += u ;
+            listSBD tmp = Find_SBD_OnRage(dsSBD, const_cast<char*>(result.c_str()));
+            result = tmp.list[0].sbDich;
             return key ;
         }
         if (key != NAV_UNKNOWN && key != NAV_BACK) return key;
@@ -1000,7 +1001,6 @@ int InputStringSBD(string &result, int x, int y, int maxLength, char placeholder
         } 
         else if (result.length() < maxLength) {
             if (result.empty() && ch == ' ') continue;
-
             // Phân loại xử lý dựa trên bảng mã ASCII (0-127) và UTF-8 (>= 128)
             if ((unsigned char)ch < 128) {
                 // VÙNG ASCII (Ký tự tiếng Anh, số, dấu)
@@ -2785,7 +2785,6 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
     Gotoxy(ToaDoBoxX, ToaDoBoxY);
     SmallBox(m,WidthPerBox,HeightPerBox,string(GRAY));
     while(true){
-        int ch ;
     
         if(idx == 0){
             ch = InputDateTime(inputs[idx],Temp[EditField[idx]]+1, 8 + rowOnScreen,Temp2[EditField[idx]]-2,' ',true,true, 6,22);

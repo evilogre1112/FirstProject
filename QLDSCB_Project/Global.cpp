@@ -248,8 +248,8 @@ bool CB::set_socho(int c) {
     }
 
     return true;
-
 }
+
 listCB::listCB(){
     slCB = 0;
     head = NULL;
