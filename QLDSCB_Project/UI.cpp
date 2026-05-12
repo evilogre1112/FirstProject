@@ -3445,6 +3445,219 @@ void ViewQLHK(){
     }  
 }
 
+void UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems) {
+    bool isChanged = false;
+
+    // Xử lý nút xóa (Backspace)
+    if (key == NAV_BACK && !res.empty()) {
+        res.pop_back();
+        Gotoxy(20, 4);
+        cout << res << "  "; 
+        isChanged = true;
+    } 
+    // Xử lý gõ chữ cái / số
+    else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) { 
+        res += toupper((char)ch); 
+        Gotoxy(20, 4);
+        cout << res; 
+        isChanged = true;
+    }
+
+    if (isChanged) {
+        if (arrHK != NULL) delete[] arrHK; 
+        
+        if (res.empty()) {
+            arrHK = duyet_HK(dsHK);
+            totalItems = dsHK.slHK;
+        } else {
+            arrHK = Find_HK_OnRage(dsHK, const_cast<char*>(res.c_str()), totalItems);
+        }
+    }
+}
+
+void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage) {
+    // Cấu hình tọa độ (Temp) và Độ rộng (Temp2) cho 4 cột: STT, CMND, Họ và Tên, Phái
+    int Temp[] = {10, 20, 45, 90};
+    int Temp2[] = {10, 25, 45, 15};
+    
+    int startIndex = currentPage * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    if (endIndex > totalItems) endIndex = totalItems;
+    
+    int itemsOnThisPage = endIndex - startIndex;
+    int rowOnScreen = 0;
+    int totalPages = (totalItems + itemsPerPage - 1) / itemsPerPage;
+    if (totalPages == 0) totalPages = 1;
+
+    // Xóa vùng dữ liệu cũ trước khi vẽ trang mới
+    ClearRegion(10, 8, 110, 16); 
+    
+    string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát.";
+    Gotoxy(35, 8 + itemsPerPage + 1);
+    SmallBox(m, 50, 4, string(GRAY));
+    
+    if (totalItems == 0 || arr == NULL) {
+        Gotoxy(50, 8);
+        cout << RED << "Không có dữ liệu hành khách nào!" << RESET;
+        return;
+    }
+
+    for(int i = startIndex; i < endIndex; i++) {
+        rowOnScreen = i - startIndex; 
+        
+        string s_stt = to_string(i + 1);
+        string s_cmnd = string(arr[i]->get_cmnd());
+        string s_hoten = string(arr[i]->get_ho()) + " " + string(arr[i]->get_ten());
+        string s_phai = arr[i]->get_phai() ? "Nữ" : "Nam";
+
+        // Vẽ từng ô cho dòng hiện tại
+        Gotoxy(Temp[0], 8 + rowOnScreen); SmallBox(s_stt, false, false, true, true, Temp2[0], 1);
+        Gotoxy(Temp[1], 8 + rowOnScreen); SmallBox(s_cmnd, false, false, true, true, Temp2[1], 1);
+        Gotoxy(Temp[2], 8 + rowOnScreen); SmallBox(s_hoten, false, false, true, true, Temp2[2], 1);
+        Gotoxy(Temp[3], 8 + rowOnScreen); SmallBox(s_phai, false, false, true, true, Temp2[3], 1);
+    }
+    
+    for(int i = 0 ; i < 4 ; i++){
+        Gotoxy(Temp[i], 8 + rowOnScreen + 1);
+        SmallBox("...", false, false, true, true, Temp2[i], 1, GRAY);
+    }
+}
+
+void It_list_HK(int mod, string res = "") { 
+    int Temp[] = {10, 20, 45, 90};
+    int Temp2[] = {10, 25, 45, 15};
+    string typemode[] = {"In danh Sách", "Hiệu Chỉnh", "Xóa"};
+    string headers[] = {"STT", "CMND", "Họ và Tên", "Phái"};
+    
+    int totalItems = dsHK.slHK;
+    HK** arrHK = duyet_HK(dsHK); 
+    
+    // In Header (Tìm kiếm CMND)
+    PrintHeader(res, mod, "Danh Sách Hành Khách", 4, headers, typemode, Temp, Temp2);
+    
+    int currentPage = 0;
+    int current_Row = 0;
+    const int itemsPerPage = 15;
+
+    while (true) {
+        int startIndex = currentPage * itemsPerPage;
+        int endIndex = min(startIndex + itemsPerPage, totalItems);
+        int itemsOnThisPage = max(0, endIndex - startIndex);
+        int totalPages = max(1, (totalItems + itemsPerPage - 1) / itemsPerPage);
+        
+        Render_HK_Page(arrHK, totalItems, currentPage, itemsPerPage);
+        
+        string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát.";
+        Gotoxy(35, 8 + itemsPerPage + 1);
+        SmallBox(m, 50, 4, string(GRAY));
+
+        int rowOnScreen = current_Row;
+
+        while (true) {
+            if (totalItems == 0) {
+                rowOnScreen = -1; // Ép nhảy lên thanh tìm kiếm nếu rỗng
+            } else {
+                int index = rowOnScreen + startIndex;
+                string data[4] = {
+                    to_string(index + 1),
+                    string(arrHK[index]->get_cmnd()),
+                    string(arrHK[index]->get_ho()) + " " + string(arrHK[index]->get_ten()),
+                    arrHK[index]->get_phai() ? "Nữ" : "Nam"
+                };
+
+                // Tô sáng dòng hiện tại
+                for(int i = 0; i < 4; i++){
+                    Gotoxy(Temp[i], 8 + rowOnScreen);
+                    SmallBox(data[i], false, false, true, true, Temp2[i], 1, HIGHLIGHT);
+                }
+
+                NavKey ch = GetNavKey();
+
+                // Trả lại màu bình thường khi con trỏ rời đi
+                Gotoxy(35, 8 + itemsPerPage + 1);
+                SmallBox(m, 50, 4, string(GRAY)); 
+                for(int i = 0; i < 4; i++){
+                    Gotoxy(Temp[i], 8 + rowOnScreen);
+                    SmallBox(data[i], false, false, true, true, Temp2[i], 1);
+                }
+
+                if (ch == NAV_UP) {
+                    if (rowOnScreen - 1 >= 0) {
+                        rowOnScreen--;
+                    } else {
+                        // VÀO THANH TÌM KIẾM
+                        while(true) {
+                            Gotoxy(20 + res.length(), 4);
+                            int inputChar = 0;
+                            NavKey key = GetNavKey(inputChar);
+
+                            if(key == NAV_ESC) goto CLEANUP_AND_EXIT;
+
+                            // Nhấn DOWN để rời khỏi thanh tìm kiếm
+                            if(key == NAV_DOWN && totalItems > 0) {
+                                break; // Chỉ thoát vòng gõ phím
+                            }
+                            
+                            int oldItems = totalItems;
+                            UiFindHK(res, key, inputChar, arrHK, totalItems);
+
+                            if (oldItems != totalItems || key == NAV_BACK || (isdigit(inputChar) && key == NAV_UNKNOWN)) {
+                                currentPage = 0; 
+                                
+                                startIndex = currentPage * itemsPerPage;
+                                endIndex = min(startIndex + itemsPerPage, totalItems);
+                                itemsOnThisPage = max(0, endIndex - startIndex);
+                                totalPages = max(1, (totalItems + itemsPerPage - 1) / itemsPerPage);
+                                
+                                Render_HK_Page(arrHK, totalItems, currentPage, itemsPerPage);
+                                
+                                m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát.";
+                                Gotoxy(35, 8 + itemsPerPage + 1);
+                                SmallBox(m, 50, 4, string(GRAY));
+                            }
+                        }
+                        
+                        // KHI RỜI THANH TÌM KIẾM BẰNG PHÍM DOWN:
+                        rowOnScreen = 0; 
+                    }
+                } 
+                else if (ch == NAV_DOWN) {
+                    if (rowOnScreen + 1 < itemsOnThisPage) rowOnScreen++;
+                    else {
+                        if (currentPage + 1 < totalPages) currentPage++;
+                        else currentPage = 0;
+                        current_Row = 0;
+                        break; // Nhảy trang thì break ra để render lại trang mới là hợp lý
+                    }
+                } 
+                else if (ch == NAV_RIGHT) {
+                    if (currentPage + 1 < totalPages) currentPage++;
+                    else currentPage = 0;
+                    current_Row = 0;
+                    break;
+                } 
+                else if (ch == NAV_LEFT) {
+                    if (currentPage - 1 >= 0) currentPage--;
+                    else currentPage = totalPages - 1;
+                    current_Row = 0;
+                    break;
+                } 
+                else if (ch == NAV_ENTER) {
+                    if (mod == 0) {
+                        Gotoxy(35, 8 + itemsPerPage + 1);
+                        SmallBox("Đây Là Chế Độ In Danh Sách, Bạn Chỉ Có Quyền Xem Ở Chế Độ Này", 50, 4, string(RED));
+                    }
+                } 
+                else if (ch == NAV_ESC) {
+                    goto CLEANUP_AND_EXIT;
+                }
+            }
+        }
+    }
+
+CLEANUP_AND_EXIT:
+    if (arrHK != NULL) delete[] arrHK;
+}
 
 void Router_B(int mainIdx, function<void()> func_1, 
                   function<void()> func_2, 
@@ -3652,7 +3865,8 @@ void Menu_QuanLyHanhKhach() {
     Router_B(2, 
         []() { RunInNewTab(BookTicket); }, // Đặt vé
         []() { /* Gọi hàm Sửa HK ở đây */ }, // Sửa
-        []() { /* Gọi hàm Xóa HK ở đây */ }  // Xóa
+        []() { /* Gọi hàm Xóa HK ở đây */ },  // Xóa
+        []() { RunInNewTab([]() { It_list_HK(0); }); }  // DS Hành Khách 
     );
 }
 
@@ -3665,7 +3879,8 @@ void Menu_ThongKeLuotBay() {
 }
 
 void Menu_InDanhSachHanhKhach() {
-     RunInNewTab();
+     // mod = 0: Chế độ chỉ xem
+    RunInNewTab([]() { It_list_HK(0); });
 }
 
 void MainScreen(){

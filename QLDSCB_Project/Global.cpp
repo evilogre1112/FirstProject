@@ -244,7 +244,7 @@ bool CB::set_socho(int c) {
     this->DSV = new char*[c];
     for (int i = 0; i < c; i++) {
         this->DSV[i] = new char[cmnd_max];
-        strcpy(this->DSV[i], "0");
+        strcpy(this->DSV[i], "\0");
     }
 
     return true;

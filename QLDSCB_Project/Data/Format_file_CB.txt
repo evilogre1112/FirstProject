@@ -15,7 +15,7 @@ ve ngoi|< mỗi dòng 1cmnd>
 0
 
 Chú thích : mã chuyến bay: Gồm 1 chuỗi tối đa 15 chữ và số
-            ngày khởi hành định dạng : số yy/mm/dd;dd<32;mm<12;1900<yy<2100
+            ngày khởi hành định dạng : số dd/mm/yyy;dd<32;mm<12;1900<yy<2100
             giờ khởi hành: số hh:mm ;hh<24 và mm<60
             cmnd : chuỗi có chứa 12 số
             sân_bay_đích: chuỗi kí tự chứa max
