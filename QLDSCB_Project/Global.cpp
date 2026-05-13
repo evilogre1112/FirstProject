@@ -56,11 +56,11 @@ void listMB::Clear() {
 }
 
 DateTime::DateTime (){
-    hh=12;
+    hh=00;
     mm=00;
     dd=1;
     mt=1;
-    yy=2026;
+    yy=1;
 }
 
 int DateTime::get_hh()const{
@@ -108,7 +108,7 @@ bool DateTime::set_mt(int t){
 }
 
 bool DateTime::set_yy(int y){
-    if (y >= 1900 && y <= 2100) { // Giới hạn năm hợp lý
+    if (y >= 1) { // Giới hạn năm hợp lý
         yy = y;
         return true;
     }
@@ -248,8 +248,8 @@ bool CB::set_socho(int c) {
     }
 
     return true;
-
 }
+
 listCB::listCB(){
     slCB = 0;
     head = NULL;

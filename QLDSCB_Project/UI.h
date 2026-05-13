@@ -11,7 +11,6 @@ using namespace std;
 
 extern int TotalWidth;
 
-
 #define boxWidth 60
 
 #define RESET       "\033[0m"
@@ -192,8 +191,8 @@ void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LE
 
 void TruyenThamSo(listMB &A, listCB& B , listHK &C, listSBD &D);
 
-void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString);
-NavKey DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString);
+void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateString);
+NavKey DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString,bool CanPast = false);
 
 // Chọn 1 danh sách nhỏ theo shMB, khối hàm hiển thị danh sách nhỏ của MB
 void UiThongTinMB(int x,int y , int width, int height,string s);
@@ -204,6 +203,9 @@ void UiSmallListShMB(int width, int max_items, int x, int y, listMB& A);
 int SmallListMCB( string& res, CB* &thisCB, int width , int x, int y, int items, listCB &A,int X, int Y, int w , int h);
 void UiSmallListMCB(int width, int max_items, int x, int y, listCB& A);
 void UiThongTinCB(int x,int y , int width, int height,string MCB);
+
+// Chọn 1 danh sách nhỏ theo mã só chỗ của chuyến bay, khối hàm hiển thị danh sách nhỏ của số chỗ
+int SmallListSoCho(string& res, listCB &dsSubCB, CB*& thisCB, int width, int x, int y, int items);
 
 
 string TranFormSatus(int st);
@@ -219,7 +221,7 @@ NavKey CustomerAddMB();
 NavKey CustomerAddCB();
 NavKey CustomerAddHK(string cmnd);
 
-void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[]);
+void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[],int ResX = 50 , int FindX = 10,int ModeX =90, int ResY = 4);
 
 void UiFindMB(string& res, NavKey key, int& ch, listMB& A,int x, int y);
 void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
@@ -231,16 +233,17 @@ bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
 bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
 
 bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
-bool MODE3_CB(listCB& dsCB, bool isEditing, int index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
 
 void BookTicket();
 
 NavKey It_Sub_List_CB(listCB& SubList,int mod);
-void OnlyPrint_List_CB(listCB& dsCB);
+void OnlyPrint_List_CB(listCB& dsCB,int size, int Temp[],int Temp2[],int Bin[] );
 
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
-void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage);
+void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage,int size, int Temp[], int Temp2[],int Bin[]);
+void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
 void It_list_CB(int mod,string res = "");
+void FindCBOnTimeAndPlace(string res="");
 
 void UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems);
 void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage);
