@@ -712,7 +712,7 @@ int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber) 
 HK** Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK) {
     CB* tempCB = Find_CB(dsCB, maCB);
     if (tempCB == NULL) return NULL; // chuyen bay khong ton tai
-    //if (tempCB->trangThai == 0 || tempCB->trangThai == 3) return NULL; // chuyen bay khong con hoat dong
+    if (tempCB->trangThai == 0 || tempCB->trangThai == 3) return NULL; // chuyen bay khong con hoat dong
     if (tempCB->sove == 0) return NULL; // chuyen bay khong co khach
     if (dsHK.slHK == 0) return NULL; // chua co thong tin khach hang
     HK** dsHKCB = new HK* [tempCB->sove];
