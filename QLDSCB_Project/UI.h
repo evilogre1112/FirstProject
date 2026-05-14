@@ -206,6 +206,7 @@ void UiThongTinCB(int x,int y , int width, int height,string MCB);
 
 // Chọn 1 danh sách nhỏ theo mã só chỗ của chuyến bay, khối hàm hiển thị danh sách nhỏ của số chỗ
 int SmallListSoCho(string& res, listCB &dsSubCB, CB*& thisCB, int width, int x, int y, int items);
+void UiThongTinHK(int x,int y , int width, int height,string s);
 
 
 string TranFormSatus(int st);
@@ -235,6 +236,8 @@ bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
 bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
 
 void BookTicket();
+NavKey SeatList(int x, int y, int xt, int yt, CB* SelectedCB);
+void EmptySeatList();
 
 NavKey It_Sub_List_CB(listCB& SubList,int mod);
 void OnlyPrint_List_CB(listCB& dsCB,int size, int Temp[],int Temp2[],int Bin[] );

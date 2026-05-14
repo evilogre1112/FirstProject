@@ -738,8 +738,12 @@ CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sld
     if (ss_ngay(nullDate, date) == 0) validDate = false;
     if (address[0] == '\0') validAddress = false;
     while (temp != NULL) {
+		bool dateMatch = false;
+        if (temp->ngayKH.dd == date.dd && temp->ngayKH.mt == date.mt && temp->ngayKH.yy == date.yy) {
+            dateMatch = true;
+        }
         if (validDate && validAddress) {
-            if (ss_ngay(temp->ngayKH, date) == 0 && ss_str(address, temp->sbDich) == 0) {
+            if (dateMatch && ss_str(address, temp->sbDich) == 0) {
                 result[sldsCB] = temp;
                 sldsCB++;
             }
@@ -751,7 +755,7 @@ CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sld
             }
         }
         else if (validDate && !validAddress) {
-            if (ss_ngay(temp->ngayKH, date) == 0) {
+            if (dateMatch) {
                 result[sldsCB] = temp;
                 sldsCB++;
             }
