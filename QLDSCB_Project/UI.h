@@ -237,12 +237,13 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
 void BookTicket();
 
 NavKey It_Sub_List_CB(listCB& SubList,int mod);
-void OnlyPrint_List_CB(listCB& dsCB,int size, int Temp[],int Temp2[],int Bin[] );
+void OnlyPrint_List_CB(listCB& dsCB,int size,int itemsPerPage,int Temp[],int Temp2[],int Bin[] );
 
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage,int size, int Temp[], int Temp2[],int Bin[]);
 void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
 void It_list_CB(int mod,string res = "");
+void View_DSHK_CB(CB* thisCB);
 void FindCBOnTimeAndPlace(string res="");
 
 void UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems);
