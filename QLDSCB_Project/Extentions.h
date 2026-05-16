@@ -220,4 +220,12 @@ bool Set_Data_HK(HK &HK, const char *path_file_HK);
  * @return Mảng các con trỏ HK** đã được sắp xếp theo thứ tự CMND 
  */
 HK** duyet_HK(listHK& dsHK);
+/**
+ * @brief Lọc danh sách Hành Khách theo CMND chứa chuỗi con searchCMND
+ * @param originalArr Mảng gốc các con trỏ HK** đã được duyệt và sắp xếp
+ * @param originalTotal Số lượng phần tử trong mảng gốc
+ * @param searchCMND Chuỗi con CMND để tìm kiếm
+ * @param displayArr Mảng kết quả chứa các con trỏ HK** thỏa mãn
+ */
+void Filter_HK_By_CMND(HK** originalArr, int originalTotal, const string& searchCMND, HK** displayArr, int& displayTotal);
 #endif

@@ -568,3 +568,26 @@ HK** duyet_HK(listHK& dsHK) {
     }
     return arr;
 }
+#include <cstring> // strstr
+
+void Filter_HK_By_CMND( HK** originalArr, int originalTotal, const string& searchCMND, HK** displayArr,int& displayTotal) {
+    displayTotal = 0;
+
+    // Nếu rỗng -> copy toàn bộ
+    if (searchCMND.empty()) {
+        for (int i = 0; i < originalTotal; ++i) {
+            displayArr[displayTotal++] = originalArr[i];
+        }
+        return;
+    }
+    const char* key = searchCMND.c_str();
+
+    for (int i = 0; i < originalTotal; ++i) {
+        const char* cmnd = originalArr[i]->get_cmnd();
+
+        // strstr tìm chuỗi con
+        if (strstr(cmnd, key) != nullptr) {
+            displayArr[displayTotal++] = originalArr[i];
+        }
+    }
+}
