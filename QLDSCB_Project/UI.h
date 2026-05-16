@@ -235,22 +235,23 @@ bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
 
 bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
 
-void BookTicket();
-NavKey SeatList(int x, int y, int xt, int yt, CB* SelectedCB);
-void EmptySeatList();
-
 NavKey It_Sub_List_CB(listCB& SubList,int mod);
-void OnlyPrint_List_CB(listCB& dsCB,int size, int Temp[],int Temp2[],int Bin[] );
+void OnlyPrint_List_CB(listCB& dsCB,int size,int itemsPerPage,int Temp[],int Temp2[],int Bin[] );
 
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage,int size, int Temp[], int Temp2[],int Bin[]);
 void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
 void It_list_CB(int mod,string res = "");
+void View_DSHK_CB(CB* thisCB);
 void FindCBOnTimeAndPlace(string res="");
 
 void UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems);
 void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage);
 void It_list_HK(int mod, string res);
+
+void BookTicket();
+NavKey SeatList(int x, int y, int xt, int yt, CB* SelectedCB);
+void EmptySeatList();
 
 void RunInNewTab(void (*func)() = [](){});
 void RunInNewTab(NavKey (*func)());
