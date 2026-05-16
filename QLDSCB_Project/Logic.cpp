@@ -668,7 +668,7 @@ int Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const C
     return -3; // hanh khach chua dat ve tren CB nay
 }
 
-int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber) {
+int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber,int mode) {
     int res = Is_Ticket_Booked(dsCB, dsHK, maCB, CMND);
     if (res != -3) {
         if (res == 0) return -3; // Hanh khach da dat ve

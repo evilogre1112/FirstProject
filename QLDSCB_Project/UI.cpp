@@ -3033,13 +3033,6 @@ void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int current
     int totalPages = (slCB + itemsPerPage - 1) / itemsPerPage;
     if (totalPages == 0) totalPages = 1;
     
-    int WidthClear = 0;
-    for (int i = 0; i < size; i++) WidthClear += Temp2[i];
-    ClearRegion(0, Y + itemsOnThisPage, WidthClear, 14 - itemsOnThisPage);
-    
-    string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang.";
-    Gotoxy(63, 27);
-    SmallBox(m, 50, 1, string(GRAY));
     
     if (slCB == 0) {
         Gotoxy(errX, errY);
@@ -3187,8 +3180,8 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
 
 
 
-void OnlyPrint_List_CB(listCB& A,int size,int Temp[],int Temp2[], int Bin[]){
-     Render_CB_Page(A, 0, 15,size, Temp, Temp2,Bin);
+void OnlyPrint_List_CB(listCB& A,int size,int itemsPerPage,int Temp[],int Temp2[], int Bin[]){
+     Render_CB_Page(A, 0, itemsPerPage,size, Temp, Temp2,Bin);
 }
 
 NavKey It_Sub_List_CB(listCB& SubList,int mod){
@@ -3419,7 +3412,8 @@ void It_list_CB(int mod, string res){
                     while(true){
                         Gotoxy(20 + res.length(),4);
                         int ch = 0 ;
-                        NavKey key = GetNavKey(ch);
+                        NavKey key = NAV_UP;
+                        while(key == NAV_UP || key == NAV_LEFT || key == NAV_RIGHT)key = GetNavKey(ch);
                        
                         if(key == NAV_ESC){
                             tmp.Clear();
@@ -3438,7 +3432,7 @@ void It_list_CB(int mod, string res){
                             }
                         }
                         UiFindCB(res,key,ch,tmp);
-                        OnlyPrint_List_CB(tmp,size,Temp,Temp2,Bin);
+                        OnlyPrint_List_CB(tmp,size,itemsPerPage,Temp,Temp2,Bin);
                     }
                     if (backToMain) {
                         current_Row = 0; 
@@ -3846,10 +3840,18 @@ void FindCBOnTimeAndPlace(string res){
         }
         int itemsOnThisPage = endIndex - startIndex;
         int rowOnScreen = 0 ;
-
+        
+        int totalPages = (slCB == 0) ? 1 : (slCB + itemsPerPage - 1) / itemsPerPage;
+        int WidthClear = 0;
+        for (int i = 0; i < size; i++) WidthClear += Temp2[i];
+        ClearRegion(0, Y + itemsOnThisPage, WidthClear, 14 - itemsOnThisPage);
+    
+        string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang.";
+        Gotoxy(63, 27);
+        SmallBox(m, 50, 1, string(GRAY));
         Render_CB_Page(CBSearch,slCB,Y,25,8,currentPage,itemsPerPage,S,Temp,Temp2,Bin);
         //In thông tin điều hướng ở cuối
-        int totalPages = (slCB == 0) ? 1 : (slCB + itemsPerPage - 1) / itemsPerPage;
+      
    
         Gotoxy(53, 24);
         cout << " /\\_/\\";
@@ -3877,7 +3879,7 @@ void FindCBOnTimeAndPlace(string res){
             }else{
                 string s ;
                 int index = rowOnScreen + startIndex;// rowOnScreen + startIndex
-                CB* SelectedNode = pageNodes[rowOnScreen];
+                CB* SelectedNode = pageNodes[rowOnScreen]; // Đây là chính là chuyến đang 
                 string Box[] = { to_string(index+1),SelectedNode->maCB,to_string(SelectedNode->socho),TranFormSatus(SelectedNode->trangThai)};
                 for(int i = 0; i < size ;i++){
                     Gotoxy(Temp[i],Y + rowOnScreen);
@@ -4223,7 +4225,7 @@ void Menu_QuanLyHanhKhach() {
         []() { RunInNewTab(BookTicket); }, // Đặt vé
         []() { /* Gọi hàm Sửa HK ở đây */ }, // Sửa
         []() { /* Gọi hàm Xóa HK ở đây */ },  // Xóa
-        []() { RunInNewTab([]() { It_list_HK(0); }); }  // DS Hành Khách 
+        []() { RunInNewTab([]() {It_list_HK(0); }); }  // DS Hành Khách 
     );
 }
 

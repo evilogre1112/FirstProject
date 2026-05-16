@@ -20,7 +20,7 @@ int main(){
     listHK dsHK ;
     listSBD dsSBD;
     #ifdef _WIN32
-        SetConsoleOutputCP(CP_UTF8);
+       
         SetConsoleCP(CP_UTF8);
     #else
         setlocale(LC_ALL, "en_US.UTF-8");
