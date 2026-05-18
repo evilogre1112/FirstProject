@@ -3708,7 +3708,7 @@ void View_DSHK_CB(CB* thisCB) {
                 if (currentPage + 1 < totalPages) { 
                     currentPage++; 
                     rowOnScreen = 0; 
-                   
+                    RenderHKBySample (displayArr,thisCB,fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
                 }
             } 
             else if (key == NAV_LEFT) {
