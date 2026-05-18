@@ -243,6 +243,7 @@ void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage,int size, int Temp[], int Temp2[],int Bin[]);
 void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
 void It_list_CB(int mod,string res = "");
+void View_DSHK_CB(CB* thisCB);
 void FindCBOnTimeAndPlace(string res="");
 
 void UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems);
