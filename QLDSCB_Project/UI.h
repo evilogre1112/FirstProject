@@ -193,6 +193,7 @@ void TruyenThamSo(listMB &A, listCB& B , listHK &C, listSBD &D);
 
 void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateString);
 NavKey DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString,bool CanPast = false);
+void DrawACat(int x = 59,int y =25);
 
 // Chọn 1 danh sách nhỏ theo shMB, khối hàm hiển thị danh sách nhỏ của MB
 void UiThongTinMB(int x,int y , int width, int height,string s);
@@ -226,8 +227,8 @@ void PrintHeader(string res, int mod, string s, int size, string headers[], stri
 
 void UiFindMB(string& res, NavKey key, int& ch, listMB& A,int x, int y);
 void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
-void OnlyPrint_List_MB(listMB& dsMB);
-NavKey It_Sub_List_MB(listMB& dsMB,int mod);
+void OnlyPrint_List_MB(listMB& dsMBm,int currentPage);
+void Get_Input_MB(bool IsHighLight, listMB &tmp, int rowOnScreen,int startIndex, int Temp[], int Temp2[] );
 void It_list_MB(int mode, string res = "");
 
 bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
