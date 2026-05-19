@@ -244,7 +244,7 @@ bool CB::set_socho(int c) {
     this->DSV = new char*[c];
     for (int i = 0; i < c; i++) {
         this->DSV[i] = new char[cmnd_max];
-        strcpy(this->DSV[i], "\0");
+        this->DSV[i][0] = '\0';
     }
 
     return true;
@@ -278,9 +278,9 @@ markList::markList() {
 
 // ---- cấu trúc hành khách ----//
 HK::HK(){
-    ho =NULL;
-    ten =NULL;
-    cmnd = NULL;
+    ho   = new char[1]{'\0'};
+    ten  = new char[1]{'\0'};
+    cmnd = new char[1]{'\0'};
     phai = false;
     left = right = NULL;
     dsDatVe.head = NULL;
