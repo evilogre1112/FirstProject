@@ -2966,14 +2966,6 @@ void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int current
     int totalPages = (slCB + itemsPerPage - 1) / itemsPerPage;
     if (totalPages == 0) totalPages = 1;
     
-    int WidthClear = 0;
-    for (int i = 0; i < size; i++) WidthClear += Temp2[i];
-    ClearRegion(0, Y + itemsOnThisPage, WidthClear, 14 - itemsOnThisPage);
-    
-    string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang.";
-    Gotoxy(63, 27);
-    SmallBox(m, 50, 1, string(GRAY));
-    
     if (slCB == 0) {
         Gotoxy(errX, errY);
         cout << RED << "Không có dữ liệu chuyến bay nào!" << RESET;
@@ -4021,12 +4013,20 @@ void FindCBOnTimeAndPlace(string res){
             endIndex = slCB;
         }
         int itemsOnThisPage = endIndex - startIndex;
-        int rowOnScreen = 0 ;
+        int rowOnScreen = 0;
 
-        Render_CB_Page(CBSearch,slCB,Y,25,8,currentPage,itemsPerPage,S,Temp,Temp2,Bin);
+        int WidthClear = 0;
         //In thông tin điều hướng ở cuối
         int totalPages = (slCB == 0) ? 1 : (slCB + itemsPerPage - 1) / itemsPerPage;
-   
+        for (int i = 0; i < size; i++) WidthClear += Temp2[i];
+        ClearRegion(0, Y + itemsOnThisPage, WidthClear, 14 - itemsOnThisPage);
+
+        string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang.";
+        Gotoxy(63, 27);
+        SmallBox(m, 50, 1, string(GRAY));
+
+        Render_CB_Page(CBSearch,slCB,Y,25,8,currentPage,itemsPerPage,S,Temp,Temp2,Bin);
+        
         Gotoxy(53, 24);
         cout << " /\\_/\\";
         Gotoxy(53, 25);
@@ -4263,11 +4263,11 @@ start:
     ClearScreen();
 
 
-    Gotoxy(startX + width1 + 1, formY - 2);
+    Gotoxy(startX + width1 + 1, formY - 1);
     SmallBox("THÔNG TIN CHUYẾN BAY", (int)width2, (int)1, (string)YELLOW);
 
-    Gotoxy(startX + width1 + 1, formY + 1);
-    SmallBox("", (int)width2, (int)height2 + 2, (string)WHITE);
+    Gotoxy(startX + width1 + 1, formY + 2);
+    SmallBox("", (int)width2, (int)height2 + 1, (string)WHITE);
 
     Gotoxy(startX + width1 + 1, formY + height2 + 5);
     SmallBox("THÔNG TIN KHÁCH HÀNG", (int)width2, (int)1, (string)YELLOW);
@@ -4281,13 +4281,40 @@ start:
     Gotoxy(0, formY + height2 + 2);
     SmallBox("◄/► : Sang Trái / Sang Phải | ▲/▼ : Đi Lên / Đi Xuống | ESC : Thoát", (int)width1, (int)1, (string)GRAY);
 
-    int Temp[] = { 0,10,40,50,0,0 };
-    int Temp2[] = { 10,30,10,10,0,0 };
-    int Bin[] = { 1,1,0,1,0,1 };
-    const int itemsPerPage = 10;
-    int currentPage = 0;
+    int Y = 4;
+    int col = 1;
+    int StartCalendarX = 64;
+    int StartCalendarY = 1;
+    int field = 5;
+    int size = 4;
     int S = 6;
-    int Y = 3;
+    int Temp[] = { 0,10,40,0,0,0 };
+    int Temp2[] = { 10,30,10,0,0,0 };
+    int Bin[] = { 1,1,0,0,0,1 };
+
+    string typemode[] = { "Kiểm Tra Danh Sách Vé Trống Của Chuyến Bay", };
+    string headers[] = { "STT","Mã Chuyến Bay","Status",""};
+    PrintHeader("", 0, "Danh Sách Chuyến Bay", size, headers, typemode, Temp, Temp2, -1, -1, 1, 0);
+    string q[] = { "","","","" };
+    string Type[] = { RED, GREEN, YELLOW, CYAN };
+    q[0] = Type[0] + SQ + RESET + ": Chuyến bay bị huỷ";
+    q[1] = Type[1] + SQ + RESET + ": Chuyến bay còn vé";
+    q[2] = Type[2] + SQ + RESET + ": Chuyến bay hết vé";
+    q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất";
+	ClearRegion(startX + width1 - 30, formY, 10, 8);
+    Gotoxy(startX + width1 - 30, formY - 1);
+	SmallBox("", 30, 6, string(WHITE));
+    Gotoxy(startX + width1 - 26, formY + 1);
+    cout << q[0];
+    Gotoxy(startX + width1 - 26, formY + 2);
+    cout << q[1];
+    Gotoxy(startX + width1 - 26, formY + 3);
+    cout << q[2];
+	Gotoxy(startX + width1 - 26, formY + 4);
+    cout << q[3];
+
+    const int itemsPerPage = 6;
+    int currentPage = 0;
 
     int slCB = 0;
     DateTime dateTemp = DateTime();
@@ -4296,15 +4323,123 @@ start:
 
     string input;
     int action;
+    listCB subListCB;
 
+    CB** subCB = new CB * [dsCB.slCB];
+    CB* tempCB = dsCB.head;
+    while (tempCB != NULL) {
+        subCB[slCB] = tempCB;
+        slCB++;
+        tempCB = tempCB->next;
+    }
+
+    Render_CB_Page(subCB, slCB, Y, 25, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
+    delete[] subCB;
+    slCB = 0;
+
+    int selectedCBIndex = 0;
+    int currentRow = 0;
     while (true) {
-        CB* tempCB = NULL;
-        action = SmallListMCB(input, tempCB, 20, startX + 1, formY - 2, 5, dsCB, startX + width1 + 4, formY, 30, 8);
-        if (action == NAV_ESC || action == NAV_UP) {
-            ClearScreen();
-            return;
+    startS:
+        slCB = 0;
+        char Prefix[maCB_max];
+        string input;
+
+        strcpy(Prefix, input.c_str());
+        subListCB = Find_CB_OnRage(dsCB, Prefix);
+
+        subCB = new CB*[subListCB.slCB];
+        CB* tempCB = subListCB.head;
+        while (tempCB != NULL) {
+            subCB[slCB] = tempCB;
+            slCB++;
+            tempCB = tempCB->next;
         }
-        SeatList(3, formY + height2 + 10, 7, formY + height2 + 6, tempCB);
+
+        while (true) {
+            ClearRegion(0, Y, 50, 8);
+            Render_CB_Page(subCB, slCB, Y, 25, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
+            Gotoxy(Temp[0], Y + currentRow);
+			SmallBox(to_string(selectedCBIndex + 1), false, false, true, true, Temp2[0], 1, HIGHLIGHT);
+            Gotoxy(Temp[1], Y + currentRow);
+            SmallBox(subCB[selectedCBIndex]->maCB, false, false, true, true, Temp2[1], 1, HIGHLIGHT);
+
+			UiThongTinCB(startX + width1 + 3, formY, 35, 7, subCB[selectedCBIndex]->maCB);
+            action = GetNavKey();
+            if (action == NAV_UP) {
+                currentRow--;
+                if (currentRow < 0) {
+                    currentRow = 0;
+                    continue;
+                }
+                selectedCBIndex--;
+                if (selectedCBIndex < 0) selectedCBIndex = 0;
+                continue;
+            }
+            else if (action == NAV_DOWN) {
+                currentRow++;
+                selectedCBIndex++;
+                if (currentRow >= itemsPerPage || selectedCBIndex >= slCB) {
+                    if (selectedCBIndex >= slCB) {
+                        selectedCBIndex = 0;
+                        currentRow = 0;
+                        currentPage = 0;
+                        continue;
+                    }
+                    if (currentPage + 1 < (slCB + itemsPerPage - 1) / itemsPerPage) {
+                        currentPage++;
+                        currentRow = 0;
+                        continue;
+                    }
+                }
+            }
+            else if (action == NAV_RIGHT) {
+                if (currentPage + 1 < (slCB + itemsPerPage - 1) / itemsPerPage) {
+                    currentPage++;
+                    currentRow = 0;
+                }
+                else {
+                    currentPage = 0;
+                    currentRow = 0;
+                }
+				selectedCBIndex = currentPage * itemsPerPage + currentRow;
+                continue;
+            }
+            else if (action == NAV_LEFT) {
+                if (currentPage - 1 >= 0) {
+                    currentPage--;
+                    currentRow = 0;
+                }
+                else {
+                    currentPage = (slCB + itemsPerPage - 1) / itemsPerPage - 1;
+                    currentRow = 0;
+                }
+				selectedCBIndex = currentPage * itemsPerPage + currentRow;
+                continue;
+            }
+            else if (action == NAV_ESC) {
+                delete[] subCB;
+                CB* tempCB = subListCB.head;
+                while (tempCB != NULL) {
+					CB* toDelete = tempCB;
+					tempCB = tempCB->next;
+					delete toDelete;
+                }
+                ClearScreen();
+                return;
+            }
+            else {
+                break;
+            }
+        }
+        SeatList(3, formY + height2 + 10, 7, formY + height2 + 6, subCB[selectedCBIndex]);
+        delete[] subCB;
+        CB* tempCB1 = subListCB.head;
+        while (tempCB1 != NULL) {
+            CB* toDelete = tempCB1;
+            tempCB1 = tempCB1->next;
+            delete toDelete;
+        }
     }
 
 }
@@ -4577,7 +4712,7 @@ void Menu_QuanLyHanhKhach() {
     Router_B(2, 
         []() { RunInNewTab(BookTicket); }, // Đặt vé
         []() { /* Gọi hàm Sửa HK ở đây */ }, // Sửa
-        []() { /* Gọi hàm Xóa HK ở đây */ },  // Xóa
+        []() { RunInNewTab(EmptySeatList); },  // Xóa
         []() { RunInNewTab([]() { It_list_HK(0); }); }  // DS Hành Khách 
     );
 }
