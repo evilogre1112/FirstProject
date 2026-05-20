@@ -4451,9 +4451,11 @@ start:
     delete[] subCB;
     slCB = 0;
 
-
+    int selectedCBIndex = 0;
+    int currentRow = 0;
     while (true) {
-        startS:
+    startS:
+        slCB = 0;
         char Prefix[maCB_max];
         string input;
 
@@ -4468,8 +4470,6 @@ start:
             tempCB = tempCB->next;
         }
 
-		int selectedCBIndex = 0;
-        int currentRow = 0;
         while (true) {
             ClearRegion(0, Y, 50, 8);
             Render_CB_Page(subCB, slCB, Y, 25, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
@@ -4539,8 +4539,6 @@ start:
 					tempCB = tempCB->next;
 					delete toDelete;
                 }
-                slCB = 0;
-                currentPage = 0;
                 ClearScreen();
                 return;
             }
@@ -4556,8 +4554,6 @@ start:
             tempCB1 = tempCB1->next;
             delete toDelete;
         }
-        slCB = 0;
-        currentPage = 0;
     }
 
 }
