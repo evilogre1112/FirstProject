@@ -3581,17 +3581,17 @@ void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage)
 
     for(int i = startIndex; i < endIndex; i++) {
         rowOnScreen = i - startIndex; 
-        
-        string s_stt = to_string(i + 1);
-        string s_cmnd = string(arr[i]->get_cmnd());
-        string s_hoten = string(arr[i]->get_ho()) + " " + string(arr[i]->get_ten());
-        string s_phai = arr[i]->get_phai() ? "Nữ" : "Nam";
+        string inputs[4] ;
+        inputs[0] = to_string(i + 1);
+        inputs[1] = string(arr[i]->get_cmnd());
+        inputs[2] = string(arr[i]->get_ho()) + " " + string(arr[i]->get_ten());
+        inputs[3] = arr[i]->get_phai() ? "Nữ" : "Nam";
 
         // Vẽ từng ô cho dòng hiện tại
-        Gotoxy(Temp[0], 8 + rowOnScreen); SmallBox(s_stt, false, false, true, true, Temp2[0], 1);
-        Gotoxy(Temp[1], 8 + rowOnScreen); SmallBox(s_cmnd, false, false, true, true, Temp2[1], 1);
-        Gotoxy(Temp[2], 8 + rowOnScreen); SmallBox(s_hoten, false, false, true, true, Temp2[2], 1);
-        Gotoxy(Temp[3], 8 + rowOnScreen); SmallBox(s_phai, false, false, true, true, Temp2[3], 1);
+        for(int i = 0 ; i < 4 ;i++){
+            Gotoxy(Temp[i], 8 + rowOnScreen); 
+            SmallBox(inputs[i], false, false, true, true, Temp2[i], 1);
+        }
     }
     
     for(int i = 0 ; i < 4 ; i++){
