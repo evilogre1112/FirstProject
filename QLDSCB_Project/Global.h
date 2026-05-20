@@ -80,6 +80,17 @@ static const VietPair viet_vowels[] = {
     {NULL, 0}
 };
 
+enum NavKey {
+    NAV_UP,
+    NAV_DOWN,
+    NAV_LEFT,
+    NAV_RIGHT,
+    NAV_ENTER,
+    NAV_ESC,
+    NAV_BACK,
+    NAV_UNKNOWN
+};
+
 //---- cấu trúc stack cho mọi data dùng danh sách liên kết ----//
 template <typename T>
 struct Stack {

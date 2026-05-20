@@ -23,6 +23,7 @@ extern int TotalWidth;
 #define CYAN        "\033[36m"
 #define BLUE        "\033[34m"
 #define BOLD        "\033[1m"
+#define ORANGE      "\033[38;5;208m"
 
 // Các màu Bold (In đậm/Sáng hơn)
 #define BOLDRED     "\033[1;31m"
@@ -82,19 +83,8 @@ extern int TotalWidth;
 #define VT  "│"
 #define BRC "╯"
 #define BLC "╰"
-#define HZ "─" 
+#define HZ  "─"
 #define DM "◈"
-
-enum NavKey {
-    NAV_UP,
-    NAV_DOWN,
-    NAV_LEFT,
-    NAV_RIGHT,
-    NAV_ENTER,
-    NAV_ESC,
-    NAV_BACK,
-    NAV_UNKNOWN
-};
 
 
 struct LineInfo {
@@ -251,6 +241,7 @@ bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems);
 bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& TotalCustomer,CB* thisCB);
 void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage);
 void RenderHKBySample (HK** displayArr, CB* thisCB,int fields, int currentPage, int CustomerPerPage, int displayTotal,int tWidth,int Temp[], int Temp2[]);
+void Get_Input_HK(bool IsHighLight,HK* arrHK[], int rowOnScreen,int index, int Temp[], int Temp2[] );
 void It_list_HK(int mod, string res);
 
 void BookTicket();

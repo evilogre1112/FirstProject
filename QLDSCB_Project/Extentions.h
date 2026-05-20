@@ -111,6 +111,10 @@ DateTime lastDay(DateTime dt);
  * @return đối tượng DateTime của ngày trước
  */
 DateTime lastDay(string time_str);
+
+NavKey PaginationController(int totalItems, int itemsPerPage, int& currentPage, int& currentRow,int& key);
+NavKey PaginationController(int totalItems, int itemsPerPage, int& currentPage, int& currentRow);
+
 int getFirstDayOfWeek(int month, int year) ;
 
 bool isNotPastTime(const DateTime& t, const DateTime& cur);
