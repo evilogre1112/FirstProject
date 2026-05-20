@@ -3382,7 +3382,6 @@ void View_DSHK_CB(CB* thisCB) {
         int startIndex = currentPage * CustomerPerPage;
         int itemsOnThisPage = min(CustomerPerPage, displayTotal - startIndex);
         int totalPages = max(1, (displayTotal + CustomerPerPage - 1) / CustomerPerPage);
-
         // nếu trống thì chỉ cho người dùng bấm esc, đã trống rồi còn bắt người ta tìm kiếm. 
         if (displayTotal == 0) {
             Gotoxy(0, 10);
@@ -3393,6 +3392,8 @@ void View_DSHK_CB(CB* thisCB) {
         } 
         else {
             int index = startIndex + rowOnScreen;
+            int oldPage = currentPage; 
+            int oldRow = rowOnScreen;
             string stt = to_string(index + 1);
             string cmnd = string(displayArr[index]->get_cmnd());
             string hoten = string(displayArr[index]->get_ho()) + " " + string(displayArr[index]->get_ten());
@@ -3409,20 +3410,16 @@ void View_DSHK_CB(CB* thisCB) {
                 SmallBox(data[i], false, false, true, true, Temp2[i], 1, string(HIGHLIGHT));
             }
 
-            int ch;
-            NavKey key = GetNavKey(ch);
+            NavKey key = PaginationController(displayTotal , CustomerPerPage, currentPage, current_Row);
 
             // TRẢ LẠI MÀU BÌNH THƯỜNG
             for(int i = 0; i < 5; i++){
                 Gotoxy(Temp[i], 8 + rowOnScreen);
                 SmallBox(data[i], false, false, true, true, Temp2[i], 1);
             }
-
+            rowOnScreen = current_Row;
             // XỬ LÝ PHÍM ĐIỀU HƯỚNG
-            if (key == NAV_UP) {
-                if (rowOnScreen > 0) rowOnScreen--;
-                else {
-                    // MŨI TÊN LÊN NHẢY VÀO THANH TÌM KIẾM
+            if (key == NAV_UP && oldRow == 0) {
                     Gotoxy(10, 4); cout << YELLOW << "Tìm CMND: " << RESET;
                     while(true) {
                         
@@ -3440,38 +3437,18 @@ void View_DSHK_CB(CB* thisCB) {
                         if (isSearchChanged) {
                             currentPage = 0;
                             rowOnScreen = 0;
+                            current_Row = 0;
                             RenderHKBySample (displayArr,thisCB,fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
                         }
                       
                     }
-                }
-            } 
-            else if (key == NAV_DOWN) {
-                // Good 10 điểm 
-                if (rowOnScreen + 1 < itemsOnThisPage) rowOnScreen++;
-                else {
-                    if (currentPage + 1 < totalPages) { 
-                        currentPage++; 
-                        rowOnScreen = 0; 
-                        RenderHKBySample (displayArr,thisCB,fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
-                    }
-                }
-            } 
-            else if (key == NAV_RIGHT) {
-                if (currentPage + 1 < totalPages) { 
-                    currentPage++; 
-                    rowOnScreen = 0; 
-                    RenderHKBySample (displayArr,thisCB,fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
-                }
-            } 
-            else if (key == NAV_LEFT) {
-                if (currentPage > 0) { 
-                    currentPage--; 
-                    rowOnScreen = 0; 
-                    RenderHKBySample (displayArr,thisCB,fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
-                }
+                    rowOnScreen = 0;
+                    current_Row = 0;
             } 
             else if (key == NAV_ESC) goto EXIT_VIEW;
+            if(currentPage != oldPage){
+                RenderHKBySample(displayArr, thisCB, fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
+            }
         }
     }
 
@@ -3533,13 +3510,12 @@ bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& TotalCustomer,
         if (res.empty()) {
            arrHK = OriginHK;
         } else {
-
             int t = 0 ;
             arrHK = new HK*[TotalCustomer];
             for(int i = 0; i <TotalCustomer; i++) {
                 string c = string(OriginHK[i]->get_cmnd());
 
-                if (res.empty() || c.find(res) != string::npos) {
+                if (c.find(res) == 0) {
                     arrHK[t++] = OriginHK[i];
                 }
             }
