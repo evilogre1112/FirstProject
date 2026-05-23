@@ -138,6 +138,39 @@ DateTime lastDay(string time_str){
     return StringtoTime(LastDay(time_str));
 }
 
+// Hàm dùng chung cho mọi danh sách
+NavKey PaginationController(int totalItems, int itemsPerPage, int& currentPage, int& currentRow,int& key) {
+    NavKey ch = GetNavKey(key);
+    int totalPages = (totalItems + itemsPerPage - 1) / itemsPerPage;
+    if (totalPages == 0) totalPages = 1;
+    
+    int itemsOnThisPage = min(itemsPerPage, totalItems - (currentPage * itemsPerPage));
+    
+    if (ch == NAV_UP) {
+        if (currentRow > 0) currentRow--;
+        else return ch; // Báo hiệu nhảy lên thanh tìm kiếm
+    } 
+    else if (ch == NAV_DOWN) {
+        if (currentRow + 1 < itemsOnThisPage) currentRow++;
+        else {
+            currentPage = (currentPage + 1 < totalPages) ? currentPage + 1 : 0;
+            currentRow = 0;
+        }
+    }else if (ch == NAV_RIGHT){
+        if(currentPage+1 <totalPages ) currentPage++;
+        else currentPage = 0 ;
+        currentRow = 0;
+    }else if(ch == NAV_LEFT){
+        if(currentPage-1 >=0 ) currentPage--;
+        else currentPage = totalPages-1 ;
+        currentRow = 0;
+    }
+    return ch; // Trả về phím để hàm gọi tự xử lý ENTER hoặc ESC
+}
+NavKey PaginationController(int totalItems, int itemsPerPage, int& currentPage, int& currentRow){
+    int key = 0 ;
+    return PaginationController(totalItems,itemsPerPage, currentPage, currentRow,key);
+}
 //=========== các hàm đọc dữ liệu ===========//
 
 

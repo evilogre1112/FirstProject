@@ -2753,6 +2753,7 @@ void Get_Input_MB(bool IsHighLight, listMB &tmp, int rowOnScreen,int startIndex,
     } 
 }
 
+
 void It_list_MB(int mod, string res){
     int field = 5 ;
     int Temp[] = {10,20,50,90,100};
@@ -2797,59 +2798,40 @@ void It_list_MB(int mod, string res){
         while(true){
             int index = rowOnScreen + startIndex;// rowOnScreen + startIndex -1
             Get_Input_MB(true, tmp, rowOnScreen, startIndex, Temp, Temp2);
-            NavKey ch = GetNavKey();
             Gotoxy(35, 8 + itemsPerPage + 1);
             SmallBox(m,50,4,string(GRAY));
+            int oldPage = currentPage; 
+            int oldRow = rowOnScreen;
+            NavKey ch =  PaginationController(tmp.slMB, itemsPerPage, currentPage, current_Row);
             Get_Input_MB(false, tmp, rowOnScreen, startIndex, Temp, Temp2);
-            if(ch == NAV_UP){
-                if(rowOnScreen -1 >= 0) rowOnScreen--;
-                else {
-                    tmp = Find_MB_OnRage(dsMB, const_cast<char*>(res.c_str()));
-                    while(true){
-                        Gotoxy(20 + res.length(),4);
-                        int chr = 0 ;
-                        NavKey key = NAV_UP;
-                        while(key == NAV_UP || key == NAV_RIGHT || key == NAV_LEFT )key = GetNavKey(chr);
-                        if(key == NAV_ESC)return ;
-                        if((key == NAV_DOWN || key == NAV_ENTER) && tmp.slMB > 0) {
-                            CanReDraw = false ;
-                            break ;
-                        }
-                        UiFindMB(res, key, chr, tmp,20,4);
-                        CanReDraw = true ;
-                        if(!res.empty())
-                             OnlyPrint_List_MB(tmp,0);
-                        else 
-                            OnlyPrint_List_MB(tmp,savedPage);
+            rowOnScreen = current_Row;
+            if(ch == NAV_UP && oldRow == 0){
+                tmp = Find_MB_OnRage(dsMB, const_cast<char*>(res.c_str()));
+                while(true){
+                    Gotoxy(20 + res.length(),4);
+                    int chr = 0 ;
+                    NavKey key = NAV_UP;
+                    while(key == NAV_UP || key == NAV_RIGHT || key == NAV_LEFT )key = GetNavKey(chr);
+                    if(key == NAV_ESC)return ;
+                    if((key == NAV_DOWN || key == NAV_ENTER) && tmp.slMB > 0) {
+                        CanReDraw = false ;
+                        break ;
                     }
-                    if (!res.empty()) {
-                        current_Row = 0;
-                        currentPage = 0;
-                    } else {
-                        currentPage = savedPage;
-                        current_Row = 0;
-                    }
-                    break;
-                } 
-            }
-            else if (ch == NAV_DOWN){
-                if(rowOnScreen +1 < itemsOnThisPage) rowOnScreen++;
-                else{
-                    if(currentPage+1 <totalPages ) currentPage++;
-                    else currentPage = 0 ;
-                    current_Row = 0;
-                    break ;
+                    UiFindMB(res, key, chr, tmp,20,4);
+                    CanReDraw = true ;
+                    if(!res.empty())
+                            OnlyPrint_List_MB(tmp,0);
+                    else 
+                        OnlyPrint_List_MB(tmp,savedPage);
                 }
-            }else if (ch == NAV_RIGHT){
-                if(currentPage+1 <totalPages ) currentPage++;
-                else currentPage = 0 ;
-                current_Row = 0;
-                break ;
-            }else if(ch == NAV_LEFT){
-                if(currentPage-1 >=0 ) currentPage--;
-                else currentPage = totalPages-1 ;
-                current_Row = 0;
-                break ;
+                if (!res.empty()) {
+                    current_Row = 0;
+                    currentPage = 0;
+                } else {
+                    currentPage = savedPage;
+                    current_Row = 0;
+                }
+                break;
             }else if (ch == NAV_ENTER){
                 if(mod == 0){
                     Gotoxy(35, 8 + itemsPerPage + 1);
@@ -2865,9 +2847,9 @@ void It_list_MB(int mod, string res){
             }else if (ch == NAV_ESC){
                 return ;
             }
+            if (currentPage != oldPage) break ;
         }
     }
-    
 }
 
 // Khối hàm In danh sách Chuyến Bay và các thao tác hiệu chỉnh ở đây không bao gồm các hàm thống kê đặt biệt
@@ -3223,7 +3205,7 @@ void It_list_CB(int mod, string res){
         for (int k = 0; k < startIndex && current != NULL; k++) {
             current = current->next; // Nhảy qua các phần tử của trang trước
         }
-        // 2. LƯU CÁC NODE CỦA TRANG NÀY VÀO MẢNG TẠM
+        //Lưu các node vào mảng tạm
         CB* pageNodes[itemsPerPage]; 
         int nodeCount = 0;
         CB* temp = current;
@@ -3235,71 +3217,51 @@ void It_list_CB(int mod, string res){
 
         int rowOnScreen = current_Row ;
         while(true){
-            string s ;
             int index = rowOnScreen + startIndex;// rowOnScreen + startIndex
+            int oldPage = currentPage; 
+            int oldRow = rowOnScreen;
             CB* SelectedNode = pageNodes[rowOnScreen];
             Get_Input_CB(true,pageNodes, rowOnScreen, startIndex, size, Temp, Temp2 );
-            NavKey ch = GetNavKey();
+            NavKey ch =  PaginationController(tmp.slCB, itemsPerPage, currentPage, current_Row);
             Gotoxy(5, 24);
             SmallBox(m,50,4,string(GRAY));
             Get_Input_CB(false,pageNodes, rowOnScreen, startIndex, size, Temp, Temp2 );
-            if(ch == NAV_UP){
-                if(rowOnScreen -1 >= 0) rowOnScreen--;
-                else{
-                    tmp.Clear(); 
-                    tmp = Find_CB_OnRage(dsCB, const_cast<char*>(res.c_str()));
+            rowOnScreen = current_Row ;
+            if(ch == NAV_UP&& oldRow == 0){
+                tmp.Clear(); 
+                tmp = Find_CB_OnRage(dsCB, const_cast<char*>(res.c_str()));
+                
+                while(true){
+                    Gotoxy(20 + res.length(),4);
+                    int chr = 0 ;
+                    NavKey key = NAV_UP;
+                    while (key == NAV_UP||key == NAV_LEFT||key == NAV_RIGHT) key = GetNavKey(chr);
                     
-                    while(true){
-                        Gotoxy(20 + res.length(),4);
-                        int chr = 0 ;
-                        NavKey key = NAV_UP;
-                        while (key == NAV_UP||key == NAV_LEFT||key == NAV_RIGHT) key = GetNavKey(chr);
-                        
-                        if(key == NAV_ESC){
-                            tmp.Clear();
-                            return ;
-                        } 
-                        if((key == NAV_DOWN || key == NAV_ENTER) && tmp.slCB > 0) {
-                            CanReDraw = false ; 
-                            break ; 
-                        }
-                        UiFindCB(res, key, chr, tmp);
-                        CanReDraw = true ;
-                        
-                        if(!res.empty())
-                            OnlyPrint_List_CB(tmp, size,0, itemsPerPage, Temp, Temp2, Bin);
-                        else 
-                            OnlyPrint_List_CB(tmp, size,savedPage, itemsPerPage, Temp, Temp2, Bin);
+                    if(key == NAV_ESC){
+                        tmp.Clear();
+                        return ;
+                    } 
+                    if((key == NAV_DOWN || key == NAV_ENTER) && tmp.slCB > 0) {
+                        CanReDraw = false ; 
+                        break ; 
                     }
+                    UiFindCB(res, key, chr, tmp);
+                    CanReDraw = true ;
                     
-                    if (!res.empty()) {
-                        currentPage = 0;
-                        current_Row = 0;
-                    } else {
-                        currentPage = savedPage;
-                        current_Row = 0;
-                    }
-                    break; 
-                } 
-            }
-            else if (ch == NAV_DOWN){
-                if(rowOnScreen +1 < itemsOnThisPage) rowOnScreen++;
-                else{
-                    if(currentPage+1 <totalPages ) currentPage++;
-                    else currentPage = 0 ;
-                    current_Row = 0;
-                    break ;
+                    if(!res.empty())
+                        OnlyPrint_List_CB(tmp, size,0, itemsPerPage, Temp, Temp2, Bin);
+                    else 
+                        OnlyPrint_List_CB(tmp, size,savedPage, itemsPerPage, Temp, Temp2, Bin);
                 }
-            }else if (ch == NAV_RIGHT){
-                if(currentPage+1 <totalPages ) currentPage++;
-                else currentPage = 0 ;
-                current_Row = 0 ;
-                break ;
-            }else if(ch == NAV_LEFT){
-                if(currentPage-1 >=0 ) currentPage--;
-                else currentPage = totalPages-1 ;
-                current_Row = 0 ;
-                break ;
+                
+                if (!res.empty()) {
+                    currentPage = 0;
+                    current_Row = 0;
+                } else {
+                    currentPage = savedPage;
+                    current_Row = 0;
+                }
+                break; 
             }else if (ch == NAV_ENTER){
                 if(mod == 0){
                     
@@ -3319,9 +3281,9 @@ void It_list_CB(int mod, string res){
                 tmp.Clear();
                 return ;
             }
+            if(currentPage != oldPage) break ;
         }
     }
-    
 }
 
 void  RenderHKBySample (HK** displayArr, CB* thisCB,int fields, int currentPage, int CustomerPerPage, int displayTotal,int tWidth,int Temp[], int Temp2[]) {
@@ -3420,7 +3382,6 @@ void View_DSHK_CB(CB* thisCB) {
         int startIndex = currentPage * CustomerPerPage;
         int itemsOnThisPage = min(CustomerPerPage, displayTotal - startIndex);
         int totalPages = max(1, (displayTotal + CustomerPerPage - 1) / CustomerPerPage);
-
         // nếu trống thì chỉ cho người dùng bấm esc, đã trống rồi còn bắt người ta tìm kiếm. 
         if (displayTotal == 0) {
             Gotoxy(0, 10);
@@ -3431,6 +3392,8 @@ void View_DSHK_CB(CB* thisCB) {
         } 
         else {
             int index = startIndex + rowOnScreen;
+            int oldPage = currentPage; 
+            int oldRow = rowOnScreen;
             string stt = to_string(index + 1);
             string cmnd = string(displayArr[index]->get_cmnd());
             string hoten = string(displayArr[index]->get_ho()) + " " + string(displayArr[index]->get_ten());
@@ -3447,20 +3410,16 @@ void View_DSHK_CB(CB* thisCB) {
                 SmallBox(data[i], false, false, true, true, Temp2[i], 1, string(HIGHLIGHT));
             }
 
-            int ch;
-            NavKey key = GetNavKey(ch);
+            NavKey key = PaginationController(displayTotal , CustomerPerPage, currentPage, current_Row);
 
             // TRẢ LẠI MÀU BÌNH THƯỜNG
             for(int i = 0; i < 5; i++){
                 Gotoxy(Temp[i], 8 + rowOnScreen);
                 SmallBox(data[i], false, false, true, true, Temp2[i], 1);
             }
-
+            rowOnScreen = current_Row;
             // XỬ LÝ PHÍM ĐIỀU HƯỚNG
-            if (key == NAV_UP) {
-                if (rowOnScreen > 0) rowOnScreen--;
-                else {
-                    // MŨI TÊN LÊN NHẢY VÀO THANH TÌM KIẾM
+            if (key == NAV_UP && oldRow == 0) {
                     Gotoxy(10, 4); cout << YELLOW << "Tìm CMND: " << RESET;
                     while(true) {
                         
@@ -3478,38 +3437,18 @@ void View_DSHK_CB(CB* thisCB) {
                         if (isSearchChanged) {
                             currentPage = 0;
                             rowOnScreen = 0;
+                            current_Row = 0;
                             RenderHKBySample (displayArr,thisCB,fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
                         }
                       
                     }
-                }
-            } 
-            else if (key == NAV_DOWN) {
-                // Good 10 điểm 
-                if (rowOnScreen + 1 < itemsOnThisPage) rowOnScreen++;
-                else {
-                    if (currentPage + 1 < totalPages) { 
-                        currentPage++; 
-                        rowOnScreen = 0; 
-                        RenderHKBySample (displayArr,thisCB,fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
-                    }
-                }
-            } 
-            else if (key == NAV_RIGHT) {
-                if (currentPage + 1 < totalPages) { 
-                    currentPage++; 
-                    rowOnScreen = 0; 
-                    RenderHKBySample (displayArr,thisCB,fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
-                }
-            } 
-            else if (key == NAV_LEFT) {
-                if (currentPage > 0) { 
-                    currentPage--; 
-                    rowOnScreen = 0; 
-                    RenderHKBySample (displayArr,thisCB,fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
-                }
+                    rowOnScreen = 0;
+                    current_Row = 0;
             } 
             else if (key == NAV_ESC) goto EXIT_VIEW;
+            if(currentPage != oldPage){
+                RenderHKBySample(displayArr, thisCB, fields, currentPage, CustomerPerPage, displayTotal, tWidth, Temp, Temp2);
+            }
         }
     }
 
@@ -3571,13 +3510,12 @@ bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& TotalCustomer,
         if (res.empty()) {
            arrHK = OriginHK;
         } else {
-
             int t = 0 ;
             arrHK = new HK*[TotalCustomer];
             for(int i = 0; i <TotalCustomer; i++) {
                 string c = string(OriginHK[i]->get_cmnd());
 
-                if (res.empty() || c.find(res) != string::npos) {
+                if (c.find(res) == 0) {
                     arrHK[t++] = OriginHK[i];
                 }
             }
@@ -3619,17 +3557,17 @@ void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage)
 
     for(int i = startIndex; i < endIndex; i++) {
         rowOnScreen = i - startIndex; 
-        
-        string s_stt = to_string(i + 1);
-        string s_cmnd = string(arr[i]->get_cmnd());
-        string s_hoten = string(arr[i]->get_ho()) + " " + string(arr[i]->get_ten());
-        string s_phai = arr[i]->get_phai() ? "Nữ" : "Nam";
+        string inputs[4] ;
+        inputs[0] = to_string(i + 1);
+        inputs[1] = string(arr[i]->get_cmnd());
+        inputs[2] = string(arr[i]->get_ho()) + " " + string(arr[i]->get_ten());
+        inputs[3] = arr[i]->get_phai() ? "Nữ" : "Nam";
 
         // Vẽ từng ô cho dòng hiện tại
-        Gotoxy(Temp[0], 8 + rowOnScreen); SmallBox(s_stt, false, false, true, true, Temp2[0], 1);
-        Gotoxy(Temp[1], 8 + rowOnScreen); SmallBox(s_cmnd, false, false, true, true, Temp2[1], 1);
-        Gotoxy(Temp[2], 8 + rowOnScreen); SmallBox(s_hoten, false, false, true, true, Temp2[2], 1);
-        Gotoxy(Temp[3], 8 + rowOnScreen); SmallBox(s_phai, false, false, true, true, Temp2[3], 1);
+        for(int i = 0 ; i < 4 ;i++){
+            Gotoxy(Temp[i], 8 + rowOnScreen); 
+            SmallBox(inputs[i], false, false, true, true, Temp2[i], 1);
+        }
     }
     
     for(int i = 0 ; i < 4 ; i++){
@@ -3637,7 +3575,20 @@ void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage)
         SmallBox("...", false, false, true, true, Temp2[i], 1, GRAY);
     }
 }
+void Get_Input_HK(bool IsHighLight,HK* arrHK[], int rowOnScreen,int index, int Temp[], int Temp2[] ){
+     string data[4] = {
+        to_string(index + 1),
+        string(arrHK[index]->get_cmnd()),
+        string(arrHK[index]->get_ho()) + " " + string(arrHK[index]->get_ten()),
+        arrHK[index]->get_phai() ? "Nữ" : "Nam"
+    };
 
+    // Tô sáng dòng hiện tại
+    for(int i = 0; i < 4; i++){
+        Gotoxy(Temp[i], 8 + rowOnScreen);
+        SmallBox(data[i], false, false, true, true, Temp2[i], 1, IsHighLight ? HIGHLIGHT : WHITE);
+    }
+}
 void It_list_HK(int mod, string res = "") { 
     int Temp[] = {10, 20, 45, 90};
     int Temp2[] = {10, 25, 45, 15};
@@ -3670,94 +3621,54 @@ void It_list_HK(int mod, string res = "") {
 
         while (true) {
             if (totalItems == 0) {
-                rowOnScreen = -1; // Ép nhảy lên thanh tìm kiếm nếu rỗng
+                _getch();
+                goto CLEANUP_AND_EXIT;
             } else {
                 int index = rowOnScreen + startIndex;
-                string data[4] = {
-                    to_string(index + 1),
-                    string(arrHK[index]->get_cmnd()),
-                    string(arrHK[index]->get_ho()) + " " + string(arrHK[index]->get_ten()),
-                    arrHK[index]->get_phai() ? "Nữ" : "Nam"
-                };
-
-                // Tô sáng dòng hiện tại
-                for(int i = 0; i < 4; i++){
-                    Gotoxy(Temp[i], 8 + rowOnScreen);
-                    SmallBox(data[i], false, false, true, true, Temp2[i], 1, HIGHLIGHT);
-                }
-
-                NavKey ch = GetNavKey();
-
+                int oldPage = currentPage; 
+                int oldRow = rowOnScreen;
+                Get_Input_HK(true,arrHK, rowOnScreen, index,  Temp,Temp2 );
+                NavKey ch =  PaginationController(totalItems, itemsPerPage, currentPage, current_Row);
                 // Trả lại màu bình thường khi con trỏ rời đi
                 Gotoxy(35, 8 + itemsPerPage + 1);
                 SmallBox(m, 50, 4, string(GRAY)); 
-                for(int i = 0; i < 4; i++){
-                    Gotoxy(Temp[i], 8 + rowOnScreen);
-                    SmallBox(data[i], false, false, true, true, Temp2[i], 1);
-                }
+                Get_Input_HK(false,arrHK, rowOnScreen, index,  Temp,Temp2 );
+                rowOnScreen = current_Row;
+                if (ch == NAV_UP && oldRow == 0) {
+                    // VÀO THANH TÌM KIẾM
+                    while(true) {
+                        Gotoxy(20 + res.length(), 4);
+                        int inputChar = 0;
+                        NavKey key = GetNavKey(inputChar);
 
-                if (ch == NAV_UP) {
-                    if (rowOnScreen - 1 >= 0) {
-                        rowOnScreen--;
-                    } else {
-                        // VÀO THANH TÌM KIẾM
-                        while(true) {
-                            Gotoxy(20 + res.length(), 4);
-                            int inputChar = 0;
-                            NavKey key = GetNavKey(inputChar);
+                        if(key == NAV_ESC) goto CLEANUP_AND_EXIT;
 
-                            if(key == NAV_ESC) goto CLEANUP_AND_EXIT;
-
-                            // Nhấn DOWN để rời khỏi thanh tìm kiếm
-                            if(key == NAV_DOWN && totalItems > 0) {
-                                break; // Chỉ thoát vòng gõ phím
-                            }
-                            
-                            int oldItems = totalItems;
-                            UiFindHK(res, key, inputChar, arrHK, totalItems);
-
-                            if (oldItems != totalItems || key == NAV_BACK || (isdigit(inputChar) && key == NAV_UNKNOWN)) {
-                                currentPage = 0; 
-                                
-                                startIndex = currentPage * itemsPerPage;
-                                endIndex = min(startIndex + itemsPerPage, totalItems);
-                                itemsOnThisPage = max(0, endIndex - startIndex);
-                                totalPages = max(1, (totalItems + itemsPerPage - 1) / itemsPerPage);
-                                
-                                Render_HK_Page(arrHK, totalItems, currentPage, itemsPerPage);
-                                
-                                m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát.";
-                                Gotoxy(35, 8 + itemsPerPage + 1);
-                                SmallBox(m, 50, 4, string(GRAY));
-                            }
+                        // Nhấn DOWN để rời khỏi thanh tìm kiếm
+                        if(key == NAV_DOWN && totalItems > 0) {
+                            break; // Chỉ thoát vòng gõ phím
                         }
                         
-                        // KHI RỜI THANH TÌM KIẾM BẰNG PHÍM DOWN:
-                        rowOnScreen = 0; 
+                        int oldItems = totalItems;
+                        UiFindHK(res, key, inputChar, arrHK, totalItems);
+
+                        if (oldItems != totalItems || key == NAV_BACK || (isdigit(inputChar) && key == NAV_UNKNOWN)) {
+                            currentPage = 0; 
+                            
+                            startIndex = currentPage * itemsPerPage;
+                            endIndex = min(startIndex + itemsPerPage, totalItems);
+                            itemsOnThisPage = max(0, endIndex - startIndex);
+                            totalPages = max(1, (totalItems + itemsPerPage - 1) / itemsPerPage);
+                            
+                            Render_HK_Page(arrHK, totalItems, currentPage, itemsPerPage);
+                            
+                            m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát.";
+                            Gotoxy(35, 8 + itemsPerPage + 1);
+                            SmallBox(m, 50, 4, string(GRAY));
+                        }
                     }
-                } 
-                else if (ch == NAV_DOWN) {
-                    if (rowOnScreen + 1 < itemsOnThisPage) rowOnScreen++;
-                    else {
-                        if (currentPage + 1 < totalPages) currentPage++;
-                        else currentPage = 0;
-                        current_Row = 0;
-                        break; // Nhảy trang thì break ra để render lại trang mới là hợp lý
-                    }
-                } 
-                else if (ch == NAV_RIGHT) {
-                    if (currentPage + 1 < totalPages) currentPage++;
-                    else currentPage = 0;
+                    rowOnScreen = 0; 
                     current_Row = 0;
-                    break;
-                } 
-                else if (ch == NAV_LEFT) {
-                    if (currentPage - 1 >= 0) currentPage--;
-                    else currentPage = totalPages - 1;
-                    current_Row = 0;
-                    break;
-                } 
-                else if (ch == NAV_ENTER) {
+                }else if (ch == NAV_ENTER) {
                     if (mod == 0) {
                         Gotoxy(35, 8 + itemsPerPage + 1);
                         SmallBox("Đây Là Chế Độ In Danh Sách, Bạn Chỉ Có Quyền Xem Ở Chế Độ Này", 50, 4, string(RED));
@@ -3766,6 +3677,7 @@ void It_list_HK(int mod, string res = "") {
                 else if (ch == NAV_ESC) {
                     goto CLEANUP_AND_EXIT;
                 }
+                if (currentPage != oldPage) break ;
             }
         }
     }
@@ -3786,6 +3698,7 @@ void StatiscalMB(){
     string headers[] = {"STT", "Số Hiệu Máy Bay", "Loại Máy Bay", "Số Chỗ", "Số Lần Bay"};
     PrintHeader("", 0, "Danh Sách Máy Bay", 5, headers, Typemode, Temp, Temp2);
     int currentPage = 0;
+    int current_Row = 0;
     while(true){
         int itemsPerPage = 15; // Ví dụ: màn hình chỉ chứa được 15 máy bay
         int startIndex = currentPage * itemsPerPage;
@@ -3802,66 +3715,32 @@ void StatiscalMB(){
         int totalPages = (dsMB_Stat.slMB + itemsPerPage - 1) / itemsPerPage; // Tính tổng số trang
         if(totalPages == 0) totalPages = 1;
         string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát." ;
-      
+        if (itemsOnThisPage == 0) {
+            NavKey ch = GetNavKey();
+            if (ch == NAV_ESC) {
+                dsMB_Stat.Clear();
+                return;
+            }
+            continue; 
+        }
         SmallBox(m,50,4,string(GRAY));
-        rowOnScreen = 0 ;
+        rowOnScreen = current_Row ;
         while(true){
             string s ;
             int index = rowOnScreen + startIndex;// rowOnScreen + startIndex -1
-            for(int i = 0; i < 5 ;i++){
-                Gotoxy(Temp[i],8 + rowOnScreen);
-                if(i == 1){
-                    s = dsMB_Stat.list[index]->soHieuMB;
-                }else if (i == 2){
-                    s = dsMB_Stat.list[index]->loaiMB;
-                }else if (i == 3){
-                    s = to_string(dsMB_Stat.list[index]->socho);
-                }else{
-                    s = to_string(dsMB_Stat.list[index]->SLB);
-                }
-                if(i == 0) s = to_string(index+1);
-                SmallBox(s,false, false,true, true, Temp2[i],1, HIGHLIGHT);
-            }
-            NavKey ch = GetNavKey();
-            for(int i = 0; i < 5 ;i++){
-                Gotoxy(Temp[i],8 + rowOnScreen);
-                 if(i == 1){
-                    s = dsMB_Stat.list[index]->soHieuMB;
-                }else if (i == 2){
-                    s = dsMB_Stat.list[index]->loaiMB;
-                }else if (i == 3){
-                    s = to_string(dsMB_Stat.list[index]->socho);
-                }else{
-                    s = to_string(dsMB_Stat.list[index]->SLB);
-                }
-                if(i == 0) s = to_string(index+1);
-                SmallBox(s,false, false,true, true, Temp2[i],1);
-            }
-            if(ch == NAV_UP){
-                if(rowOnScreen -1 >= 0) rowOnScreen--;
-                else break ;
-            }
-            else if (ch == NAV_DOWN){
-                if(rowOnScreen +1 < itemsOnThisPage) rowOnScreen++;
-                else{
-                    if(currentPage+1 <totalPages ) currentPage++;
-                    else currentPage = 0 ;
-                    break ;
-                }
-            }else if (ch == NAV_RIGHT){
-                if(currentPage+1 <totalPages ) currentPage++;
-                else currentPage = 0 ;
-                break ;
-            }else if(ch == NAV_LEFT){
-                if(currentPage-1 >=0 ) currentPage--;
-                else currentPage = totalPages-1 ;
-                break ;
-            }else if (ch == NAV_ENTER){
-                break ;
-            }else if (ch == NAV_ESC){
+            Get_Input_MB(true, dsMB_Stat, rowOnScreen, startIndex, Temp, Temp2);
+            Gotoxy(35, 8 + itemsPerPage + 1);
+            SmallBox(m,50,4,string(GRAY));
+            int oldPage = currentPage; 
+            int oldRow = rowOnScreen;
+            NavKey ch =  PaginationController(dsMB_Stat.slMB, itemsPerPage, currentPage, current_Row);
+            Get_Input_MB(false, dsMB_Stat, rowOnScreen, startIndex, Temp, Temp2);
+            rowOnScreen = current_Row;
+            if (ch == NAV_ESC){
                 dsMB_Stat.Clear();
                 return ;
             }
+            if (currentPage != oldPage) break;
         }
     }
 
@@ -3939,13 +3818,7 @@ void FindCBOnTimeAndPlace(string res){
         SmallBox(m, 50, 1, string(GRAY));
 
         Render_CB_Page(CBSearch,slCB,Y,25,8,currentPage,itemsPerPage,S,Temp,Temp2,Bin);
-        
-        Gotoxy(53, 24);
-        cout << " /\\_/\\";
-        Gotoxy(53, 25);
-        cout <<"( o.o )";
-        Gotoxy(53, 26);
-        cout << " > ^ <";
+        DrawACat(53,24);
 
         // LƯU CÁC NODE CỦA TRANG NÀY VÀO MẢNG TẠM
         CB* pageNodes[itemsPerPage]; 
@@ -3959,6 +3832,9 @@ void FindCBOnTimeAndPlace(string res){
         while(true){
             int key ;
             NavKey ch;
+            int oldPage = currentPage; 
+            int oldRow = rowOnScreen;
+            //PaginationController
            if(slCB == 0){
                 Gotoxy(25, Y);
                 cout << RED << "Không có dữ liệu chuyến bay nào!" << RESET;
@@ -3977,7 +3853,7 @@ void FindCBOnTimeAndPlace(string res){
                     if(i!= 3)SmallBox(s,false, false,true, true, Temp2[i],1,HIGHLIGHT);
                 }
                 UiThongTinCB(2,18,47,7,SelectedNode->maCB);
-                ch = GetNavKey(key);
+                ch =  PaginationController(slCB, itemsPerPage, currentPage, current_Row,key);
 
                 for(int i = 0; i < size ;i++){
                     Gotoxy(Temp[i],Y + rowOnScreen);
@@ -3988,28 +3864,12 @@ void FindCBOnTimeAndPlace(string res){
                     if(i!= 3)SmallBox(s,false, false,true, true, Temp2[i],1);
                 }
             }
-            if(ch == NAV_UP){
-                if(rowOnScreen -1 >= 0) rowOnScreen--; 
-            }
-            else if (ch == NAV_DOWN){
-                if(rowOnScreen +1 < itemsOnThisPage) rowOnScreen++;
-                else{
-                    if(currentPage+1 <totalPages ) currentPage++;
-                    else currentPage = 0 ;
-                    break ;
+            rowOnScreen = current_Row;
+            if (ch == NAV_UP && oldRow == 0) {
+                if (currentPage > 0) {
+                    currentPage--; 
+                    current_Row = itemsPerPage - 1;
                 }
-            }else if (ch == NAV_RIGHT){
-                if(currentPage+1 <totalPages ) currentPage++;
-                else currentPage = 0 ;
-                current_Row = 0 ;
-                break ;
-            }else if(ch == NAV_LEFT){
-                if(currentPage-1 >=0 ) currentPage--;
-                else currentPage = totalPages-1 ;
-                current_Row = 0 ;
-                break ;
-            }else if (ch == NAV_ENTER){
-                // Xử lý logic khi bấm ENTER
             }else if (ch == NAV_ESC){
                 delete[] CBSearch;
                 return ;
@@ -4038,6 +3898,7 @@ void FindCBOnTimeAndPlace(string res){
                 current_Row = 0;
                 break;
             }
+            if (currentPage != oldPage) break;
         }
     }
     
