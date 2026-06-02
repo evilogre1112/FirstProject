@@ -742,7 +742,7 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
         } 
         else if (result.length() < maxLength) {
             if (result.empty() && ch == ' ') continue;
-
+            if(result.back() == ' ' && ch == ' ') continue;
             // Phân loại xử lý dựa trên bảng mã ASCII (0-127) và UTF-8 (>= 128)
             if ((unsigned char)ch < 128) {
                 // VÙNG ASCII (Ký tự tiếng Anh, số, dấu)
@@ -2505,22 +2505,25 @@ void UiThongTinHK(int x, int y, int width, int height, string s) {
 }
 
 // Khối hàm thực hiện In danh sách MB và các thao tác sữa xoá ở đây 
-
-void UiFindMB(string& res, NavKey key, int& ch, listMB& A, int x, int y) {
+bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width){
     bool isChanged = false; 
-
     if (key == NAV_BACK && !res.empty()) {
         res.pop_back();
         Gotoxy(x, y);
         cout << res << "  ";
         isChanged = true;
     } 
-    else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) { 
+    else if (visualLength(res) < width && (( (!res.empty() && res.back() != ' ' && ch == ' ') || ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) ) )) { 
         res += toupper((char)ch); 
         Gotoxy(x, y);
         cout << res; 
         isChanged = true;
     }
+    return isChanged;
+}
+
+void UiFindMB(string& res, NavKey key, int& ch, listMB& A, int x, int y) {
+    bool isChanged = SimpleInput(res, key, ch, x, y,soHieuMB_max); 
 
     if (isChanged) {
         A = Find_MB_OnRage(dsMB, const_cast<char*>(res.c_str()));
@@ -2817,11 +2820,12 @@ void It_list_MB(int mod, string res){
                         CanReDraw = false ;
                         break ;
                     }
+                    bool Changed = res.empty();
                     UiFindMB(res, key, chr, tmp,20,4);
                     CanReDraw = true ;
                     if(!res.empty())
-                            OnlyPrint_List_MB(tmp,0);
-                    else 
+                        OnlyPrint_List_MB(tmp,0);
+                    else if (res.empty() && !Changed)
                         OnlyPrint_List_MB(tmp,savedPage);
                 }
                 if (!res.empty()) {
@@ -2856,23 +2860,10 @@ void It_list_MB(int mod, string res){
 
 // Truyền listCB& A (tham chiếu) để sửa trực tiếp, không dùng lệnh return
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A) {
-    bool isChanged = false;
-
-    if (key == NAV_BACK && !res.empty()) {
-        res.pop_back();
-        Gotoxy(20, 4);
-        cout << res << "  "; 
-        isChanged = true;
-    } 
-    else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) { 
-        res += toupper((char)ch); 
-        Gotoxy(20, 4);
-        cout << res; 
-        isChanged = true;
-    }
+    int X = 20 , Y = 4 ;
+    bool isChanged = SimpleInput(res, key, ch, X, Y,maCB_max);
   
     // CHỈ DỌN RAM VÀ TÌM LẠI NẾU NGƯỜI DÙNG THỰC SỰ GÕ PHÍM CHỮ/XÓA
-    // Nếu bấm phím mũi tên, hàm kết thúc luôn, giữ nguyên danh sách A
     if (isChanged) {
         A.Clear();
         A = Find_CB_OnRage(dsCB, const_cast<char*>(res.c_str()));
@@ -3245,12 +3236,13 @@ void It_list_CB(int mod, string res){
                         CanReDraw = false ; 
                         break ; 
                     }
+                    bool changed = res.empty();
                     UiFindCB(res, key, chr, tmp);
                     CanReDraw = true ;
                     
                     if(!res.empty())
                         OnlyPrint_List_CB(tmp, size,0, itemsPerPage, Temp, Temp2, Bin);
-                    else 
+                    else if(res.empty() && !changed)
                         OnlyPrint_List_CB(tmp, size,savedPage, itemsPerPage, Temp, Temp2, Bin);
                 }
                 
@@ -3309,6 +3301,7 @@ void  RenderHKBySample (HK** displayArr, CB* thisCB,int fields, int currentPage,
                 for(int v = 0; v < thisCB->socho; v++){
                     if(strcmp(thisCB->DSV[v], displayArr[i]->get_cmnd()) == 0){
                         inputs[1] = to_string(v + 1); 
+                        inputs[1] = string(3 - inputs[1].size(), '0') + inputs[1];
                         break;
                     }
                 }
@@ -3344,7 +3337,7 @@ void View_DSHK_CB(CB* thisCB) {
 
     int Temp[] = {10, 20, 35, 60, 100};   
     int Temp2[] = {10, 15, 25, 40, 15};  
-    string headers[] = {"STT", "Số Vé", "Số CMND", "Họ Tên", "Phái"};
+    string headers[] = {"STT", "Ghế Ngồi", "Số CMND", "Họ Tên", "Phái"};
 
     ClearScreen();
 
@@ -3400,7 +3393,11 @@ void View_DSHK_CB(CB* thisCB) {
             string phai = displayArr[index]->get_phai() ? "Nữ" : "Nam";
             string soVe = "?";
             for(int v = 0; v < thisCB->socho; v++){
-                if(strcmp(thisCB->DSV[v], displayArr[index]->get_cmnd()) == 0){ soVe = to_string(v + 1); break; }
+                if(strcmp(thisCB->DSV[v], displayArr[index]->get_cmnd()) == 0){ 
+                    soVe = to_string(v + 1);
+                    soVe = string(3 - soVe.size(), '0') + soVe;
+                    break; 
+                }
             }
             string data[] = {stt, soVe, cmnd, hoten, phai};
 
@@ -3456,23 +3453,27 @@ EXIT_VIEW:
     if (displayArr != NULL) delete[] displayArr;
 }
 
-bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems) {
-    bool isChanged = false;
-
+bool InputSimpleHK(string& res, NavKey key, int& ch,int x,int y) {
     // Xử lý nút xóa (Backspace)
     if (key == NAV_BACK && !res.empty()) {
         res.pop_back();
-        Gotoxy(20, 4);
+        Gotoxy(x, y);
         cout << res << "  "; 
-        isChanged = true;
+        return true;
     } 
     // Xử lý gõ chữ cái / số
-    else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) { 
+    else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN && visualLength(res) < cmnd_max) { 
         res += toupper((char)ch); 
-        Gotoxy(20, 4);
+        Gotoxy(x, y);
         cout << res; 
-        isChanged = true;
+        return true;
     }
+    return false;
+}
+
+bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems) {
+    int X = 20 , Y = 4 ;
+    bool isChanged = InputSimpleHK(res, key, ch, X, Y);
     if (isChanged) {
         if (arrHK != NULL) delete[] arrHK; 
         
@@ -3488,22 +3489,8 @@ bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems) {
 }
 
 bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& TotalCustomer,CB* thisCB) {
-    bool isChanged = false;
-    
-    // Xử lý nút xóa (Backspace)
-    if (key == NAV_BACK && !res.empty()) {
-        res.pop_back();
-        Gotoxy(20, 4);
-        cout << res << "  "; 
-        isChanged = true;
-    } 
-    // Xử lý gõ chữ cái / số
-    else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) { 
-        res += toupper((char)ch); 
-        Gotoxy(20, 4);
-        cout << res; 
-        isChanged = true;
-    }
+    int X = 20 , Y = 4 ;
+    bool isChanged = InputSimpleHK(res, key, ch, X, Y);
     if (isChanged) {
         HK** OriginHK = Get_DSHKCB(dsCB, dsHK, thisCB->maCB, TotalCustomer);
         if (arrHK != NULL) delete[] arrHK; 
@@ -3599,7 +3586,7 @@ void It_list_HK(int mod, string res = "") {
     HK** arrHK = duyet_HK(dsHK); 
     
     // In Header (Tìm kiếm CMND)
-    PrintHeader(res, mod, "Danh Sách Hành Khách", 4, headers, typemode, Temp, Temp2);
+    PrintHeader(res, mod, "Danh Sách Hành Khách", 4, headers, typemode, Temp, Temp2,50,10,87);
     
     int currentPage = 0;
     int current_Row = 0;
@@ -3649,6 +3636,7 @@ void It_list_HK(int mod, string res = "") {
                         }
                         
                         int oldItems = totalItems;
+                        bool changed = res.empty() ;
                         UiFindHK(res, key, inputChar, arrHK, totalItems);
 
                         if (oldItems != totalItems || key == NAV_BACK || (isdigit(inputChar) && key == NAV_UNKNOWN)) {
@@ -3659,7 +3647,8 @@ void It_list_HK(int mod, string res = "") {
                             itemsOnThisPage = max(0, endIndex - startIndex);
                             totalPages = max(1, (totalItems + itemsPerPage - 1) / itemsPerPage);
                             
-                            Render_HK_Page(arrHK, totalItems, currentPage, itemsPerPage);
+                            if(res.empty() && !changed) Render_HK_Page(arrHK, totalItems, currentPage, itemsPerPage); // Nếu xóa hết thì về trang đầu, nếu có kết quả mới thì cũng về trang đầu, chỉ khi đang tìm kiếm mà gõ thêm thì mới giữ nguyên trang
+                            else if (!res.empty()) Render_HK_Page(arrHK, totalItems, currentPage, itemsPerPage);
                             
                             m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang, ▲/▼ đổi lựa chọn, ESC để thoát.";
                             Gotoxy(35, 8 + itemsPerPage + 1);
@@ -3696,7 +3685,7 @@ void StatiscalMB(){
     int Temp2[] ={10,30,40,10,15};
     string Typemode[] = {"In danh Sách","Hiệu Chỉnh","Xoá"};
     string headers[] = {"STT", "Số Hiệu Máy Bay", "Loại Máy Bay", "Số Chỗ", "Số Lần Bay"};
-    PrintHeader("", 0, "Danh Sách Máy Bay", 5, headers, Typemode, Temp, Temp2);
+    PrintHeader("", 0, "Danh Sách Máy Bay", 5, headers, Typemode, Temp, Temp2,50,-1,97);
     int currentPage = 0;
     int current_Row = 0;
     while(true){
@@ -3718,7 +3707,6 @@ void StatiscalMB(){
         if (itemsOnThisPage == 0) {
             NavKey ch = GetNavKey();
             if (ch == NAV_ESC) {
-                dsMB_Stat.Clear();
                 return;
             }
             continue; 
@@ -3737,7 +3725,6 @@ void StatiscalMB(){
             Get_Input_MB(false, dsMB_Stat, rowOnScreen, startIndex, Temp, Temp2);
             rowOnScreen = current_Row;
             if (ch == NAV_ESC){
-                dsMB_Stat.Clear();
                 return ;
             }
             if (currentPage != oldPage) break;
@@ -4220,25 +4207,6 @@ start:
 
 // Phần của các Router và Hàm đồ hoạ giao diện nhìn cơ bản ở đây
 
-// Hiển thị giao diện bên tay phải
-void ViewOptions(int mainMenuIdx) {
-    Gotoxy(71, 6); 
-    int startX = whereX();
-    int startY = whereY();
-    string* subOptions = Menus[mainMenuIdx];
-    int count = MenusSize[mainMenuIdx];
-    // 1. Xóa vùng cũ 
-    ClearRegion(startX+5, startY, 30, 20); 
-
-    int space = 2;
-    // 3. Vẽ nội dung ra
-    for(int i = 0 ; i < count ; i++) {
-        // con trỏ sẽ nhảy xuống dưới, nên vẫn cần Gotoxy để căn dòng
-        SmallBox(subOptions[i], true, true, true, true, 30, 1, WHITE);
-        Gotoxy(whereX(),whereY()+space);
-    }
-}
-
 void ViewQLMB(){
     int startX = 1 ;
     int startY = 22;
@@ -4411,6 +4379,26 @@ void Router_Board(int mainMenuIdx, function<void()> func_1,
     }
 }
 
+// Hiển thị giao diện bên tay phải
+void ViewOptions(int mainMenuIdx) {
+    Gotoxy(71, 6); 
+    int startX = whereX();
+    int startY = whereY();
+    
+    // 1. Xóa vùng cũ 
+    ClearRegion(startX+5, startY, 30, 20); 
+    if( mainMenuIdx >= 2) return ;
+    string* subOptions = Menus[mainMenuIdx];
+    int count = MenusSize[mainMenuIdx];
+
+    int space = 2;
+    // 3. Vẽ nội dung ra
+    for(int i = 0 ; i < count ; i++) {
+        // con trỏ sẽ nhảy xuống dưới, nên vẫn cần Gotoxy để căn dòng
+        SmallBox(subOptions[i], true, true, true, true, 30, 1, WHITE);
+        Gotoxy(whereX(),whereY()+space);
+    }
+}
 
 int MainMenuOptionInBoard(string options[], int length) {
     int chosen = 0;
@@ -4438,10 +4426,11 @@ int MainMenuOptionInBoard(string options[], int length) {
                 SmallBox(s, false, true, true, true, 70, 3, color);
             }
         }
-        if(chosen < 2) ViewOptions(chosen);
+        ViewOptions(chosen);
         //if(chosen == 2) //Hướng dẫn sử dụng 
         int pre_chosen = chosen ;
         chosen = GetKey(chosen,length);
+       
         if(chosen == 999) return pre_chosen ;
         if(chosen == 1000) return 4;
     }
@@ -4515,7 +4504,7 @@ void MainScreen(){
         // nhảy xuống dòng do SmallBox k tự động xuống dòng
         Gotoxy(whereX(),whereY()+2);
         int chosen = MainMenuOptionInBoard(options,sizeof(options)/sizeof(string));
-        if(chosen >= 0 && chosen <= 2)
+        if(chosen >= 0 && chosen <= 1)
         {
             switch (chosen)
             {
@@ -4530,11 +4519,11 @@ void MainScreen(){
                 break;
             }
         }
-        else if(chosen == 3)
+        else if(chosen == 2)
         {
             // Hướng dẫn sử dụng
         }
-        else if(chosen == 4)
+        else if(chosen == 3)
         {
             exit(0); // thoát chương trình
         }
