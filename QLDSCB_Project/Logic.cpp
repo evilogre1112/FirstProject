@@ -577,11 +577,7 @@ void realTimeUpdateCB(listCB &dsCB, listHK &dsHK, listMB &dsMB) {
                     HK* tempHK = Find_HK_At_List(dsHK, tempCB->DSV[i]);
                     delMarkHK(tempHK, tempCB->maCB);
                 }
-                delete[] tempCB->DSV[i];
             }
-            delete[] tempCB->DSV;
-            tempCB->DSV = NULL;
-            tempCB->socho = 0;
             int index = Find_MB(dsMB, tempCB->soHieuMB);
             dsMB.list[index]->SLB++;
             delMarkMB(dsMB.list[index], tempCB->maCB);
