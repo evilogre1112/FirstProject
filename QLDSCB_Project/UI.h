@@ -220,6 +220,7 @@ void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
 void OnlyPrint_List_MB(listMB& dsMBm,int currentPage);
 void Get_Input_MB(bool IsHighLight, listMB &tmp, int rowOnScreen,int startIndex, int Temp[], int Temp2[] );
 void It_list_MB(int mode, string res = "");
+void StatiscalMB();
 
 bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
 bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
@@ -256,7 +257,8 @@ int InputStatus(int &result, int x, int y);
 int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false,bool isonlychar = true);
 int InputDateTime(string &result, int x, int y,int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false, int errX =-1, int errY=-1) ;
 int InputStringSBD(string &result, int x, int y, int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false);
-
+bool InputSimpleHK(string& res, NavKey key, int& ch,int x,int y);
+bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width);
 
 void Menu_QuanLyMayBay();
 void Menu_QuanLyChuyenBay();
