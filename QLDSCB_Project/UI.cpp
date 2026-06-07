@@ -742,7 +742,7 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
         } 
         else if (result.length() < maxLength) {
             if (result.empty() && ch == ' ') continue;
-            if(result.back() == ' ' && ch == ' ') continue;
+            if(!result.empty() && result.back() == ' ' && ch == ' ') continue;
             // Phân loại xử lý dựa trên bảng mã ASCII (0-127) và UTF-8 (>= 128)
             if ((unsigned char)ch < 128) {
                 // VÙNG ASCII (Ký tự tiếng Anh, số, dấu)
@@ -1878,7 +1878,7 @@ NavKey CustomerAddHK(string cmnd) {
         int gender = 0;
         int action;
         if (currentField == 0) {
-            action = InputString(inputs[0], inputX, formY + 16, cmnd_max - 1, '_', true);
+            action = InputString(inputs[0], inputX, formY + 16, cmnd_max - 1, '_', true, false, false, false, false);
         }
         else if (currentField == 1) {
             action = InputString(inputs[1], inputX, formY + 18, ho_max, '_', false, false, false, false, true);
@@ -3902,25 +3902,38 @@ NavKey SeatList(int x, int y, int xt, int yt, CB* SelectedCB) {
 selectStage:
     while (true) {
         int tempX = startXT, tempY = startYT;
+        Gotoxy(tempX - 5, tempY);
+        SmallBox("IN", (int)6, (int)1, (string)YELLOW);
+        Gotoxy(tempX + 64, tempY);
+        SmallBox("OUT", (int)7, (int)1, (string)YELLOW);
         for (int i = 0; i < 10; i++) {
-            Gotoxy(tempX - 1, tempY);
+            Gotoxy(tempX + 3, tempY);
             SmallBox("", (int)5, (int)1, (string)WHITE);
-            Gotoxy(tempX + 1, tempY + 1);
+            Gotoxy(tempX + 5, tempY + 1);
             if (stageSelected == i)  cout << HIGHLIGHT << char('A' + i) << RESET;
             else if (i <= stage) cout << GREEN << char('A' + i) << RESET;
             else cout << RED << char('A' + i) << RESET;
-            tempX = tempX + 7;
+            tempX = tempX + 6;
             int startSeat = stageSelected * 60;
             int seatNumber = min(60, seatCount - (stageSelected * 60));
             int tempX = x;
-            int tempY = y;
+            int tempY = y - 1;
             int countRow = 0;
-            ClearRegion(x - 1, y, 77, 7); // Xóa vùng ghế cũ trước khi vẽ lại
+            int row = 1;
+            ClearRegion(x - 1, y - 1, 77, 9); // Xóa vùng ghế cũ trước khi vẽ lại
+            Gotoxy(tempX, tempY + 3);
+            cout << WHITE << string(73,'-') << RESET;
+            Gotoxy(tempX + 10, tempY + 4);
+            cout << WHITE << "  L  Ố  I    Đ  I                 L  Ố  I    Đ  I  " << RESET;
+            Gotoxy(tempX, tempY + 5);
+            cout << WHITE << string(73, '-') << RESET;
             for (int i = 0; i < seatNumber; i++) {
                 if (countRow == 15) {
                     tempX = x;
                     tempY = tempY + 2;
                     countRow = 0;
+                    row++;
+                    if (row == 3) tempY+=2;
                 }
                 Gotoxy(tempX + 5 * countRow, tempY);
                 if (SelectedCB->DSV[startSeat + i][0] != '\0') cout << (startSeat + i + 1);
@@ -3952,10 +3965,11 @@ selectStage:
     int seatNumber = min(60, seatCount - (stageSelected * 60));
     while (true) {
         int tempX = x;
-        int tempY = y;
+        int tempY = y - 1;
         int selectedX;
         int selectedY;
         int countRow = 0;
+        int row = 1;
         if (SelectedCB->DSV[selectedSeat][0] != '\0') {
             UiThongTinHK(84, 22, 35, 7, SelectedCB->DSV[selectedSeat]);
         }
@@ -3964,6 +3978,8 @@ selectStage:
                 tempX = x;
                 tempY = tempY + 2;
                 countRow = 0;
+                row++;
+                if (row == 3) tempY+=2;
             }
             Gotoxy(tempX + 5 * countRow, tempY);
             if (startSeat + i == selectedSeat && SelectedCB->DSV[startSeat + i][0] != '\0') {
@@ -4086,7 +4102,7 @@ start:
     int action;
     listCB subListCB;
 
-    CB** subCB = new CB * [dsCB.slCB];
+    CB** subCB = new CB *[dsCB.slCB];
     CB* tempCB = dsCB.head;
     while (tempCB != NULL) {
         subCB[slCB] = tempCB;
@@ -4094,7 +4110,7 @@ start:
         tempCB = tempCB->next;
     }
 
-    Render_CB_Page(subCB, slCB, Y, 25, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
+    Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
     delete[] subCB;
     slCB = 0;
 
@@ -4105,11 +4121,81 @@ start:
         slCB = 0;
         char Prefix[maCB_max];
         string input;
+        Gotoxy(startX + width1 - 30, formY + 8);
+        cout << " Tìm Kiếm: ";
+        Gotoxy(startX + width1 - 20, formY + 7);
+		SmallBox("", 20, 1, string(WHITE));
+        Gotoxy(startX + width1 - 18, formY + 8);
+        int curX = whereX();
+        int curY = whereY();
+    nhap:
+        while (true) {
+            currentPage = 0;
+            selectedCBIndex = 0;
+            currentRow = 0;
+            Gotoxy(curX, curY);
+			int ch = _getch();
+            if (ch == 13) break;
+            else if (ch == 27) {
+                CB* tempCB = subListCB.head;
+                while (tempCB != NULL) {
+                    CB* toDelete = tempCB;
+                    tempCB = tempCB->next;
+                    delete toDelete;
+                }
+                ClearScreen();
+                return;
+            }
+            else if (input.size() < maCB_max - 1 && ( ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' )) {
+                input += (char)ch;
+                Gotoxy(startX + width1 - 18, formY + 8);
+                cout << input;
+				curX = whereX(); curY = whereY();
+
+                strcpy(Prefix, input.c_str());
+                subListCB = Find_CB_OnRage(dsCB, Prefix);
+                subCB = new CB * [subListCB.slCB];
+                CB* tempCB = subListCB.head;
+                while (tempCB != NULL) {
+                    subCB[slCB] = tempCB;
+                    slCB++;
+                    tempCB = tempCB->next;
+                }
+
+                ClearRegion(0, Y, 50, 8);
+                Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
+                delete[] subCB;
+                slCB = 0;
+            }
+			else if (ch == 8 && !input.empty()) {
+                Gotoxy(whereX() - 1, whereY());
+                cout << " ";
+                input.pop_back();
+                Gotoxy(startX + width1 - 18, formY + 8);
+                cout << input;
+                curX = whereX(); curY = whereY();
+
+                strcpy(Prefix, input.c_str());
+                subListCB = Find_CB_OnRage(dsCB, Prefix);
+                subCB = new CB * [subListCB.slCB];
+                CB* tempCB = subListCB.head;
+                while (tempCB != NULL) {
+                    subCB[slCB] = tempCB;
+                    slCB++;
+                    tempCB = tempCB->next;
+                }
+
+                ClearRegion(0, Y, 50, 8);
+                Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
+                delete[] subCB;
+                slCB = 0;
+			}
+        }
 
         strcpy(Prefix, input.c_str());
         subListCB = Find_CB_OnRage(dsCB, Prefix);
 
-        subCB = new CB*[subListCB.slCB];
+        subCB = new CB * [subListCB.slCB];
         CB* tempCB = subListCB.head;
         while (tempCB != NULL) {
             subCB[slCB] = tempCB;
@@ -4119,7 +4205,7 @@ start:
 
         while (true) {
             ClearRegion(0, Y, 50, 8);
-            Render_CB_Page(subCB, slCB, Y, 25, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
+            Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
             Gotoxy(Temp[0], Y + currentRow);
 			SmallBox(to_string(selectedCBIndex + 1), false, false, true, true, Temp2[0], 1, HIGHLIGHT);
             Gotoxy(Temp[1], Y + currentRow);
@@ -4180,14 +4266,8 @@ start:
             }
             else if (action == NAV_ESC) {
                 delete[] subCB;
-                CB* tempCB = subListCB.head;
-                while (tempCB != NULL) {
-					CB* toDelete = tempCB;
-					tempCB = tempCB->next;
-					delete toDelete;
-                }
-                ClearScreen();
-                return;
+                slCB = 0;
+                goto nhap;
             }
             else {
                 break;
@@ -4195,12 +4275,8 @@ start:
         }
         SeatList(3, formY + height2 + 10, 7, formY + height2 + 6, subCB[selectedCBIndex]);
         delete[] subCB;
-        CB* tempCB1 = subListCB.head;
-        while (tempCB1 != NULL) {
-            CB* toDelete = tempCB1;
-            tempCB1 = tempCB1->next;
-            delete toDelete;
-        }
+        slCB = 0;
+        goto nhap;
     }
 
 }
