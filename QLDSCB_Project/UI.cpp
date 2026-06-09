@@ -3563,7 +3563,7 @@ void Render_HK_Page(HK** arr, int totalItems, int currentPage, int itemsPerPage)
     }
 }
 void Get_Input_HK(bool IsHighLight,HK* arrHK[], int rowOnScreen,int index, int Temp[], int Temp2[] ){
-     string data[4] = {
+    string data[4] = {
         to_string(index + 1),
         string(arrHK[index]->get_cmnd()),
         string(arrHK[index]->get_ho()) + " " + string(arrHK[index]->get_ten()),
@@ -4402,37 +4402,44 @@ void ViewOptions(int mainMenuIdx) {
 
 int MainMenuOptionInBoard(string options[], int length) {
     int chosen = 0;
-    // Lưu lại vị trí bắt đầu để menu không bị "trôi"
     int startX = whereX();
     int startY = whereY();
+    int A[4] = {0,0,0,0};
 
-    while(true) {
-        ClearRegion(startX, startY, 70, (length * 3)); // (Mỗi box cao 3 dòng)
+    ClearRegion(startX, startY, 70, length * 3);
 
-        for(int i = 0 ; i < length ; i++) {
-            string s = options[i];
-            if (i == chosen) {
-                s = string(ARR) + " " + s + " " + ARL;
-            }
+    auto DrawOption = [&](int index, int currentChosen) {
+        
+        bool isSelected = (index == currentChosen);
+        string s = isSelected ? (string(ARR) + " " + options[index] + " " + ARL) : options[index];
+        string color = isSelected ? YELLOW : WHITE;
 
-            // Chọn màu trước
-            string color = (i == chosen) ? YELLOW : WHITE;
+        SmallBox(s, (index == 0), (index == length - 1), true, true, 70, 3, color);
+    };
 
-            if (i == 0) {
-                SmallBox(s, true, false, true, true, 70, 3, color);
-            } else if (i < length - 1) {
-                SmallBox(s, false, false, true, true, 70, 3, color);
-            } else {
-                SmallBox(s, false, true, true, true, 70, 3, color);
-            }
-        }
+    Gotoxy(startX, startY );
+    for (int i = 0; i < length; i++){
+        A[i] = whereY();
+        DrawOption(i, chosen);
+    }
+
+    while (true) {
+        Gotoxy(startX,  A[chosen]);
+        DrawOption(chosen, chosen);
         ViewOptions(chosen);
-        //if(chosen == 2) //Hướng dẫn sử dụng 
-        int pre_chosen = chosen ;
-        chosen = GetKey(chosen,length);
+
+        //if(chosen == 2) //Hướng dẫn sử dụng
+        int pre_chosen = chosen;
+        chosen = GetKey(chosen, length);
+
+        if (chosen == 999) return pre_chosen;
+        if (chosen == 1000) return 4;
+
        
-        if(chosen == 999) return pre_chosen ;
-        if(chosen == 1000) return 4;
+        if (chosen != pre_chosen) {
+            Gotoxy(startX,  A[pre_chosen]);
+            DrawOption(pre_chosen, chosen); 
+        }
     }
 }
 

@@ -275,14 +275,14 @@ int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, 
 // --- CÂU D: HỦY VÉ ---
 
 /**
- * @brief               Thực hiện hủy vé của hành khách trên một chuyến bay
- * @param dsCB          Danh sách chuyến bay
- * @param seatNumber    Số thứ tự ghế cần hủy (tính từ 1 đến n)
+ * @brief              Thực hiện hủy vé của hành khách trên một chuyến bay
+ * @param dsCB         Danh sách chuyến bay
+ * @param seatNumber   Số thứ tự ghế cần hủy (tính từ 1 đến n)
  * @return             Mã lối
  * @note            -1 Chuyến bay không tồn tại
  *                  -2 Chuyen bay không còn hoạt động
  *                  -3 Ghế trống chưa có khách đặt
- *                  0  Huỷ vé thành công
+ *                   0 Huỷ vé thành công
  *
  */
 int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber);  
