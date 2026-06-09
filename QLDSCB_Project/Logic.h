@@ -448,5 +448,5 @@ void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB);
  */
 void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate);
 
-
+void CopyMarkList(listCB& A, listHK& dsHK, char* const cmnd);
 #endif
