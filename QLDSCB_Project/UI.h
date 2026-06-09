@@ -246,7 +246,7 @@ void Get_Input_HK(bool IsHighLight,HK* arrHK[], int rowOnScreen,int index, int T
 void It_list_HK(int mod, string res);
 
 void BookTicket();
-void CancelTicket();
+void HuyChuyen();
 NavKey SeatClear(int x, int y, int xt, int yt, CB* SelectedCB);
 void CancelTicketByCB();
 void CancelTicketByHK(int mod, string res = "");

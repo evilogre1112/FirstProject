@@ -3934,7 +3934,7 @@ void FindCBOnTimeAndPlace(string res){
     
 }
 
-void CancelTicket() {
+void HuyChuyen() {
     int width = 120;
     int width1 = 80;
     int width2 = 39;
@@ -5096,7 +5096,7 @@ void Menu_QuanLyChuyenBay() {
 void Menu_QuanLyHanhKhach() {
     Router_B(2, 
         []() { RunInNewTab(BookTicket); }, // Đặt vé
-        []() { RunInNewTab(CancelTicket); }, // Hủy vé
+        []() { RunInNewTab(HuyChuyen); }, // Hủy vé
         []() { RunInNewTab(EmptySeatList); },  // Xóa
         []() { RunInNewTab([]() { It_list_HK(0); }); }  // DS Hành Khách 
     );
