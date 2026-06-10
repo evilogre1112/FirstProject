@@ -229,13 +229,13 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_
         // ---- 4. thêm HK vào DSV
         tmp->sove = 0;
         if (!Add_CB(dsCB, dsMB, tmp)) {
-        delete[] tmp->sbDich;
-        for (int i = 0; i < tmp->socho; i++) {
-            delete[] tmp->DSV[i];
-        }
-        delete[] tmp->DSV;
-        delete tmp; 
-        return false;
+            delete[] tmp->sbDich;
+            for (int i = 0; i < tmp->socho; i++) {
+                delete[] tmp->DSV[i];
+            }
+            delete[] tmp->DSV;
+            delete tmp; 
+            return false;
         }
         // --- 5. Đọc danh sách vé (nếu có)---
         while (true) {
@@ -262,10 +262,13 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_
 
             Book_Ticket(dsCB, dsHK, tmp->maCB, CMND, seatNumber);
         }
+        if( tmp->trangThai != 0&& tmp->sove==tmp->socho)
+            tmp->trangThai = 2;
         f.clear(); // Đảm bảo trạng thái file ổn định
         f >> ws;   // Nhảy đến ký tự đầu tiên của chuyến bay tiếp theo
     }
     f.close();
+    realTimeUpdateCB(dsCB, dsHK, dsMB);
     return true;
 }
 bool Get_Data_MB(listMB &dsMB, const char *path_file_MB){
@@ -376,9 +379,10 @@ bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
             << setfill('0') << setw(2) << temp->ngayKH.dd << '/'
             << setfill('0') << setw(2) << temp->ngayKH.mt << '/'
             << setfill('0') << setw(4) << temp->ngayKH.yy << '|'
-            << temp->sbDich << '|'
-            << temp->trangThai << '|'
-            << temp->soHieuMB << '|';
+            << temp->sbDich << '|';
+        if(temp->trangThai == 0) {f << 0 << '|';}
+        else f<< 1 <<'|';
+        f<< temp->soHieuMB << '|';
         // Đếm số vé có thể bán
         f << temp->socho << '\n';
         // Ghi danh sách vé (vị trí | CMND)
@@ -444,10 +448,11 @@ bool Set_Data_CB(CB &CB, const char *path_file_CB){
         << setfill('0') << setw(2) << CB.ngayKH.dd << '/'
         << setfill('0') << setw(2) << CB.ngayKH.mt << '/'
         << setfill('0') << setw(4) << CB.ngayKH.yy << '|'
-        << CB.sbDich << '|'
-        << CB.trangThai << '|'
-        << CB.soHieuMB << '|'
-        << CB.socho << '|';;
+        << CB.sbDich << '|';
+        if(CB.trangThai == 0) {f << 0 << '|';}
+        else f<< 1 <<'|';
+        f << CB.soHieuMB << '|';
+        f << CB.socho << '|';;
     // Ghi danh sách vé (vị trí | CMND)
     if(CB.sove > 0) {    
         for (int i = 0; i < CB.socho; i++) {
