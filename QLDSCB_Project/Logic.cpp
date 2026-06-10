@@ -1057,3 +1057,22 @@ void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate) {
         return;
     }
 }
+
+void CopyMarkList(listCB& A, listHK&  dsHK, char* const cmnd) {
+    HK* tmpHK = Find_HK_At_List(dsHK, cmnd);
+    markCB* tmpMark = tmpHK->dsDatVe.head;
+    if (tmpMark != NULL) {
+        CB* newCB = new CB();
+        copy_CB(newCB, tmpMark->mark);
+        A.head = newCB;
+        tmpMark = tmpMark->next;
+    }
+    CB* current = A.head;
+    while (tmpMark != NULL) {
+        CB* newCB = new CB();
+        copy_CB(newCB, tmpMark->mark);
+        current->next = newCB;
+        current = current->next;
+        tmpMark = tmpMark->next;
+    }
+}
