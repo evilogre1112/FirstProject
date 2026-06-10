@@ -181,8 +181,10 @@ void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LE
 
 void TruyenThamSo(listMB &A, listCB& B , listHK &C, listSBD &D);
 
+void UiDrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string DateString);
 void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateString);
 NavKey DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString,bool CanPast = false);
+NavKey DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast = false);
 void DrawACat(int x = 59,int y =25);
 
 // Chọn 1 danh sách nhỏ theo shMB, khối hàm hiển thị danh sách nhỏ của MB
@@ -236,6 +238,7 @@ void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int current
 void Get_Input_CB(bool IsHighLight,CB* pageNodes[], int rowOnScreen,int startIndex,int size, int Temp[], int Temp2[] );
 void It_list_CB(int mod, listCB& A, string res = "", string cmnd = "");
 void View_DSHK_CB(CB* thisCB);
+void View_MB_CB(CB* thisCB);
 void FindCBOnTimeAndPlace(string res="");
 
 bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems);

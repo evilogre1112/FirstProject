@@ -34,6 +34,7 @@ static const char* path_file_CB = "Data/DSCB.txt";
 static const char* path_file_MB = "Data/DSMB.txt";
 static const char* path_file_HK = "Data/DSHK.txt";
 static const char* path_file_SBD = "Data/DSSBD.txt";
+static const char* path_file_picture = "Data/PicturePlane.txt";
 
 typedef struct { const char *acc; char plain; } VietPair;
 

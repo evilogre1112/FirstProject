@@ -170,6 +170,10 @@ bool Get_Data_HK(listHK &dsHK, const char *path_file_HK);
 * @return true nếu lấy thành công
 */
 bool Get_Data_SBD(listSBD &dsSBD, const char *path_file_SBD);
+/**
+ * @brief Đọc dữ liệu ảnh
+ */
+string ReadFilePicture(const char* filename);
 //=========== các hàm ghi hết dữ liệu ===========//
 
 /**

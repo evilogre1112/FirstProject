@@ -52,7 +52,7 @@ string subOptions3[5] = {
 };
 
 string subOptions2[4] = {
-    "Tra Cứu Chuyến Bay",
+    "Máy Bay Của Chuyến Bay",
     "Thống Kê Lượt Bay",
     "In Danh Sách Hành Khách",
     "Quay Lại Main Menu"
@@ -252,6 +252,57 @@ void DrawACat(int x  ,int y){
 }
 void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateString){
     if (rowpadding < 4) rowpadding = 4;
+
+    int year = GetYearFromStr(DateString);
+    int month = GetMonthFromStr(DateString);
+    int SelectedDay = GetDayFromStr(DateString);
+    int hours = GetHourFromStr(DateString);
+    int minute = GetMinuteFromStr(DateString);
+    int Days_In_Month = daysInMonth(month, year);
+    // Lấy mốc thời gian thực tế ngoài đời để tô màu chuẩn xác
+    UiDrawCalendarWithoutTime(x , y,rowpadding , colpadding,DateString);
+    
+    // --- BẮT ĐẦU VẼ KHUNG GIỜ/PHÚT CO GIÃN ĐỘNG ---
+    int calWidth = rowpadding * 7; 
+    int timeY = y + colpadding * 6 + 7;
+    
+    // Bóp nhỏ cụm Giờ/Phút lại (Tổng rộng khoảng 28 ký tự)
+    int timeStartX = x ; 
+
+    Gotoxy(timeStartX, timeY); cout << "Giờ" ;
+    Gotoxy(timeStartX + 4, timeY - 1); SmallBox(string(3,' ') + AD, 8, 1); // Rộng 8
+    
+    Gotoxy(timeStartX + 14, timeY); cout << "Phút" ;
+    Gotoxy(timeStartX + 19, timeY - 1); SmallBox(string(3,' ') + AD, 8, 1); // Rộng 8 
+
+    int H = hours; 
+    int M = ((minute + 14) / 15) * 15; 
+    
+    // Nếu phút nhảy lên 60 thì reset về 0 và tăng 1 giờ
+    if (M == 60) {
+        M = 0;
+        H = (H + 1) % 24; // Nếu 23h thì vòng lại 0h
+    }
+    int timeFocus = 1; // 1: Đang chọn Giờ, 2: Đang chọn Phút
+
+    int textY = timeY;
+    // Dịch tọa độ in số (cách viền trái box 2 ký tự)
+    int hourX = timeStartX + 4 + 2; 
+    int minX = timeStartX + 19 + 2;
+    
+    // 1. In Giờ
+    Gotoxy(hourX, textY);
+    if (timeFocus == 1) cout << YELLOW; else cout << RESET;
+    cout << (H < 10 ? "0" : "") << H << RESET;
+    
+    // 2. In Phút
+    Gotoxy(minX, textY);
+    if (timeFocus == 2) cout << YELLOW; else cout << RESET;
+    cout << (M < 10 ? "0" : "") << M << RESET;
+}
+
+void UiDrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string DateString){
+    if (rowpadding < 4) rowpadding = 4;
     
     string label[] = {"Sun","Mon","Tue","Wed","Thur","Fri","Sat"};
     int size = 7 ;
@@ -302,30 +353,36 @@ void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateStr
         }
         
         cout << Day << RESET;
-    }
-    int max_rows = (FirstDayOfMonth + Days_In_Month - 1) / 7;
-    
-    // --- BẮT ĐẦU VẼ KHUNG GIỜ/PHÚT CO GIÃN ĐỘNG ---
+    }    
+}
+
+NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast){
+    if (rowpadding < 4) rowpadding = 4;
+    int lens = visualLength(DateString);
+    Gotoxy(x + (rowpadding*7)/2 - lens/2 , y);
+    cout << DateString ; 
+    int year = GetYearFromStr(DateString);
+    int month = GetMonthFromStr(DateString);
+    int SelectedDay = GetDayFromStr(DateString);
+    int hours = GetHourFromStr(DateString);
+    int minute = GetMinuteFromStr(DateString);
+    int Days_In_Month = daysInMonth(month, year);
+   
+    // --- VẼ KHUNG GIỜ/PHÚT CO GIÃN ĐỘNG ---
     int calWidth = rowpadding * 7; 
     int timeY = y + colpadding * 6 + 7;
     
     // Bóp nhỏ cụm Giờ/Phút lại (Tổng rộng khoảng 28 ký tự)
     int timeStartX = x ; 
 
-    Gotoxy(timeStartX, timeY); cout << "Giờ" ;
-    Gotoxy(timeStartX + 4, timeY - 1); SmallBox(string(3,' ') + AD, 8, 1); // Rộng 8
-    
-    Gotoxy(timeStartX + 14, timeY); cout << "Phút" ;
-    Gotoxy(timeStartX + 19, timeY - 1); SmallBox(string(3,' ') + AD, 8, 1); // Rộng 8 
-
     int H = hours; 
     int M = ((minute + 14) / 15) * 15; 
-    
-    // Nếu phút nhảy lên 60 thì reset về 0 và tăng 1 giờ
+
     if (M == 60) {
         M = 0;
-        H = (H + 1) % 24; // Nếu 23h thì vòng lại 0h
+        H = (H + 1) % 24;
     }
+    
     int timeFocus = 1; // 1: Đang chọn Giờ, 2: Đang chọn Phút
 
     int textY = timeY;
@@ -333,17 +390,73 @@ void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateStr
     int hourX = timeStartX + 4 + 2; 
     int minX = timeStartX + 19 + 2;
     
-    // 1. In Giờ
-    Gotoxy(hourX, textY);
-    if (timeFocus == 1) cout << YELLOW; else cout << RESET;
-    cout << (H < 10 ? "0" : "") << H << RESET;
+    UiDrawCalendar(x, y, rowpadding, colpadding, DateString);
     
-    // 2. In Phút
-    Gotoxy(minX, textY);
-    if (timeFocus == 2) cout << YELLOW; else cout << RESET;
-    cout << (M < 10 ? "0" : "") << M << RESET;
+    // Nếu đang ở tháng hiện tại, mốc nhỏ nhất là realToday. Nếu là tháng tương lai, mốc nhỏ nhất là 1.
+ 
+    while (true){
+        NavKey kt = DrawCalendarWithoutTime( x , y, rowpadding , colpadding, DateString ,CanPast);
+
+        if(kt == NAV_RIGHT || kt == NAV_LEFT || kt == NAV_ESC || kt == NAV_BACK) return kt;
+
+        DateTime ChossenDay = StringtoTime(DateString);
+        int D = ChossenDay.get_dd() ;
+        while(true){
+            // In Giờ
+            Gotoxy(hourX, textY);
+            if (timeFocus == 1) cout << YELLOW; else cout << RESET;
+            cout << (H < 10 ? "0" : "") << H << RESET;
+            
+            // In Phút
+            Gotoxy(minX, textY);
+            if (timeFocus == 2) cout << YELLOW; else cout << RESET;
+            cout << (M < 10 ? "0" : "") << M << RESET;
+
+            int ch;
+            NavKey key = GetNavKey(ch);
+            
+            if (key == NAV_ESC) {
+                DateString = "";
+                return NAV_ESC;
+            }
+            else if (key == NAV_ENTER) {
+                ChossenDay.set_hh(H);
+                ChossenDay.set_mm(M);
+                DateString = ToStringDate(ChossenDay);
+                return NAV_ENTER;
+            }
+            
+            // Quay về Lịch (phím W)
+            else if (key == NAV_UNKNOWN && tolower(ch) == 'w') {
+                // Trả lại màu sáng bình thường cho Giờ/Phút trước khi thoát lên trên
+                Gotoxy(hourX, textY); cout << (H < 10 ? "0" : "") << H;
+                Gotoxy(minX, textY); cout << (M < 10 ? "0" : "") << M;
+                ChossenDay.set_hh(H);
+                ChossenDay.set_mm(M);
+                DateString = ToStringDate(ChossenDay);
+                break; // Break vòng lặp này -> Vòng lặp tổng sẽ quay ngược lên vòng chọn Ngày
+            }
+            
+            // Đảo Focus giữa Giờ và Phút
+            else if (key == NAV_LEFT || key == NAV_RIGHT) {
+                timeFocus = (timeFocus == 1) ? 2 : 1;
+            }
+            else if (key == NAV_UNKNOWN && tolower(ch) == 'h') timeFocus = 1;
+            else if (key == NAV_UNKNOWN && tolower(ch) == 'm') timeFocus = 2;
+            
+            else if (key == NAV_UP) {
+                if (timeFocus == 1) H = (H + 1) % 24;
+                else M = (M + 15) % 60;
+            }
+            else if (key == NAV_DOWN) {
+                if (timeFocus == 1) H = (H - 1 + 24) % 24;
+                else M = (M - 15 + 60) % 60;
+            }
+        }
+    }
 }
-NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast){
+
+NavKey DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast){
     if (rowpadding < 4) rowpadding = 4;
     string label[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
     int size = 7 ;
@@ -370,52 +483,8 @@ NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateSt
     a.set_hh(0);
     a.set_mm(0);
     int FirstDayOfMonth = Get_Weekday(a);
-    for(int i = 0 ; i < 7; i++){
-        Gotoxy(x + rowpadding * i, y + 2);
-        cout << label[i];
-    }
-    // VẼ NGÀY TĨNH
-    for(int Day = 1 ; Day <= Days_In_Month; Day++){
-        int cx = x + rowpadding * ((FirstDayOfMonth + Day - 1) % 7);
-        int cy = y + ((FirstDayOfMonth + Day - 1) / 7) * colpadding + 5;
-        
-        Gotoxy(cx, cy);
-        
-        // Chỉ tô xám quá khứ hoặc xanh hôm nay nếu đang vẽ tháng hiện tại
-        if (month == realMonth && year == realYear) {
-            if (Day < realToday) cout << GRAY;
-            else if (Day == realToday) cout << GREEN;
-        }else if (year < realYear || (year == realYear && month < realMonth)) {
-            cout << GRAY; 
-        }
-        
-        // Vẽ ngoặc cho ngày đang được chọn (SelectedDay)
-        if (Day == SelectedDay){
-            Gotoxy(cx - 3, cy); cout << "[";
-            Gotoxy(cx + 3, cy); cout << "]";
-            Gotoxy(cx, cy);
-        }
-        
-        cout << Day << RESET;
-    }
-    int max_rows = (FirstDayOfMonth + Days_In_Month - 1) / 7;
     
-    // --- BẮT ĐẦU VẼ KHUNG GIỜ/PHÚT CO GIÃN ĐỘNG ---
-    int calWidth = rowpadding * 7; 
-    int timeY = y + colpadding * 6 + 7;
-    
-    // Bóp nhỏ cụm Giờ/Phút lại (Tổng rộng khoảng 28 ký tự)
-    int timeStartX = x ; 
-
-    Gotoxy(timeStartX, timeY); cout << "Giờ" ;
-    Gotoxy(timeStartX + 4, timeY - 1); SmallBox(string(3,' ') + AD, 8, 1); // Rộng 8
-    
-    Gotoxy(timeStartX + 14, timeY); cout << "Phút" ;
-    Gotoxy(timeStartX + 19, timeY - 1); SmallBox(string(3,' ') + AD, 8, 1); // Rộng 8 
-
-    //Gotoxy(x, timeY + 3);
-    //SmallBox("Arrows:Chọn | A/D:Tháng | ESC:Thoát",rowpadding * 6 , 1, string(YELLOW));
-    // ----------------------------------------------
+    UiDrawCalendarWithoutTime(x , y,rowpadding , colpadding,DateString);
     
     int H = hours; 
     int M = ((minute + 14) / 15) * 15; 
@@ -426,195 +495,128 @@ NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateSt
         H = (H + 1) % 24; // Nếu 23h thì vòng lại 0h
     }
     int timeFocus = 1; // 1: Đang chọn Giờ, 2: Đang chọn Phút
-
-    int textY = timeY;
-    // Dịch tọa độ in số (cách viền trái box 2 ký tự)
-    int hourX = timeStartX + 4 + 2; 
-    int minX = timeStartX + 19 + 2;
     
-    // 1. In Giờ
-    Gotoxy(hourX, textY);
-    if (timeFocus == 1) cout << YELLOW; else cout << RESET;
-    cout << (H < 10 ? "0" : "") << H << RESET;
-    
-    // 2. In Phút
-    Gotoxy(minX, textY);
-    if (timeFocus == 2) cout << YELLOW; else cout << RESET;
-    cout << (M < 10 ? "0" : "") << M << RESET;
-
-   
     DateTime ChossenDay = StringtoTime(DateString);
     
     // Nếu đang ở tháng hiện tại, mốc nhỏ nhất là realToday. Nếu là tháng tương lai, mốc nhỏ nhất là 1.
+    int D = ChossenDay.get_dd() ;
+
     int minDay = (!CanPast && month == realMonth && year == realYear) ? realToday : 1;
+    
+    int initial_cx = x + rowpadding * ((FirstDayOfMonth + D - 1) % 7);
+    int initial_cy = y + ((FirstDayOfMonth + D - 1) / 7) * colpadding + 5;
 
+    Gotoxy(initial_cx - 3, initial_cy); cout << "[";
+    Gotoxy(initial_cx + 3, initial_cy); cout << "]";
+    
     while(true){
-        int D = ChossenDay.get_dd() ;
-        while(true){
-            int ch ;
-            NavKey key = GetNavKey(ch);
-            int old_cx = x + rowpadding * ((FirstDayOfMonth + D - 1) % 7);
-            int old_cy = y + ((FirstDayOfMonth + D - 1) / 7) * colpadding + 5;
-          
-            Gotoxy(old_cx - 3, old_cy); cout << " "; 
-            Gotoxy(old_cx + 3, old_cy); cout << " ";
-            Gotoxy(old_cx, old_cy);
-            
+        int ch ;
+        NavKey key = GetNavKey(ch);
+        int old_cx = x + rowpadding * ((FirstDayOfMonth + D - 1) % 7);
+        int old_cy = y + ((FirstDayOfMonth + D - 1) / 7) * colpadding + 5;
+        
+        Gotoxy(old_cx - 3, old_cy); cout << " "; 
+        Gotoxy(old_cx + 3, old_cy); cout << " ";
+        Gotoxy(old_cx, old_cy);
+        
 
-            if (month == realMonth && year == realYear) {
-                if (D < realToday) cout << GRAY << D << RESET; 
-                else if (D == realToday) cout << GREEN << D << RESET;
-                else cout << D;
-            }else if (year < realYear || (year == realYear && month < realMonth)) {
-                cout << GRAY << D << RESET; // Thêm dòng này
-            }else {
-                cout << D; // Tháng tương lai thì in màu trắng bình thường
-            }
+        if (month == realMonth && year == realYear) {
+            if (D < realToday) cout << GRAY << D << RESET; 
+            else if (D == realToday) cout << GREEN << D << RESET;
+            else cout << D;
+        }else if (year < realYear || (year == realYear && month < realMonth)) {
+            cout << GRAY << D << RESET; // Thêm dòng này
+        }else {
+            cout << D; // Tháng tương lai thì in màu trắng bình thường
+        }
 
-            if (key == NAV_BACK) {
-                DateString = "";
-                return NAV_BACK;
+        if (key == NAV_BACK) {
+            DateString = "";
+            return NAV_BACK;
+        }
+        else if (key == NAV_RIGHT) {
+            if (D < Days_In_Month) D++;
+        } 
+        else if (key == NAV_LEFT) {
+            if (D > 1) {
+                D = max(minDay, D - 1); 
             }
-            else if (key == NAV_RIGHT) {
-                if (D < Days_In_Month) D++;
-            } 
-            else if (key == NAV_LEFT) {
-                if (D > 1) {
-                    D = max(minDay, D - 1); 
-                }
-            }
-            else if (key == NAV_DOWN) {
-                if (D + 7 <= Days_In_Month) D += 7;
-                else {
-                    ChossenDay.set_dd(D); 
-                    Gotoxy(old_cx - 3, old_cy); cout << "["; 
-                    Gotoxy(old_cx + 3, old_cy); cout << "]";
-                    Gotoxy(old_cx, old_cy);
-                    cout << CYAN << D << RESET;
-                    break;
-                }            
-            }
-            else if (key == NAV_UP) {
-                // Đã fix: Dùng minDay để chặn nhảy lên tuần quá khứ
-                if ((D - 7) >= minDay) D -= 7;
-            }
-            else if (key == NAV_ENTER){
-                ChossenDay.set_dd(D);
-                ChossenDay.set_hh(H);
-                ChossenDay.set_mm(M); 
-                Gotoxy(old_cx - 3, old_cy); cout << "["; 
-                Gotoxy(old_cx + 3, old_cy); cout << "]";
-                Gotoxy(old_cx, old_cy);
-                cout << CYAN << D << RESET;
-                DateString = ToStringDate(ChossenDay);
-                return NAV_ENTER;
-            }
-            else if(key == NAV_UNKNOWN && (tolower(ch) == 'h' || tolower(ch) == 'm')){
+        }
+        else if (key == NAV_DOWN) {
+            if (D + 7 <= Days_In_Month) D += 7;
+            else {
                 ChossenDay.set_dd(D); 
                 Gotoxy(old_cx - 3, old_cy); cout << "["; 
                 Gotoxy(old_cx + 3, old_cy); cout << "]";
                 Gotoxy(old_cx, old_cy);
                 cout << CYAN << D << RESET;
-                timeFocus = (tolower(ch) == 'h') ? 1 : 2; 
+                DateString = ToStringDate(ChossenDay);
                 break;
-            }
-            else if (key == NAV_UNKNOWN && tolower(ch) == 'd') {
-                ChossenDay.set_dd(Days_In_Month); 
-                DateString = NextDay(ChossenDay); 
-                return NAV_RIGHT; 
-            }
-            else if (key == NAV_UNKNOWN && tolower(ch) == 'a') {
-               int current_d = ChossenDay.get_dd(); 
-                int m = ChossenDay.get_mt() - 1;
-                int y = ChossenDay.get_yy();
-                
-                if (m < 1) { m = 12; y--; }
-                
-                int maxDays = daysInMonth(m, y);
-                if (current_d > maxDays) current_d = maxDays;
-                
-                DateTime temp = ChossenDay;
-                temp.set_dd(current_d);
-                temp.set_mt(m);
-                temp.set_yy(y);
-                
-                string prevMonthStr = ToStringDate(temp); 
-                
-                // Kiểm tra xem ngày tính ra có bị rơi vào quá khứ không?
-                if (!CanPast && IsGreaterTime(time_now(), prevMonthStr) == 1) { 
-                    // Nếu lùi về TRÚNG tháng hiện tại ngoài đời -> Bẻ nó về đúng ngày hôm nay
-                    if (m == realMonth && y == realYear) {
-                        temp.set_dd(realToday);
-                        DateString = ToStringDate(temp);
-                        return NAV_LEFT;
-                    }
-                    // Còn nếu lùi về hụt qua hẳn tháng trước (ví dụ tháng 4) -> Bị chặn, không làm gì cả
-                } else {
-                    // Tương lai hợp lệ -> Nhảy lịch bình thường
-                    DateString = prevMonthStr;
+            }            
+        }
+        else if (key == NAV_UP) {
+            // Đã fix: Dùng minDay để chặn nhảy lên tuần quá khứ
+            if ((D - 7) >= minDay) D -= 7;
+        }
+        else if (key == NAV_ENTER){
+            ChossenDay.set_dd(D);
+            ChossenDay.set_hh(H);
+            ChossenDay.set_mm(M); 
+            Gotoxy(old_cx - 3, old_cy); cout << "["; 
+            Gotoxy(old_cx + 3, old_cy); cout << "]";
+            Gotoxy(old_cx, old_cy);
+            cout << CYAN << D << RESET;
+            DateString = ToStringDate(ChossenDay);
+            return NAV_ENTER;
+        }
+        else if (key == NAV_UNKNOWN && tolower(ch) == 'd') {
+            ChossenDay.set_dd(Days_In_Month); 
+            DateString = NextDay(ChossenDay); 
+            return NAV_RIGHT; 
+        }
+        else if (key == NAV_UNKNOWN && tolower(ch) == 'a') {
+            int current_d = ChossenDay.get_dd(); 
+            int m = ChossenDay.get_mt() - 1;
+            int y = ChossenDay.get_yy();
+            
+            if (m < 1) { m = 12; y--; }
+            
+            int maxDays = daysInMonth(m, y);
+            if (current_d > maxDays) current_d = maxDays;
+            
+            DateTime temp = ChossenDay;
+            temp.set_dd(current_d);
+            temp.set_mt(m);
+            temp.set_yy(y);
+            
+            string prevMonthStr = ToStringDate(temp); 
+            
+            // Kiểm tra xem ngày tính ra có bị rơi vào quá khứ không?
+            if (!CanPast && IsGreaterTime(time_now(), prevMonthStr) == 1) { 
+                // Nếu lùi về TRÚNG tháng hiện tại ngoài đời -> Bẻ nó về đúng ngày hôm nay
+                if (m == realMonth && y == realYear) {
+                    temp.set_dd(realToday);
+                    DateString = ToStringDate(temp);
                     return NAV_LEFT;
                 }
-            }else if( key == NAV_ESC){
-                DateString = ""; 
-                return NAV_ESC;
+                // Còn nếu lùi về hụt qua hẳn tháng trước (ví dụ tháng 4) -> Bị chặn, không làm gì cả
+            } else {
+                // Tương lai hợp lệ -> Nhảy lịch bình thường
+                DateString = prevMonthStr;
+                return NAV_LEFT;
             }
-            
-            int new_cx = x + rowpadding * ((FirstDayOfMonth + D - 1) % 7);
-            int new_cy = y + ((FirstDayOfMonth + D - 1) / 7) * colpadding + 5;
-            
-            Gotoxy(new_cx - 3, new_cy); cout << "[";
-            Gotoxy(new_cx + 3, new_cy); cout << "]";
+        }else if( key == NAV_ESC){
+            DateString = ""; 
+            return NAV_ESC;
         }
-        while(true){
-            // In Giờ
-            Gotoxy(hourX, textY);
-            if (timeFocus == 1) cout << YELLOW; else cout << RESET;
-            cout << (H < 10 ? "0" : "") << H << RESET;
-            
-            // In Phút
-            Gotoxy(minX, textY);
-            if (timeFocus == 2) cout << YELLOW; else cout << RESET;
-            cout << (M < 10 ? "0" : "") << M << RESET;
-
-            int ch;
-            NavKey key = GetNavKey(ch);
-            
-            if (key == NAV_ESC) {
-                DateString = "";
-                return NAV_ESC;
-            }
-            else if (key == NAV_ENTER) {
-                ChossenDay.set_hh(H);
-                ChossenDay.set_mm(M);
-                DateString = ToStringDate(ChossenDay);
-                return NAV_ENTER;
-            }
-            
-            // Quay về Lịch (phím X)
-            else if (key == NAV_UNKNOWN && tolower(ch) == 'x') {
-                // Trả lại màu sáng bình thường cho Giờ/Phút trước khi thoát lên trên
-                Gotoxy(hourX, textY); cout << (H < 10 ? "0" : "") << H;
-                Gotoxy(minX, textY); cout << (M < 10 ? "0" : "") << M;
-                break; // Break vòng lặp này -> Vòng lặp tổng sẽ quay ngược lên vòng chọn Ngày
-            }
-            
-            // Đảo Focus giữa Giờ và Phút
-            else if (key == NAV_LEFT || key == NAV_RIGHT) {
-                timeFocus = (timeFocus == 1) ? 2 : 1;
-            }
-            else if (key == NAV_UNKNOWN && (char(ch) == 'h' || char(ch) == 'H')) timeFocus = 1;
-            else if (key == NAV_UNKNOWN && (char(ch) == 'm' || char(ch) == 'M')) timeFocus = 2;
-            
-            else if (key == NAV_UP) {
-                if (timeFocus == 1) H = (H + 1) % 24;
-                else M = (M + 15) % 60;
-            }
-            else if (key == NAV_DOWN) {
-                if (timeFocus == 1) H = (H - 1 + 24) % 24;
-                else M = (M - 15 + 60) % 60;
-            }
-        }
+        
+        int new_cx = x + rowpadding * ((FirstDayOfMonth + D - 1) % 7);
+        int new_cy = y + ((FirstDayOfMonth + D - 1) / 7) * colpadding + 5;
+        
+        Gotoxy(new_cx - 3, new_cy); cout << "[";
+        Gotoxy(new_cx + 3, new_cy); cout << "]";
     }
+    return NAV_UNKNOWN;   
 }
 
 string TranFormSatus(int st){
@@ -1551,9 +1553,9 @@ NavKey CustomerAddCB() {
                 // Nếu người dùng nhấn ENTER để chốt ngày, ta tiến hành kiểm tra
                 if (k == NAV_ENTER) {
                     // Nếu thời gian hiện tại LỚN HƠN thời gian vừa chọn -> Lỗi quá khứ
-                    if (IsGreaterTime(time_now(), inputs[1]) == 1) { 
+                    if (IsGreaterTime(time_now(), inputs[1]) == 1 || IsGreaterTime(NextDay(time_now()), inputs[1]) == 1) { 
                         Gotoxy(startX+1, formY + 20);
-                        string u = "Lỗi: Thời gian khởi hành không được ở trong quá khứ! Bấm phím bất kỳ..." ;
+                        string u = "Lỗi: Thời gian khởi hành " + inputs[1] + " Phải lớn hơn ngày hiện tại ít nhất 24h! Bấm phím bất kỳ..." ;
                         SmallBox(u,false,true,false,false,width-2,3,RED);
                         _getch();
                         ClearRegion(startX+1, formY + 20, width-2, 3);
@@ -1571,7 +1573,8 @@ NavKey CustomerAddCB() {
             }
         } else if (currentField == 2) {
             // Tham số TRUE cuối cùng sẽ chặn toàn bộ các ký tự không phải là số
-            action = InputString(inputs[2], inputX, formY + 8, sbDich_max, '_', false); 
+            action = InputStringSBD(inputs[2], inputX, formY + 8, sbDich_max, '_', false); 
+            RedrawInput(inputs[2], inputX, formY + 8, sbDich_max, '_', false, false, ""); 
         }else if (currentField == 3){
             Gotoxy(inputX+25, formY + 2 + (currentField * 3));
             SmallBox(string(22,' ') + AD, 25,1);
@@ -1659,7 +1662,7 @@ NavKey CustomerAddCB() {
                         SmallBox(u,false,true,true,false,width-2,3,RED); // tính cả hai cái viền của box xung quanh
                     }
                     else if(error_code == "2") {
-                        string u = "Lỗi:Không thể đặt chuyến bay có số hiệu [" + inputs[3] + "] trong 24h gần nhất khi đang thực hiện chuyến bay khác!";
+                        string u = "Lỗi:Chuyến bay có số hiệu [" + inputs[3] + "] đang thực hiện chuyến bay khác vào thời điểm này! hãy đặt cách nhau 24h giữa 2 chuyến bay có cùng số hiệu máy bay.";
                         SmallBox(u,false,true,false,false,width-2,3,RED);
                     }
                     else if(error_code == "3") {
@@ -1691,8 +1694,8 @@ NavKey CustomerAddCB() {
                     }
 
                     if (!isConfirm) {
-                        Gotoxy(startX + width/2 - 20, formY + 15);
-                        SmallBox(text, width + width/2, 3, (string)WHITE);
+                        Gotoxy(startX, formY + 24);
+                        SmallBox(text, width, 3, (string)WHITE);
                         continue; 
                     }
 
@@ -2005,7 +2008,7 @@ start:
     SmallBox("", (int)width - 43, (int)height, (string)WHITE);
 
     string strDate = time_now();
-    UiDrawCalendar(81, 0, 5, 1, strDate);
+    UiDrawCalendarWithoutTime(81, 0, 5, 1, strDate);
 
     Gotoxy(startX + 81, startY + 19);
     SmallBox("", (int)39, (int)9, (string)WHITE);
@@ -2110,7 +2113,7 @@ start:
             // Vòng lặp do-while giữ Lịch không bị tắt khi đổi tháng HOẶC khi chọn sai ngày
             while (k == NAV_LEFT || k == NAV_RIGHT || dateError) {
                 ClearRegion(81, 0, 39, 15); // Xóa sạch không gian trước khi vẽ
-                k = DrawCalendar(81, 0, 5, 1, inputs[1]);
+                k = DrawCalendarWithoutTime(81, 0, 5, 1, inputs[1]);
 
                 dateError = false; // Reset cờ mỗi lần vẽ lại lịch
 
@@ -2148,7 +2151,7 @@ start:
                     }
                 }
                 Gotoxy(inputX, formY + 2 * currentField);
-                cout << inputs[currentField];
+                cout << inputs[currentField].substr(0,10); //dd/mm/yyyy có độ dài là 10
                 action = NAV_DOWN;    // Tự động nhảy xuống ô Sân bay đến
             }
         }
@@ -2955,13 +2958,7 @@ void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int current
     int rowOnScreen = 0;
     int totalPages = (slCB + itemsPerPage - 1) / itemsPerPage;
     if (totalPages == 0) totalPages = 1;
-    
-    if (slCB == 0) {
-        Gotoxy(errX, errY);
-        cout << RED << "Không có dữ liệu chuyến bay nào!" << RESET;
-        return;
-    }
-
+    if(slCB == 0)return ;
     // DUYỆT TRỰC TIẾP TỪ MẢNG CON TRỎ CB** 
     for (int i = startIndex; i < endIndex; i++) {
         rowOnScreen = i - startIndex; 
@@ -3043,23 +3040,17 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
         return false ;
     }
     int EditField[] = {2,4,5};
-    int idx = 0 ;
+    const int idx = 0 ;
     int ch = 0 ;
 
     Gotoxy(ToaDoBoxX, ToaDoBoxY);
     SmallBox(m,WidthPerBox,HeightPerBox,string(GRAY));
     while(true){
     
-        if(idx == 0){
-            ch = InputDateTime(inputs[idx],Temp[EditField[idx]]+1, 8 + rowOnScreen,Temp2[EditField[idx]]-2,' ',true,true, 6,22);
-            RedrawInput(inputs[idx], Temp[EditField[idx]]+1, 8 + rowOnScreen, Temp2[EditField[idx]]-2, ' ', true, false);
-        }
-        if(idx == 1){
-            ch = InputStringSBD(inputs[idx],Temp[EditField[idx]]+1, 8 + rowOnScreen,Temp2[EditField[idx]]-2,' ',true, true);
-            RedrawInput(inputs[idx], Temp[EditField[idx]]+1, 8 + rowOnScreen, Temp2[EditField[idx]]-2, ' ', true, false);
-        }
+        ch = InputDateTime(inputs[idx],Temp[EditField[idx]]+1, 8 + rowOnScreen,Temp2[EditField[idx]]-2,' ',true,true, 6,22);
+        RedrawInput(inputs[idx], Temp[EditField[idx]]+1, 8 + rowOnScreen, Temp2[EditField[idx]]-2, ' ', true, false);
+        
         if(ch == NAV_ESC) return false ;
-        if(ch == NAV_LEFT || ch == NAV_RIGHT) idx = 1 - idx;
         if(ch == NAV_UP){
             thiscolors = (thiscolors + 1)%3;
             string stat = Colors[thiscolors] + SQ + RESET;
@@ -3150,7 +3141,7 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
     int Temp[] = { 10,20,50,80,90,105 };
     int Temp2[] = { 10,30,30,10,15,10 };
     int Bin[] = { 1,1,1,1,1,1 };
-    string typemode[] = { "In danh sách","Hiệu Chỉnh/Huỷ Chuyến","Hủy Vé Theo Hành Khách" };
+    string typemode[] = { "In danh sách","Hiệu Chỉnh/Huỷ Chuyến","Hủy Vé Theo Hành Khách","Thông tin kỹ thuật" };
     string headers[] = { "STT","Mã Chuyến Bay", "Ngày Khởi Hành", "Số Vé","Sân bay đích","Status" };
     string q[] = { "","","","" };
     string Type[] = { RED, GREEN, YELLOW, CYAN };
@@ -3160,11 +3151,8 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
     q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất ";
     start:
     ClearScreen();
-    string st = "Danh Sách Chuyến Bay Đã Được Đặt Theo Số CMND: " + cmnd;
-    if (mod < 2)
-        PrintHeader(res, mod, "Danh Sách Chuyến Bay", size, headers, typemode, Temp, Temp2);
-    else
-        PrintHeader(res, mod, st, size, headers, typemode, Temp, Temp2, (TotalWidth / 2) - (visualLength(st) / 2));
+    string header[] = {"Danh Sách Chuyến Bay","Danh Sách Chuyến Bay","Danh Sách Chuyến Bay Đã Được Đặt Theo Số CMND: " + cmnd,"Danh Sách Chuyến Bay"};
+    PrintHeader(res, mod, header[mod], size, headers, typemode, Temp, Temp2, (TotalWidth / 2) - (visualLength(header[mod]) / 2));
     Gotoxy(70,24);
     string u = "  " + q[0] + q[1] +"    " +q[2] + q[3];
     SmallBox(u,50,4);
@@ -3302,6 +3290,14 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
 					}
                     Gotoxy(5, 24);
                     SmallBox(m, 50, 4, string(GRAY));
+                }else if(mod == 3){
+                    View_MB_CB(SelectedNode);
+                    ClearScreen();
+                    PrintHeader(res, mod, "Danh Sách Chuyến Bay", size, headers,typemode, Temp, Temp2);
+                    Gotoxy(70,24);
+                    SmallBox(u,50,4);
+                    Render_CB_Page(tmp, currentPage, itemsPerPage,size,Temp,Temp2,Bin);
+                    DrawACat();
                 }
             }else if (ch == NAV_ESC){
                 tmp.Clear();
@@ -3485,6 +3481,38 @@ void View_DSHK_CB(CB* thisCB) {
 
 EXIT_VIEW:
     if (displayArr != NULL) delete[] displayArr;
+}
+
+void View_MB_CB(CB* thisCB){
+    int thisMB = Find_MB(dsMB, thisCB->soHieuMB);
+    if(thisMB == -1) return ;
+    ClearScreen();
+    string u = ReadFilePicture(path_file_picture);
+    cout << u ; 
+    string s = "Thông số kỹ thuật của máy bay có mã : " + string(thisCB->maCB);
+    Gotoxy((GetTerminalWidth() - visualLength(s)) / 2 + 33, 1);
+    SmallBox(s,visualLength(s) + 4,3);
+    Gotoxy((GetTerminalWidth() - visualLength(s)) / 2 + 35, 6);
+    string t = "Mã máy bay :";
+    SmallBox(t,20,1,string(YELLOW));
+    Gotoxy(100 , 6);
+    t = string(dsMB.list[thisMB]->soHieuMB);
+    SmallBox(t,18,1);
+    Gotoxy((GetTerminalWidth() - visualLength(s)) / 2 + 35, 9);
+    t =  "Loại máy bay :";
+    SmallBox( t,20,1,string(YELLOW));
+    Gotoxy(100 , 9);
+    t = string(dsMB.list[thisMB]->loaiMB);
+    SmallBox(t,18,1);
+    Gotoxy((GetTerminalWidth() - visualLength(s)) / 2+35, 12);
+    t = "Số Ghế Tối Đa :";
+    SmallBox( t ,20,1,string(YELLOW));
+    Gotoxy(100, 12);
+    t = to_string(dsMB.list[thisMB]->socho);
+    SmallBox(t,18,1);
+   
+
+    _getch();
 }
 
 bool InputSimpleHK(string& res, NavKey key, int& ch,int x,int y) {
@@ -3808,7 +3836,7 @@ void FindCBOnTimeAndPlace(string res){
     int currentPage = 0;
     int current_Row = 0;
     const int itemsPerPage = 12; // Ví dụ: màn hình chỉ chứa được 12 CB
-    UiDrawCalendar(StartCalendarX,StartCalendarY,8,col,time_now());
+    UiDrawCalendarWithoutTime(StartCalendarX,StartCalendarY,8,col,time_now());
     Gotoxy(StartCalendarX,  col*4+13);
     string v =  "Tìm Kiếm Sân Bay :";
     cout << v;
@@ -3820,10 +3848,8 @@ void FindCBOnTimeAndPlace(string res){
     SmallBox("Thông Tin Chuyến Bay",50,1,(string)YELLOW);
     Gotoxy(63,23);
     SmallBox("ESC thoát "+ string(DM) +" Nhấn D để chuyển sang chọn ngày " + string(DM) + " Backspace để bỏ qua field chọn ngày",50,2,string(GRAY));
-    Gotoxy(93,14);
-    cout << GRAY<< "X Chọn Ngày || H Chọn Giờ "<< RESET ;
-    Gotoxy(98,15);
-    cout << GRAY << "D Tháng Sau" << RESET ; 
+    Gotoxy(65,12);
+    cout << GRAY<< "D tháng sau || S tháng trước ||  Dùng phím ◄/► để chọn ngày trong tháng."<< RESET ;
     while(true){
          // Thiết lập thông số phân trang
         
@@ -3848,6 +3874,12 @@ void FindCBOnTimeAndPlace(string res){
         SmallBox(m, 50, 1, string(GRAY));
 
         Render_CB_Page(CBSearch,slCB,Y,25,8,currentPage,itemsPerPage,S,Temp,Temp2,Bin);
+        if (slCB == 0) {
+            Gotoxy(15, Y);
+            cout << RED << "Không có dữ liệu chuyến bay nào!" << RESET;
+            Gotoxy(5, Y + 1);
+            cout << RED << "Nhấn Backspace để bỏ qua ngày hoặc chọn một ngày khác!" << RESET;
+        }
         DrawACat(53,24);
 
         // LƯU CÁC NODE CỦA TRANG NÀY VÀO MẢNG TẠM
@@ -3865,11 +3897,7 @@ void FindCBOnTimeAndPlace(string res){
             int oldPage = currentPage; 
             int oldRow = rowOnScreen;
             //PaginationController
-           if(slCB == 0){
-                Gotoxy(25, Y);
-                cout << RED << "Không có dữ liệu chuyến bay nào!" << RESET;
-                ch = GetNavKey(key);
-            }else{
+            if(slCB > 0){
                 string s ;
                 int index = rowOnScreen + startIndex;// rowOnScreen + startIndex
                 CB* SelectedNode = pageNodes[rowOnScreen]; // Đây là chính là chuyến đang 
@@ -3911,7 +3939,7 @@ void FindCBOnTimeAndPlace(string res){
                 // Vòng lặp do-while giữ Lịch không bị tắt khi đổi tháng HOẶC khi chọn sai ngày
                 while (k == NAV_LEFT || k == NAV_RIGHT){
                     ClearRegion(StartCalendarX, StartCalendarY, 8*6 + 7, 13); // Xóa sạch không gian trước khi vẽ
-                    k = DrawCalendar(StartCalendarX, StartCalendarY, 8, 1, ti,true);
+                    k = DrawCalendarWithoutTime(StartCalendarX, StartCalendarY, 8, 1, ti,true);
                     // Nếu người dùng nhấn ENTER để chốt ngày, ta tiến hành kiểm tra
                 }
                 if(k == NAV_ENTER)  T = StringtoTime(ti);
@@ -4827,6 +4855,22 @@ start:
 
 }
 
+void Tutorial(){
+    Gotoxy(0,0);
+    SmallBox("Hướng dẫn sử dụng",120,3);
+    Gotoxy(2,6);
+    cout << GRAY << "1. Sử dụng phím mũi tên để di chuyển qua lại giữa các lựa chọn." << RESET;
+    Gotoxy(2,8);
+    cout << GRAY << "2. Nhấn Enter để chọn một tùy chọn/ Nhấn ESC để quay lại menu trước." << RESET;
+    Gotoxy(2,10);
+    cout << GRAY << "3. A để chuyển sang tháng trước, D để chuyển sang tháng sau." << RESET;
+    Gotoxy(2,12);
+    cout << GRAY << "4. F để quay lại phần tìm kiếm, khi đã vào phần tìm kiếm thì có thể nhập mã chuyến bay cần tìm." << RESET;
+    Gotoxy(2,14);
+    cout << GRAY << "5. Backspace để không chọn ngày giờ" << RESET;
+    _getch();
+}
+
 // Phần của các Router và Hàm đồ hoạ giao diện nhìn cơ bản ở đây
 
 void ViewQLMB(){
@@ -5055,7 +5099,7 @@ int MainMenuOptionInBoard(string options[], int length) {
         chosen = GetKey(chosen, length);
 
         if (chosen == 999) return pre_chosen;
-        if (chosen == 1000) return 4;
+        if (chosen == 1000) return 3;
 
        
         if (chosen != pre_chosen) {
@@ -5110,7 +5154,7 @@ void Menu_QuanLyHanhKhach() {
 }
 
 void Menu_TraCuuChuyenBay() {
-     RunInNewTab();
+     RunInNewTab([]() { It_list_CB(3, dsCB, ""); });
 }
 
 void Menu_ThongKeLuotBay() {
@@ -5150,7 +5194,7 @@ void MainScreen(){
         }
         else if(chosen == 2)
         {
-            // Hướng dẫn sử dụng
+            RunInNewTab([]() { Tutorial(); });
         }
         else if(chosen == 3)
         {
