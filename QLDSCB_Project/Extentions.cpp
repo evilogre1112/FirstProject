@@ -367,6 +367,27 @@ bool Get_Data_SBD(listSBD& dsSBD, const char* path_file_SBD) {
     return true;
 }
 
+string ReadFilePicture(const char* filename)
+{
+    ifstream file(filename);
+
+    if (!file.is_open())
+    {
+        cout << "Khong mo duoc file!\n";
+        return "";
+    }
+
+    string data;
+    string line;
+
+    while (getline(file, line))
+    {
+        data += line + '\n';
+    }
+
+    return data;
+}
+
 // ============== các hàm ghi hết dữ liệu ==============
 bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
     ofstream f(path_file_CB);
