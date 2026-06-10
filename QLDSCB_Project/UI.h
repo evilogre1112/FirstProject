@@ -234,7 +234,7 @@ void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage,int size, int Temp[], int Temp2[],int Bin[]);
 void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
 void Get_Input_CB(bool IsHighLight,CB* pageNodes[], int rowOnScreen,int startIndex,int size, int Temp[], int Temp2[] );
-void It_list_CB(int mod,string res = "");
+void It_list_CB(int mod, listCB& A, string res = "", string cmnd = "");
 void View_DSHK_CB(CB* thisCB);
 void FindCBOnTimeAndPlace(string res="");
 
@@ -246,6 +246,10 @@ void Get_Input_HK(bool IsHighLight,HK* arrHK[], int rowOnScreen,int index, int T
 void It_list_HK(int mod, string res);
 
 void BookTicket();
+void HuyChuyen();
+NavKey SeatClear(int x, int y, int xt, int yt, CB* SelectedCB);
+void CancelTicketByCB();
+void CancelTicketByHK(int mod, string res = "");
 NavKey SeatList(int x, int y, int xt, int yt, CB* SelectedCB);
 void EmptySeatList();
 
