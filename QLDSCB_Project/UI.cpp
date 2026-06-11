@@ -4134,6 +4134,9 @@ selectStage:
         if (SelectedCB->DSV[selectedSeat][0] != '\0') {
             UiThongTinHK(84, 22, 35, 7, SelectedCB->DSV[selectedSeat]);
         }
+		else {
+			ClearRegion(84, 22, 35, 7);
+		}
         for (int i = 0; i < seatNumber; i++) {
             if (countRow == 15) {
                 tempX = x;
@@ -4155,8 +4158,7 @@ selectStage:
                 selectedX = tempX + 5 * countRow - 1;
                 selectedY = tempY;
             }
-            else if (SelectedCB->DSV[startSeat + i][0] != '\0') cout << (startSeat + i + 1);
-            else cout << GRAY << (startSeat + i + 1) << RESET;
+           
             countRow++;
         }
         int action = GetNavKey();
@@ -4220,6 +4222,11 @@ selectStage:
 			}
         }
         ClearRegion(selectedX, selectedY, 5, 1);
+        Gotoxy(selectedX + 1, selectedY);
+        if (SelectedCB->DSV[selectedSeat][0] == '\0') {
+            cout << GRAY << (selectedSeat + 1) << RESET;
+        }
+        else cout << (selectedSeat + 1);
         if (action == NAV_ESC) {
             ClearRegion(84, 22, 35, 7);
             goto selectStage;
@@ -4585,6 +4592,10 @@ selectStage:
         if (SelectedCB->DSV[selectedSeat][0] != '\0') {
             UiThongTinHK(84, 22, 35, 7, SelectedCB->DSV[selectedSeat]);
         }
+        else {
+			ClearRegion(84, 22, 35, 7);
+        }
+        // In danh sach ghe
         for (int i = 0; i < seatNumber; i++) {
             if (countRow == 15) {
                 tempX = x;
@@ -4606,12 +4617,17 @@ selectStage:
                 selectedX = tempX + 5 * countRow - 1;
                 selectedY = tempY;
             }
-            else if (SelectedCB->DSV[startSeat + i][0] != '\0') cout << (startSeat + i + 1);
-            else cout << GRAY << (startSeat + i + 1) << RESET;
+          
             countRow++;
         }
+    seatselect:
         int action = GetNavKey();
         ClearRegion(selectedX, selectedY, 5, 1);
+        Gotoxy(selectedX + 1, selectedY);
+        if (SelectedCB->DSV[selectedSeat][0] == '\0') {
+            cout << GRAY << (selectedSeat + 1) << RESET;
+        }
+		else cout << (selectedSeat + 1);
         if (action == NAV_ESC) {
             ClearRegion(84, 22, 35, 7);
             goto selectStage;
