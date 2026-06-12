@@ -201,7 +201,7 @@ int Find_MB(listMB& dsMB, char* const soHieuMB) {
     return -1; // not found
 }
 
-bool Add_MB(listMB& dsMB, MB *newMB) {
+bool Add_MB(listMB& dsMB, MB *newMB, int mod) {
     if (dsMB.slMB >= 300) {
         return false;
     }
@@ -209,6 +209,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
     if (index == dsMB.slMB) {
         dsMB.list[index] = newMB;
         dsMB.slMB++;
+        if (mod == 0) Set_Data_MB(*newMB, path_file_MB);
         return true;
     }
     if (ss_str(dsMB.list[index]->soHieuMB, newMB->soHieuMB) == 0) {
@@ -217,6 +218,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
     for (int i = dsMB.slMB; i > index; i--) dsMB.list[i] = dsMB.list[i - 1];
     dsMB.list[index] = newMB;
     dsMB.slMB++;
+    if (mod == 0) Set_Data_MB(*newMB, path_file_MB);
     return true;
 }
 
@@ -242,6 +244,7 @@ bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
     }
     dsMB.list[dsMB.slMB - 1] = NULL;
     dsMB.slMB--;
+    Set_Data_MB(dsMB, path_file_MB);
     return true;
 }
 
@@ -259,14 +262,23 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
     // Trường hợp cập nhật trùng mã máy bay
     if (ss_str(dsMB.list[index]->soHieuMB, infoUpdate->soHieuMB) == 0) {
         int SLBcu = dsMB.list[index]->SLB;
+        
+        
         markCB* tnode = dsMB.list[index]->dsHD.head;
         *dsMB.list[index] = *infoUpdate;
         dsMB.list[index]->SLB = SLBcu; // Thông tin này không được thay đổi
+        
+        
+        
+       
         dsMB.list[index]->dsHD.head = tnode; // Thông tin này không được thay đổi
+        Set_Data_MB(dsMB, path_file_MB);
         return true;
     }
     return false;
 }
+
+
 
 // Chuyen Bay
 void copy_CB(CB* CB1, CB* CB2) {
@@ -403,7 +415,7 @@ CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB) { // Tìm xem có chuyế
     return NULL;
 }
 
-bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
+bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB, int mod) {
     int index = Find_MB(dsMB, newCB->soHieuMB);
     if (index == -1) return false; // Khong the them mot chuyen bay voi may bay khong ton tai
     if (newCB->socho > dsMB.list[index]->socho) return false; // Khong the them chuyen co so ve mo ban lon hon socho cua MB
@@ -423,6 +435,7 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
         dsCB.head = newCB;
         dsCB.slCB++;
         if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
+        if (mod == 0) Set_Data_CB(*newCB, path_file_CB);
         return true;
     }
     if (temp == NULL && dsCB.head != NULL) {
@@ -430,6 +443,7 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
         dsCB.head = newCB;
         dsCB.slCB++;
         if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
+        if (mod == 0) Set_Data_CB(*newCB, path_file_CB);
         return true;
     }
     if (ss_str(temp->maCB, newCB->maCB) == 0) {
@@ -441,6 +455,7 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
     newCB->next = temp2;
     dsCB.slCB++;
     if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
+    if (mod == 0) Set_Data_CB(*newCB, path_file_CB);
     return true;
 }
 
@@ -458,6 +473,7 @@ bool Update_Time_CB(listCB &dsCB, listMB &dsMB, char* const maCB, const DateTime
         tnode = tnode->next;
     }
     temp->ngayKH = newTime;
+    Set_Data_CB(dsCB, path_file_CB);
     return true;
 }
 
@@ -530,6 +546,7 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
     temp->socho = infor->socho;
     delete[] temp->DSV;
     temp->DSV = newDSV;
+    Set_Data_CB(dsCB, path_file_CB);
     return true;
 }
 
@@ -546,6 +563,7 @@ bool Cancel_CB(listCB &dsCB, listMB &dsMB, char* const maCB) {
     //delete[] temp->DSV;
     //temp->DSV = NULL;
     //temp->socho = 0;
+    Set_Data_CB(dsCB, path_file_CB);
     return true;
 }
 
@@ -619,7 +637,7 @@ HK* Find_HK(listCB &dsCB, listHK &dsHK, char* const maCB, char* const cmnd) {
     return NULL;
 }
 
-bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai) {
+bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai, int mod) {
     HK* newHK = new HK();
     newHK->set_ho(ho);
     newHK->set_ten(ten);
@@ -629,6 +647,7 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
     if (dsHK.goc == NULL) {
         dsHK.goc = newHK;
         dsHK.slHK++;
+        if (mod == 0) Set_Data_HK(dsHK, path_file_HK);
         return true;
     }
     
@@ -656,6 +675,7 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
         }
     }
     dsHK.slHK++;
+    if (mod == 0) Set_Data_HK(dsHK, path_file_HK);
     return true;
 }
 
@@ -672,7 +692,7 @@ int Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const C
     return -3; // hanh khach chua dat ve tren CB nay
 }
 
-int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber) {
+int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber, int mod) {
     int res = Is_Ticket_Booked(dsCB, dsHK, maCB, CMND);
     if (res != -3) {
         if (res == 0) return -3; // Hanh khach da dat ve
@@ -694,6 +714,7 @@ int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, 
     strcpy(tempCB->DSV[seatNumber - 1], CMND);
     tempCB->sove++;
     if (tempCB->sove == tempCB->socho) tempCB->trangThai = 2; // CB da het ve;
+    if (mod == 0) Set_Data_CB(dsCB, path_file_CB);
     return 0;
 }
 
@@ -713,6 +734,7 @@ int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber) 
     tempCB->DSV[seatNumber - 1] = emptySeat;
     tempCB->sove--;
     tempCB->trangThai = 1;
+    Set_Data_CB(dsCB, path_file_CB);
     return 0;
 }
 
