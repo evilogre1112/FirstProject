@@ -228,11 +228,11 @@ bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
     markCB* tnode = dsMB.list[index]->dsHD.head;
     while (tnode != NULL) { // Huy nhung chuyen bay dang su dung may bay bi xoa
         tnode->mark->trangThai = 0;
-        for (int i = 0; i < tnode->mark->socho; i++)
-            delete[] tnode->mark->DSV[i];
-        delete[] tnode->mark->DSV;
-        tnode->mark->DSV = NULL;
-        tnode->mark->socho = 0;
+        //for (int i = 0; i < tnode->mark->socho; i++)
+        //    delete[] tnode->mark->DSV[i];
+        //delete[] tnode->mark->DSV;
+        //tnode->mark->DSV = NULL;
+        //tnode->mark->socho = 0;
         tnode = tnode->next;
     }
     clearMarkMB(dsMB.list[index]);
@@ -409,6 +409,9 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
     if (newCB->socho > dsMB.list[index]->socho) return false; // Khong the them chuyen co so ve mo ban lon hon socho cua MB
     markCB* newMark = new markCB();
     newMark->mark = newCB;
+    if (newCB->trangThai == 3 || newCB->trangThai == 0) {
+        delete newMark;
+    }
     if (newCB->trangThai == 1 || newCB->trangThai == 2) {
         if (addMarkMB(dsMB.list[index], newMark) == false) {
             delete newMark;
@@ -480,6 +483,9 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
             if (Update_Time_CB(dsCB, dsMB, maCB, infor->ngayKH) == false) return -6; // Xung dot thoi gian
             strcpy(temp->sbDich, infor->sbDich);
             temp->trangThai = infor->trangThai;
+            if (infor->trangThai == 3 || infor->trangThai == 0) {
+				delMarkMB(dsMB.list[index], maCB);
+            }
         }
     }
     else { // Truong hop khac so hieu MB
@@ -535,11 +541,11 @@ bool Cancel_CB(listCB &dsCB, listMB &dsMB, char* const maCB) {
     temp->trangThai = 0;
     int index = Find_MB(dsMB, temp->soHieuMB);
     delMarkMB(dsMB.list[index], maCB);
-    for (int i = 0; i < temp->socho; i++)
-        delete[] temp->DSV[i];
-    delete[] temp->DSV;
-    temp->DSV = NULL;
-    temp->socho = 0;
+    //for (int i = 0; i < temp->socho; i++)
+    //    delete[] temp->DSV[i];
+    //delete[] temp->DSV;
+    //temp->DSV = NULL;
+    //temp->socho = 0;
     return true;
 }
 
@@ -565,22 +571,24 @@ void realTimeUpdateCB(listCB &dsCB, listHK &dsHK, listMB &dsMB) {
     DateTime Now = StringtoTime(currTime);
     while (tempCB != NULL) {
         DateTime TimeCB = tempCB->ngayKH;
-        if (ss_ngay(TimeCB, Now) <= 60 && isNotPastTime(TimeCB, Now)) {
+        if (tempCB->trangThai != 0 && tempCB->trangThai != 3 && ss_ngay(TimeCB, Now) <= 60 && isNotPastTime(TimeCB, Now)) {
             tempCB->trangThai = 2; // Chỉ còn ít hơn một tiếng trước khởi hành, không nhận đặt thêm vé
             tempCB = tempCB->next;
             continue;
         }
         if (ss_ngay(TimeCB, Now) > 120 && !isNotPastTime(TimeCB, Now)) {
-            tempCB->trangThai = 3; // Chuyến bay đã bay được hơn 2 tiếng => Coi như đã hoàn tất chuyến
-            for (int i = 0; i < tempCB->socho; i++) {
-                if (tempCB->DSV[i][0] != '\0') {
-                    HK* tempHK = Find_HK_At_List(dsHK, tempCB->DSV[i]);
-                    delMarkHK(tempHK, tempCB->maCB);
+            if (tempCB->trangThai != 3 && tempCB->trangThai != 0) { // Neu la chuyen da hoan tat hoac bi huy thi khoi xet
+                tempCB->trangThai = 3; // Chuyến bay đã bay được hơn 2 tiếng => Coi như đã hoàn tất chuyến
+                for (int i = 0; i < tempCB->socho; i++) {
+                    if (tempCB->DSV[i][0] != '\0') {
+                        HK* tempHK = Find_HK_At_List(dsHK, tempCB->DSV[i]);
+                        delMarkHK(tempHK, tempCB->maCB);
+                    }
                 }
+                int index = Find_MB(dsMB, tempCB->soHieuMB);
+                dsMB.list[index]->SLB++;
+                delMarkMB(dsMB.list[index], tempCB->maCB);
             }
-            int index = Find_MB(dsMB, tempCB->soHieuMB);
-            dsMB.list[index]->SLB++;
-            delMarkMB(dsMB.list[index], tempCB->maCB);
         }
         tempCB = tempCB->next;
     }
@@ -694,6 +702,9 @@ int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber) 
     if (tempCB == NULL) return -1; // Chuyen bay khong ton tai
     if (tempCB->trangThai == 0 || tempCB->trangThai == 3) return -2; // Chuyen bay da khong con hoat dong
     if (tempCB->DSV[seatNumber - 1][0] == '\0') return -3; // Ghe trong, chua co khach dat
+    DateTime now = StringtoTime(time_now());
+    if (ss_ngay(tempCB->ngayKH, now) <= 60 && isNotPastTime(tempCB->ngayKH, now)) return -4; // Khong the huy ve trong vong 1 tieng truoc khi khoi hanh
+	if (ss_ngay(tempCB->ngayKH, now) != 0 && !isNotPastTime(tempCB->ngayKH, now)) return -5; // Khong the huy ve sau khi chuyen bay da khoi hanh 
     HK* tempHK = Find_HK_At_List(dsHK, tempCB->DSV[seatNumber - 1]);
     delMarkHK(tempHK, maCB);
     char* emptySeat = new char[cmnd_max];
@@ -1060,6 +1071,7 @@ void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate) {
 
 void CopyMarkList(listCB& A, listHK&  dsHK, char* const cmnd) {
     HK* tmpHK = Find_HK_At_List(dsHK, cmnd);
+    if (tmpHK == NULL) return;
     markCB* tmpMark = tmpHK->dsDatVe.head;
     if (tmpMark != NULL) {
         CB* newCB = new CB();
