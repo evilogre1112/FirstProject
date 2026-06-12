@@ -270,7 +270,7 @@ bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width);
 void Menu_QuanLyMayBay();
 void Menu_QuanLyChuyenBay();
 void Menu_QuanLyHanhKhach();
-void Menu_TraCuuChuyenBay();
+void Menu_MayBayChuyenBay();
 void Menu_ThongKeLuotBay();
 void Menu_InDanhSachHanhKhach();
 
