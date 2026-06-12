@@ -441,19 +441,46 @@ bool Set_Data_MB(listMB &dsMB, const char *path_file_MB){
     return true;
 }
 
+// Hàm tiện ích dùng để sắp xếp lại dữ liệu để lưu
+void Get_List_Data_HK(HK** list, HK** result, int l, int r, int& count) {
+    if (l > r) return;
+    int m = (l + r) / 2;
+    result[count++] = list[m];
+    Get_List_Data_HK(list, result, l, m - 1, count);
+    Get_List_Data_HK(list, result, m + 1, r, count);
+}
+
 bool Set_Data_HK(listHK &dsHK, const char *path_file_HK){
     ofstream f(path_file_HK);
     if(!f.is_open()) return false;
     if (dsHK.goc == NULL) { f.close(); return true; }
-    // Ham duyet luu theo thu tu NLR
+    
     Stack<HK*> s;
-    s.push(dsHK.goc);
-    while(!s.isEmpty()){
-        HK* temp =s.pop();
-        f << temp->cmnd << '|' << temp->ho << '|' << temp->ten << '|' << temp->phai << '\n';
-        if(temp->right != NULL) s.push(temp->right);
-        if(temp->left != NULL) s.push(temp->left);
+    HK* curr = dsHK.goc;
+    int slHK = 0;
+    HK** dataList = new HK* [dsHK.slHK];
+    while(!s.isEmpty() || curr != NULL){
+        while (curr != NULL) {
+            s.push(curr);
+            curr = curr->left;
+        }
+        curr = s.pop();
+        if (curr != NULL) {
+            dataList[slHK] = curr;
+            slHK++;
+        }
+        curr = curr->right;
     }
+    
+    HK** result = new HK* [dsHK.slHK];
+    int count = 0;
+    Get_List_Data_HK(dataList, result, 0, dsHK.slHK - 1, count);
+    for (int i = 0; i < slHK; i++) {
+        HK* hk = result[i];
+        f << hk->cmnd << '|' << hk->ho << '|' << hk->ten << '|' << hk->phai << '\n';
+    }
+    delete[] dataList;
+    delete[] result;
     f.close();
     return true;
 }

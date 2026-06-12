@@ -209,6 +209,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
     if (index == dsMB.slMB) {
         dsMB.list[index] = newMB;
         dsMB.slMB++;
+        Set_Data_MB(*newMB, path_file_MB);
         return true;
     }
     if (ss_str(dsMB.list[index]->soHieuMB, newMB->soHieuMB) == 0) {
@@ -217,6 +218,7 @@ bool Add_MB(listMB& dsMB, MB *newMB) {
     for (int i = dsMB.slMB; i > index; i--) dsMB.list[i] = dsMB.list[i - 1];
     dsMB.list[index] = newMB;
     dsMB.slMB++;
+    Set_Data_MB(*newMB, path_file_MB);
     return true;
 }
 
@@ -242,6 +244,7 @@ bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
     }
     dsMB.list[dsMB.slMB - 1] = NULL;
     dsMB.slMB--;
+    Set_Data_MB(dsMB, path_file_MB);
     return true;
 }
 
@@ -263,6 +266,7 @@ bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
         *dsMB.list[index] = *infoUpdate;
         dsMB.list[index]->SLB = SLBcu; // Thông tin này không được thay đổi
         dsMB.list[index]->dsHD.head = tnode; // Thông tin này không được thay đổi
+        Set_Data_MB(dsMB, path_file_MB);
         return true;
     }
     return false;
@@ -423,6 +427,8 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
         dsCB.head = newCB;
         dsCB.slCB++;
         if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
+        Set_Data_CB(*newCB, path_file_CB);
+        Set_Data_MB(dsMB, path_file_MB);
         return true;
     }
     if (temp == NULL && dsCB.head != NULL) {
@@ -430,6 +436,8 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
         dsCB.head = newCB;
         dsCB.slCB++;
         if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
+        Set_Data_CB(*newCB, path_file_CB);
+        Set_Data_MB(dsMB, path_file_MB);
         return true;
     }
     if (ss_str(temp->maCB, newCB->maCB) == 0) {
@@ -441,6 +449,8 @@ bool Add_CB(listCB &dsCB, listMB &dsMB, CB *newCB) {
     newCB->next = temp2;
     dsCB.slCB++;
     if (newCB->trangThai == 3) dsMB.list[index]->SLB++;
+    Set_Data_CB(*newCB, path_file_CB);
+    Set_Data_MB(dsMB, path_file_MB);
     return true;
 }
 
@@ -458,6 +468,7 @@ bool Update_Time_CB(listCB &dsCB, listMB &dsMB, char* const maCB, const DateTime
         tnode = tnode->next;
     }
     temp->ngayKH = newTime;
+    Set_Data_CB(dsCB, path_file_CB);
     return true;
 }
 
@@ -530,6 +541,7 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
     temp->socho = infor->socho;
     delete[] temp->DSV;
     temp->DSV = newDSV;
+    Set_Data_CB(dsCB, path_file_CB);
     return true;
 }
 
@@ -546,6 +558,7 @@ bool Cancel_CB(listCB &dsCB, listMB &dsMB, char* const maCB) {
     //delete[] temp->DSV;
     //temp->DSV = NULL;
     //temp->socho = 0;
+    Set_Data_CB(dsCB, path_file_CB);
     return true;
 }
 
@@ -592,6 +605,8 @@ void realTimeUpdateCB(listCB &dsCB, listHK &dsHK, listMB &dsMB) {
         }
         tempCB = tempCB->next;
     }
+    Set_Data_CB(dsCB, path_file_CB);
+    Set_Data_MB(dsMB, path_file_MB);
 }
 
 HK* Find_HK_At_List(listHK &dsHK, char* const cmnd) {
@@ -629,6 +644,7 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
     if (dsHK.goc == NULL) {
         dsHK.goc = newHK;
         dsHK.slHK++;
+        Set_Data_HK(dsHK, path_file_HK);
         return true;
     }
     
@@ -656,6 +672,7 @@ bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, boo
         }
     }
     dsHK.slHK++;
+    Set_Data_HK(dsHK, path_file_HK);
     return true;
 }
 
@@ -694,6 +711,7 @@ int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, 
     strcpy(tempCB->DSV[seatNumber - 1], CMND);
     tempCB->sove++;
     if (tempCB->sove == tempCB->socho) tempCB->trangThai = 2; // CB da het ve;
+    Set_Data_CB(dsCB, path_file_CB);
     return 0;
 }
 
@@ -713,6 +731,7 @@ int Cancel_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, int seatNumber) 
     tempCB->DSV[seatNumber - 1] = emptySeat;
     tempCB->sove--;
     tempCB->trangThai = 1;
+    Set_Data_CB(dsCB, path_file_CB);
     return 0;
 }
 
