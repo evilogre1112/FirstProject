@@ -1997,6 +1997,7 @@ NavKey CustomerAddHK(string cmnd) {
 
 void BookTicket() {
 start:
+    realTimeUpdateCB(dsCB, dsHK, dsMB);
     int width = 120;
     int startX = (GetTerminalWidth() - width) / 2;
     int formY = 2;
@@ -2980,7 +2981,7 @@ void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int current
                     SmallBox(ToStringDate(current->ngayKH), false, false, true, true, Temp2[j - pha], 1);
                 } else if (j == 3) {
                     Gotoxy(Temp[j - pha], Y + rowOnScreen);
-                    SmallBox(to_string(current->socho), false, false, true, true, Temp2[j - pha], 1);
+                    SmallBox(to_string(current->socho - current->sove), false, false, true, true, Temp2[j - pha], 1);
                 } else if (j == 4) {
                     Gotoxy(Temp[j - pha], Y + rowOnScreen);
                     SmallBox(current->sbDich, false, false, true, true, Temp2[j - pha], 1);
@@ -3005,7 +3006,7 @@ void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int current
 }
 // MODE 2 là sữa 
 bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){
-    string m = "Đang Hiệu Chỉnh - Dùng ◄/► để nhảy ô, ENTER để lưu, ESC thoát";
+    string m = "Đang Hiệu Chỉnh - Dùng ↑/↓ để điều chỉnh trạng thái ENTER để lưu, ESC thoát";
     string u = "";
     string inputs[] = {"","",""}; // Edit 3 field Ngày giờ , Sân Bay đích, trạng thái
     int ToaDoBoxX = 5 ;
@@ -3151,6 +3152,7 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
     q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất ";
     start:
     ClearScreen();
+    realTimeUpdateCB(dsCB, dsHK, dsMB);
     string header[] = {"Danh Sách Chuyến Bay","Danh Sách Chuyến Bay","Danh Sách Chuyến Bay Đã Được Đặt Theo Số CMND: " + cmnd,"Danh Sách Chuyến Bay"};
     PrintHeader(res, mod, header[mod], size, headers, typemode, Temp, Temp2, (TotalWidth / 2) - (visualLength(header[mod]) / 2));
     Gotoxy(70,24);
@@ -3640,6 +3642,7 @@ void Get_Input_HK(bool IsHighLight,HK* arrHK[], int rowOnScreen,int index, int T
 }
 void It_list_HK(int mod, string res = "") { 
     start:
+    realTimeUpdateCB(dsCB, dsHK, dsMB);
     ClearScreen();
     int Temp[] = {10, 20, 45, 90};
     int Temp2[] = {10, 25, 45, 15};
@@ -3750,6 +3753,7 @@ CLEANUP_AND_EXIT:
 
 // Phần này thống kê đặc biệt không được để các hàm in danh sách thường ở gần đây
 void StatiscalMB(){
+    realTimeUpdateCB(dsCB, dsHK, dsMB);
     listMB dsMB_Stat = Get_Flight_Stats(dsMB);
     int field = 5 ;
     int Temp[] = {10,20,50,90,100};
@@ -3817,7 +3821,7 @@ void FindCBOnTimeAndPlace(string res){
     int Bin[] = {1,1,0,1,0,1};
     string typemode[] = {"Tìm Chuyến Bay Theo Ngày Khởi Hành/Sân Bay Đích",};
     //string headers[] = {"STT","Mã Chuyến Bay", "Ngày Khởi Hành", "Số Vé","Sân bay đích","Status"};
-    string headers[] = {"STT","Mã Chuyến Bay", "Số Vé","Status"};
+    string headers[] = {"STT","Mã Chuyến Bay", "Vé Trống","Status"};
     PrintHeader(res, 0, "Danh Sách Chuyến Bay", size, headers,typemode, Temp, Temp2,-1,-1,3,1);
     string q[] = {"","","",""};
     string Type[] = {RED, GREEN, YELLOW, CYAN};
@@ -3831,6 +3835,7 @@ void FindCBOnTimeAndPlace(string res){
     DateTime t ;
     string add = "";
     int slCB ;
+    realTimeUpdateCB(dsCB, dsHK, dsMB);
     CB** CBSearch = Search_CB(dsCB,t,const_cast<char*>(add.c_str()),slCB);
     string ti = time_now();
     int currentPage = 0;
@@ -3901,7 +3906,7 @@ void FindCBOnTimeAndPlace(string res){
                 string s ;
                 int index = rowOnScreen + startIndex;// rowOnScreen + startIndex
                 CB* SelectedNode = pageNodes[rowOnScreen]; // Đây là chính là chuyến đang 
-                string Box[] = { to_string(index+1),SelectedNode->maCB,to_string(SelectedNode->socho),TranFormSatus(SelectedNode->trangThai)};
+                string Box[] = { to_string(index+1),SelectedNode->maCB,to_string(SelectedNode->socho - SelectedNode->sove),TranFormSatus(SelectedNode->trangThai)};
                 for(int i = 0; i < size ;i++){
                     Gotoxy(Temp[i],Y + rowOnScreen);
                     s = Box[i];
@@ -3951,6 +3956,7 @@ void FindCBOnTimeAndPlace(string res){
                 InputStringSBD(r,StartCalendarX+visualLength(v)+1,  col*4 + 13,23,' ');
                 RedrawInput(r,StartCalendarX+visualLength(v)+1,  col*4 + 13,23,' ',false,false);
                 delete[] CBSearch;
+                realTimeUpdateCB(dsCB, dsHK, dsMB);
                 CBSearch = Search_CB(dsCB,T,const_cast<char*>(r.c_str()),slCB);
                 currentPage = 0;
                 current_Row = 0;
@@ -4209,6 +4215,7 @@ selectStage:
 }
 void CancelTicketByCB() {
 start:
+    realTimeUpdateCB(dsCB, dsHK, dsMB);
     int width = 120;
     int width1 = 80;
     int width2 = 39;
@@ -4868,6 +4875,8 @@ void Tutorial(){
     cout << GRAY << "4. F để quay lại phần tìm kiếm, khi đã vào phần tìm kiếm thì có thể nhập mã chuyến bay cần tìm." << RESET;
     Gotoxy(2,14);
     cout << GRAY << "5. Backspace để không chọn ngày giờ" << RESET;
+    Gotoxy(2,16);
+    cout << GRAY << "6. Chỉ bật Unikey(Tiếng Việt) khi nhập tên(Hành khách,Sân Bay), hệ thống chưa được tối ưu khi sử dụng bàn phím Tiếng Việt" << RESET;
     _getch();
 }
 
@@ -5153,7 +5162,7 @@ void Menu_QuanLyHanhKhach() {
     );
 }
 
-void Menu_TraCuuChuyenBay() {
+void Menu_MayBayChuyenBay() {
      RunInNewTab([]() { It_list_CB(3, dsCB, ""); });
 }
 
@@ -5186,7 +5195,7 @@ void MainScreen(){
                 Router_Board(chosen, Menu_QuanLyMayBay, Menu_QuanLyChuyenBay, Menu_QuanLyHanhKhach);
                 break;
             case 1:
-                Router_Board(chosen, Menu_TraCuuChuyenBay, Menu_ThongKeLuotBay, Menu_InDanhSachHanhKhach);
+                Router_Board(chosen, Menu_MayBayChuyenBay, Menu_ThongKeLuotBay, Menu_InDanhSachHanhKhach);
                 break;
             default:
                 break;
@@ -5200,5 +5209,6 @@ void MainScreen(){
         {
             exit(0); // thoát chương trình
         }
+        
     }
 }
