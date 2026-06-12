@@ -412,7 +412,7 @@ bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
                 f << (i + 1) << '|' << temp->DSV[i] << '\n';
             }
         }
-
+ 
         // --- 3. Luôn ghi số 0 để làm "điểm dừng" cho mỗi chuyến bay ---
         f << 0 << '\n';
 
