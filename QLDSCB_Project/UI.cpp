@@ -1652,6 +1652,7 @@ NavKey CustomerAddCB() {
                 
                 NewCB->set_sbDich(const_cast<char*>(inputs[2].c_str()));
                 NewCB->set_soHieuMB(const_cast<char*>(inputs[3].c_str()));
+                Init_Tickets(NewCB, stoi(inputs[4]));
                 NewCB->trangThai = 1;
             
                 string error_code =Can_Add_CB(dsCB, dsMB, NewCB);
@@ -1703,7 +1704,6 @@ NavKey CustomerAddCB() {
                     Gotoxy(startX, formY + 24);
                     SmallBox("ĐANG LƯU DỮ LIỆU...", width, 3, (string)GREEN);
                     Add_CB(dsCB,dsMB, NewCB);
-                    Init_Tickets(NewCB, stoi(inputs[4]));
                     string succeededtext = "Đã lưu thành công! Nhấn phím bất kỳ để tiếp tục, ESC để thoát.";
                     Gotoxy(startX + width/2 -visualLength(succeededtext)/2, formY + 27);
                     cout << YELLOW << succeededtext << RESET;
