@@ -2863,14 +2863,14 @@ void It_list_MB(int mod, string res){
 // Khối hàm In danh sách Chuyến Bay và các thao tác hiệu chỉnh ở đây không bao gồm các hàm thống kê đặt biệt
 
 // Truyền listCB& A (tham chiếu) để sửa trực tiếp, không dùng lệnh return
-void UiFindCB(string& res, NavKey key, int& ch, listCB& A) {
+void UiFindCB(string& res, NavKey key, int& ch, listCB& A, listCB& mainList) {
     int X = 20 , Y = 4 ;
     bool isChanged = SimpleInput(res, key, ch, X, Y,maCB_max);
   
     // CHỈ DỌN RAM VÀ TÌM LẠI NẾU NGƯỜI DÙNG THỰC SỰ GÕ PHÍM CHỮ/XÓA
     if (isChanged) {
         A.Clear();
-        A = Find_CB_OnRage(dsCB, const_cast<char*>(res.c_str()));
+        A = Find_CB_OnRage(mainList, const_cast<char*>(res.c_str()));
     }
 }
 
@@ -3238,7 +3238,7 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
                         break ; 
                     }
                     bool changed = res.empty();
-                    UiFindCB(res, key, chr, tmp);
+                    UiFindCB(res, key, chr, tmp, A);
                     CanReDraw = true ;
                     
                     if(!res.empty())
@@ -4367,7 +4367,10 @@ start:
             currentRow = 0;
             Gotoxy(curX, curY);
             int ch = _getch();
-            if (ch == 13) break;
+            if (ch == 0 || ch == 224) {
+                ch = _getch();
+            }
+            else if (ch == 13) break;
             else if (ch == 27) {
                 CB* tempCB = subListCB.head;
                 while (tempCB != NULL) {
@@ -4378,7 +4381,8 @@ start:
                 ClearScreen();
                 return;
             }
-            else if (input.size() < maCB_max - 1 && (ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')) {
+            else if (input.size() < maCB_max - 1 && (ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch == '-' )) {
+                if ((input.size() > 0 && input[input.size() - 1] == '-' && ch == '-') || (input.size() == 0 && ch == '-')) continue;
                 input += (char)ch;
                 Gotoxy(startX + width1 - 18, formY + 8);
                 cout << input;
@@ -4770,7 +4774,10 @@ start:
             currentRow = 0;
             Gotoxy(curX, curY);
 			int ch = _getch();
-            if (ch == 13) break;
+            if (ch == 0 || ch == 224) {
+                ch = _getch();
+            }
+            else if (ch == 13) break;
             else if (ch == 27) {
                 CB* tempCB = subListCB.head;
                 while (tempCB != NULL) {
@@ -4781,7 +4788,8 @@ start:
                 ClearScreen();
                 return;
             }
-            else if (input.size() < maCB_max - 1 && ( ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' )) {
+            else if (input.size() < maCB_max - 1 && ( ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch == '-' )) {
+                if ((input.size() > 0 && input[input.size() - 1] == '-' && ch == '-') || (input.size() == 0 && ch == '-')) continue;
                 input += (char)ch;
                 Gotoxy(startX + width1 - 18, formY + 8);
                 cout << input;

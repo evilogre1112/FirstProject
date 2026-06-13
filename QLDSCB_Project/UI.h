@@ -232,7 +232,7 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
 
 void OnlyPrint_List_CB(listCB& dsCB,int size,int CurrentPage, int itemsPerPage, int Temp[],int Temp2[],int Bin[] );
 
-void UiFindCB(string& res, NavKey key, int& ch, listCB& A);
+void UiFindCB(string& res, NavKey key, int& ch, listCB& A, listCB& mainList);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage,int size, int Temp[], int Temp2[],int Bin[]);
 void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
 void Get_Input_CB(bool IsHighLight,CB* pageNodes[], int rowOnScreen,int startIndex,int size, int Temp[], int Temp2[] );
