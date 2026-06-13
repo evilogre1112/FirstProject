@@ -3238,7 +3238,9 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
                         break ; 
                     }
                     bool changed = res.empty();
+                    string c = res;    // tránh nháy màn hình
                     UiFindCB(res, key, chr, tmp, A);
+                    if (c == res) continue; // tránh nháy màn hình nếu chuổi k đổi
                     CanReDraw = true ;
                     
                     if(!res.empty())
