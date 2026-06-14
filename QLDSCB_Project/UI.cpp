@@ -3929,15 +3929,13 @@ void FindCBOnTimeAndPlace(string res){
 
         int WidthClear = 0;
         //In thông tin điều hướng ở cuối
-        int totalPages = (slCB == 0) ? 1 : ((slCB + itemsPerPage - 1) / itemsPerPage);
+        int totalPages = (slCB == 0) ? 1 : (slCB + itemsPerPage - 1) / itemsPerPage;
         for (int i = 0; i < size; i++) WidthClear += Temp2[i];
         ClearRegion(0, Y + itemsOnThisPage, WidthClear, 14 - itemsOnThisPage);
         string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang.";
         Gotoxy(63, 27);
         SmallBox(m, 50, 1, string(GRAY));
-        _getch();
         Render_CB_Page(CBSearch,slCB,Y,25,8,currentPage,itemsPerPage,S,Temp,Temp2,Bin);
-        _getch();
         if(dsCB.slCB == 0){
             Gotoxy(5, Y);
             cout << RED << "Danh sách chuyến bay rỗng!/Nhấn phím bất kì để thoát" << RESET;
