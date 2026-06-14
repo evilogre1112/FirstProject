@@ -1291,9 +1291,9 @@ NavKey CustomerAddMB() {
 
         int action;
         if (currentField == 0) {
-            action = InputString(inputs[0], inputX, formY + 2, soHieuMB_max, '_', false, false, false, true, false,false);
+            action = InputString(inputs[0], inputX, formY + 2, soHieuMB_max-1, '_', false, false, false, true, false,false);
         } else if (currentField == 1) {
-            action = InputString(inputs[1], inputX, formY + 6, loaiMB_max, '_', false, false, false, false, false);
+            action = InputString(inputs[1], inputX, formY + 6, loaiMB_max-1, '_', false, false, false, false, false);
         } else if (currentField == 2) {
             action = InputString(inputs[2], inputX, formY + 10, 3, '_', true, false, false, false, false);
         }
@@ -1313,9 +1313,9 @@ NavKey CustomerAddMB() {
                 
                 // --- Đã điền đủ: Tiến hành kiểm tra logic và hỏi lưu ---
                 int soCho = stoi(inputs[2]);
-                if (soCho <= 0 || soCho > socho_max) {
+                if (soCho < 20 || soCho > socho_max) {
                     Gotoxy(startX + 5, formY + 12);
-                    cout << RED << "Lỗi: Số chỗ phải từ 1 đến " << socho_max << "! Bấm phím bất kỳ..." << RESET;
+                    cout << RED << "Lỗi: Số chỗ phải từ 20 đến " << socho_max << "! Bấm phím bất kỳ..." << RESET;
                     _getch(); 
                     currentField = 2; // Ép con trỏ nhảy về ô Số chỗ để sửa
                     continue;
@@ -1537,7 +1537,7 @@ NavKey CustomerAddCB() {
         string s = "";
         int action;
         if (currentField == 0) {
-            action = InputString(inputs[0], inputX, formY + 2, maCB_max, '_', false, false, false, true, false,false);
+            action = InputString(inputs[0], inputX, formY + 2, maCB_max-1, '_', false, false, false, true, false,false);
         } else if (currentField == 1) {
             string old = inputs[1];
             NavKey k = NAV_LEFT;
@@ -1574,8 +1574,8 @@ NavKey CustomerAddCB() {
             }
         } else if (currentField == 2) {
             // Tham số TRUE cuối cùng sẽ chặn toàn bộ các ký tự không phải là số
-            action = InputStringSBD(inputs[2], inputX, formY + 8, sbDich_max, '_', false); 
-            RedrawInput(inputs[2], inputX, formY + 8, sbDich_max, '_', false, false, ""); 
+            action = InputStringSBD(inputs[2], inputX, formY + 8, sbDich_max-1, '_', false); 
+            RedrawInput(inputs[2], inputX, formY + 8, sbDich_max-1, '_', false, false, ""); 
         }else if (currentField == 3){
             Gotoxy(inputX+25, formY + 2 + (currentField * 3));
             SmallBox(string(22,' ') + AD, 25,1);
@@ -1588,7 +1588,7 @@ NavKey CustomerAddCB() {
                 int ch = 0 ;
                 NavKey key = GetNavKey(ch);
                 ClearRegion(inputX+24, formY + 2 + currentField*3+3, 30, items*2-1);
-                if(key == NAV_UP || key  == NAV_RIGHT){
+                if(key == NAV_UP || key  == NAV_LEFT){
                     Gotoxy(inputX+25, formY + 2 + (currentField * 3));
                     SmallBox(o + string(22-visualLength(o),' ') + AD, 25,1);
                     ClearRegion(inputX+40, formY + 2 + currentField*3+3, 12, items*2-1);
@@ -1608,7 +1608,7 @@ NavKey CustomerAddCB() {
                         return NAV_ESC;
                     }else if(action == NAV_ENTER){
                         inputs[3] = s ;
-                        inputs[4] = to_string(tmp.list[idx]->socho);
+                        if(inputs[4].empty())inputs[4] = to_string(tmp.list[idx]->socho);
                         Gotoxy(inputX+25, formY + 2 + (currentField * 3));
                         SmallBox(o + string(22-visualLength(o),' ') + AD, 25,1);
                         RedrawInput(inputs[4],inputX, formY + 3 + (size - 1) * 3,3,' ',true,false)  ; 
@@ -1637,11 +1637,13 @@ NavKey CustomerAddCB() {
         } 
         else if (action == NAV_DOWN) { 
             currentField = (currentField >= 3) ? 0 : currentField + 1;
-        }else if(action == NAV_RIGHT){ 
-            currentField = (currentField == 4) ? 0 : 4;
         }else if(action == NAV_LEFT){
-            currentField = (currentField == 0) ? 4 : 0;
+            currentField = (currentField == 3) ? 4 : currentField;
         }else if (action == NAV_ENTER) { // Nhấn ENTER
+            if(action == NAV_ENTER && currentField == 3){
+                currentField = (currentField + 1)%5;
+                continue ;
+            }
             if (!inputs[0].empty() && !inputs[1].empty() && !inputs[2].empty() && !inputs[3].empty() && !inputs[4].empty()) {
                 CB* NewCB = new CB; 
                 NewCB->set_maCB(const_cast<char*>(inputs[0].c_str()));
@@ -1656,7 +1658,7 @@ NavKey CustomerAddCB() {
                 Init_Tickets(NewCB, stoi(inputs[4]));
                 NewCB->trangThai = 1;
             
-                string error_code =Can_Add_CB(dsCB, dsMB, NewCB);
+                string error_code = Can_Add_CB(dsCB, dsMB, NewCB);
                 if(error_code != "0") {
                     Gotoxy(startX+1, formY + 20);
                     if(error_code == "1") {
@@ -1672,6 +1674,9 @@ NavKey CustomerAddCB() {
                         SmallBox(u,false,true,false,false,width-2,3,RED);
                     }else if(error_code == "4") {
                         string u = "Lỗi: Không được đặt số vé khởi tạo lớn hơn số chỗ của máy bay [" + inputs[3] + "]";
+                        SmallBox(u,false,true,false,false,width-2,3,RED);
+                    }else if( error_code == "5"){
+                        string u = "Lỗi: Không được đặt số vé khởi tạo nhở hơn 20!";
                         SmallBox(u,false,true,false,false,width-2,3,RED);
                     }
                     delete NewCB; 
@@ -1885,10 +1890,10 @@ NavKey CustomerAddHK(string cmnd) {
             action = InputString(inputs[0], inputX, formY + 16, cmnd_max - 1, '_', true, false, false, false, false);
         }
         else if (currentField == 1) {
-            action = InputString(inputs[1], inputX, formY + 18, ho_max, '_', false, false, false, false, true);
+            action = InputString(inputs[1], inputX, formY + 18, ho_max-1, '_', false, false, false, false, true);
         }
         else if (currentField == 2) {
-            action = InputString(inputs[2], inputX, formY + 20, ten_max, '_', false, false, false, false, true);
+            action = InputString(inputs[2], inputX, formY + 20, ten_max - 1, '_', false, false, false, false, true);
         }
         else if (currentField == 3) {
             action = InputGender(gender, inputX, formY + 22);
@@ -2559,7 +2564,7 @@ bool SimpleInput(string& res, NavKey key, int& ch, int x, int y, int width, bool
 }
 
 void UiFindMB(string& res, NavKey key, int& ch, listMB& A, int x, int y) {
-    bool isChanged = SimpleInput(res, key, ch, x, y,soHieuMB_max); 
+    bool isChanged = SimpleInput(res, key, ch, x, y,soHieuMB_max-1); 
 
     if (isChanged) {
         A = Find_MB_OnRage(dsMB, const_cast<char*>(res.c_str()));
@@ -2899,7 +2904,7 @@ void It_list_MB(int mod, string res){
 // Truyền listCB& A (tham chiếu) để sửa trực tiếp, không dùng lệnh return
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A, listCB& mainList) {
     int X = 20 , Y = 4 ;
-    bool isChanged = SimpleInput(res, key, ch, X, Y,maCB_max);
+    bool isChanged = SimpleInput(res, key, ch, X, Y,maCB_max-1);
   
     // CHỈ DỌN RAM VÀ TÌM LẠI NẾU NGƯỜI DÙNG THỰC SỰ GÕ PHÍM CHỮ/XÓA
     if (isChanged) {
