@@ -1588,7 +1588,7 @@ NavKey CustomerAddCB() {
                 int ch = 0 ;
                 NavKey key = GetNavKey(ch);
                 ClearRegion(inputX+24, formY + 2 + currentField*3+3, 30, items*2-1);
-                if(key == NAV_UP || key  == NAV_RIGHT){
+                if(key == NAV_UP || key  == NAV_LEFT){
                     Gotoxy(inputX+25, formY + 2 + (currentField * 3));
                     SmallBox(o + string(22-visualLength(o),' ') + AD, 25,1);
                     ClearRegion(inputX+40, formY + 2 + currentField*3+3, 12, items*2-1);
@@ -1608,7 +1608,7 @@ NavKey CustomerAddCB() {
                         return NAV_ESC;
                     }else if(action == NAV_ENTER){
                         inputs[3] = s ;
-                        inputs[4] = to_string(tmp.list[idx]->socho);
+                        if(inputs[4].empty())inputs[4] = to_string(tmp.list[idx]->socho);
                         Gotoxy(inputX+25, formY + 2 + (currentField * 3));
                         SmallBox(o + string(22-visualLength(o),' ') + AD, 25,1);
                         RedrawInput(inputs[4],inputX, formY + 3 + (size - 1) * 3,3,' ',true,false)  ; 
@@ -1637,11 +1637,13 @@ NavKey CustomerAddCB() {
         } 
         else if (action == NAV_DOWN) { 
             currentField = (currentField >= 3) ? 0 : currentField + 1;
-        }else if(action == NAV_RIGHT){ 
-            currentField = (currentField == 4) ? 0 : 4;
         }else if(action == NAV_LEFT){
-            currentField = (currentField == 0) ? 4 : 0;
+            currentField = (currentField == 3) ? 4 : currentField;
         }else if (action == NAV_ENTER) { // Nhấn ENTER
+            if(action == NAV_ENTER && currentField == 3){
+                currentField = (currentField + 1)%5;
+                continue ;
+            }
             if (!inputs[0].empty() && !inputs[1].empty() && !inputs[2].empty() && !inputs[3].empty() && !inputs[4].empty()) {
                 CB* NewCB = new CB; 
                 NewCB->set_maCB(const_cast<char*>(inputs[0].c_str()));
