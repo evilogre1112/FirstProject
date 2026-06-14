@@ -3837,6 +3837,7 @@ void StatiscalMB(){
 }
 
 void FindCBOnTimeAndPlace(string res){
+    
     int Y = 5 ; 
     int col = 1 ;
     int StartCalendarX = 64;
@@ -3907,6 +3908,12 @@ void FindCBOnTimeAndPlace(string res){
         SmallBox(m, 50, 1, string(GRAY));
 
         Render_CB_Page(CBSearch,slCB,Y,25,8,currentPage,itemsPerPage,S,Temp,Temp2,Bin);
+        if(dsCB.slCB == 0){
+            Gotoxy(5, Y);
+            cout << RED << "Danh sách chuyến bay rỗng!/Nhấn phím bất kì để thoát" << RESET;
+            _getch();
+            return ; 
+        }
         if (slCB == 0) {
             Gotoxy(15, Y);
             cout << RED << "Không có dữ liệu chuyến bay nào!" << RESET;
