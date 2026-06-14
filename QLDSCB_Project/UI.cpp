@@ -719,7 +719,7 @@ int InputStatus(int &result, int x, int y) {
 
 
 // Trả về: 0 (ESC), 1 (ENTER), 2 (UP), 3 (DOWN)
-int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers, bool isCenter, bool isHighlight, bool isUppercase,bool isonlychar) {
+int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers, bool isCenter, bool isHighlight, bool isUppercase,bool isonlychar, bool canspace ) {
     // Vẽ lần đầu tiên
     RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
 
@@ -744,6 +744,7 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
         } 
         else if (result.length() < maxLength) {
             if (result.empty() && ch == ' ') continue;
+            if (!canspace && ch == ' ') continue ; 
             if(!result.empty() && result.back() == ' ' && ch == ' ') continue;
             // Phân loại xử lý dựa trên bảng mã ASCII (0-127) và UTF-8 (>= 128)
             if ((unsigned char)ch < 128) {
@@ -760,7 +761,7 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
 
             } else {
                 // UTF-8 (Byte của tiếng Việt có dấu, ký tự đặc biệt)
-               
+                if (!canspace && ch == ' ') continue ; 
                 if (onlyNumbers) continue; // Nếu chỉ nhập số thì chặn luôn các ký tự UTF-8
                 
                 result += (char)ch;
@@ -1290,7 +1291,7 @@ NavKey CustomerAddMB() {
 
         int action;
         if (currentField == 0) {
-            action = InputString(inputs[0], inputX, formY + 2, soHieuMB_max, '_', false, false, false, true, false);
+            action = InputString(inputs[0], inputX, formY + 2, soHieuMB_max, '_', false, false, false, true, false,false);
         } else if (currentField == 1) {
             action = InputString(inputs[1], inputX, formY + 6, loaiMB_max, '_', false, false, false, false, false);
         } else if (currentField == 2) {
@@ -1536,7 +1537,7 @@ NavKey CustomerAddCB() {
         string s = "";
         int action;
         if (currentField == 0) {
-            action = InputString(inputs[0], inputX, formY + 2, maCB_max, '_', false, false, false, true, false);
+            action = InputString(inputs[0], inputX, formY + 2, maCB_max, '_', false, false, false, true, false,false);
         } else if (currentField == 1) {
             string old = inputs[1];
             NavKey k = NAV_LEFT;
@@ -2537,7 +2538,7 @@ void UiThongTinHK(int x, int y, int width, int height, string s) {
 }
 
 // Khối hàm thực hiện In danh sách MB và các thao tác sữa xoá ở đây 
-bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width){
+bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width,bool canspace){
     bool isChanged = false; 
     if (key == NAV_BACK && !res.empty()) {
         res.pop_back();
@@ -2546,6 +2547,7 @@ bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width){
         isChanged = true;
     } 
     else if (visualLength(res) < width && (( (!res.empty() && res.back() != ' ' && ch == ' ') || ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) ) )) { 
+        if((char)ch == ' ' && !canspace) return false ; 
         res += toupper((char)ch); 
         Gotoxy(x, y);
         cout << res; 
@@ -2853,9 +2855,11 @@ void It_list_MB(int mod, string res){
                         break ;
                     }
                     bool Changed = res.empty();
+                    string c = res; // tránh nháy màn hình
                     UiFindMB(res, key, chr, tmp,20,4);
+                    if(res == c) continue ; // tránh nháy màn hình nếu chuỗi k đổi
                     CanReDraw = true ;
-                    if(!res.empty())
+                    if(!res.empty() && res != c)
                         OnlyPrint_List_MB(tmp,0);
                     else if (res.empty() && !Changed)
                         OnlyPrint_List_MB(tmp,savedPage);
