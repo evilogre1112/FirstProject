@@ -2183,7 +2183,7 @@ start:
             if (dateSelected == false) dateTemp = DateTime();
             char sbDich[sbDich_max];
             strcpy(sbDich, inputs[2].c_str());
-            int slcb;
+            int slcb = 0;
             CB** tempList = Search_CB(dsCB, dateTemp, sbDich, slcb);
             if (slcb == 0) {
                 string t = "Không tìm thấy CB nào phù hợp với ngày KH hoặc sân bay đích mong muốn...";
@@ -2257,8 +2257,13 @@ start:
             ClearRegion(inputX + 35, formY + 2 * (currentField - 1), 3, 1);
             Gotoxy(inputX + 35, formY + 2 * (currentField - 1));
             cout << inputs[currentField];
+            action = GetNavKey();
             if (action == NAV_ESC) {
                 currentField--;
+                continue;
+            }
+            if (action == NAV_DOWN) {
+                currentField = 0;
                 continue;
             }
         }
@@ -2283,7 +2288,6 @@ start:
             }
             continue;
         }
-
 
         if (action == NAV_ENTER) {
             if (currentField < 5) {
@@ -4396,6 +4400,12 @@ start:
 
     int selectedCBIndex = 0;
     int currentRow = 0;
+    if (dsCB.slCB == 0) {
+        Gotoxy(startX + 1, startY + 4);
+        cout << RED << "Không có dữ liệu chuyến bay nào!...";
+        _getch();
+        return;
+    }
     while (true) {
     startS:
         slCB = 0;
@@ -4444,10 +4454,10 @@ start:
             delete[] subCB;
             slCB = 0;
         }
-
+        slCB = 0;
         //strcpy(Prefix, input.c_str());
         subListCB = Find_CB_OnRage(dsCB, const_cast<char*>(input.c_str()));
-
+        if (subListCB.slCB == 0) goto nhap;
         subCB = new CB* [subListCB.slCB];
         CB* tempCB = subListCB.head;
         while (tempCB != NULL) {
@@ -4772,6 +4782,12 @@ start:
 
     int selectedCBIndex = 0;
     int currentRow = 0;
+    if (dsCB.slCB == 0) {
+        Gotoxy(startX + 1, startY + 4);
+        cout << RED << "Không có dữ liệu chuyến bay nào!...";
+        _getch();
+        return;
+    }
     while (true) {
     startS:
         slCB = 0;
@@ -4820,10 +4836,10 @@ start:
             delete[] subCB;
             slCB = 0;
         }
-
+        slCB = 0;
         //strcpy(Prefix, input.c_str());
         subListCB = Find_CB_OnRage(dsCB, const_cast<char*>(input.c_str()));
-
+        if (subListCB.slCB == 0) goto nhap;
         subCB = new CB * [subListCB.slCB];
         CB* tempCB = subListCB.head;
         while (tempCB != NULL) {
