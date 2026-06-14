@@ -798,13 +798,18 @@ CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sld
     return result;
 }
 
-int* Get_Empty_Seats(listCB &dsCB, char* const maCB, int &sldsVT) {
+int* Get_Empty_Seats(listCB &dsCB, char* const maCB, int &sldsVT, string prefix) {
     CB* temp = Find_CB(dsCB, maCB);
     if (temp == NULL) return NULL; // CB khong ton tai
     int* result = new int [temp->socho];
     sldsVT = 0;
+    char prefixStr[4];
+    strcpy(prefixStr, prefix.c_str());
     for (int i = 0; i < temp->socho; i++) {
-        if (temp->DSV[i][0] == '\0') {
+        string t = to_string(i + 1);
+        char tempStr[4];
+        strcpy(tempStr, t.c_str());
+        if (temp->DSV[i][0] == '\0' && cmp_prefix(tempStr, prefixStr)) {
             result[sldsVT] = i + 1;
             sldsVT++;
         }
