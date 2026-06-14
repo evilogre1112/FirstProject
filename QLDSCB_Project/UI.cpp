@@ -2433,7 +2433,7 @@ start:
         NavKey k;
         Gotoxy(x, y - 2);
         k = GetNavKey(ch);
-		SimpleInput(input, k, ch, x, y - 2, 3);
+		SimpleInput(input, k, ch, x, y - 2, 3, false, true);
         int* soghe = Get_Empty_Seats(dsSubCB, maCB, sldsVT, input);
         ClearRegion(x, y, width + 6, items * 2 - 1);
         if (sldsVT == 0) {
@@ -2538,7 +2538,7 @@ void UiThongTinHK(int x, int y, int width, int height, string s) {
 }
 
 // Khối hàm thực hiện In danh sách MB và các thao tác sữa xoá ở đây 
-bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width,bool canspace){
+bool SimpleInput(string& res, NavKey key, int& ch, int x, int y, int width, bool canspace, bool onlyNums) {
     bool isChanged = false; 
     if (key == NAV_BACK && !res.empty()) {
         res.pop_back();
@@ -2547,7 +2547,9 @@ bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width,bool c
         isChanged = true;
     } 
     else if (visualLength(res) < width && (( (!res.empty() && res.back() != ' ' && ch == ' ') || ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) ) )) { 
-        if((char)ch == ' ' && !canspace) return false ; 
+        if ((char)ch == ' ' && !canspace) return false ; 
+        if (((char)ch < '0' || (char)ch > '9') && onlyNums) return false;
+        if (((char)ch == '-' && res.size() == 0) || ((char)ch == '-' && res.size() > 0 && res[res.size() - 1] == '-')) return false;
         res += toupper((char)ch); 
         Gotoxy(x, y);
         cout << res; 
@@ -4402,9 +4404,7 @@ start:
             Gotoxy(curX, curY);
             int ch;
             NavKey k = GetNavKey(ch);
-            if (ch == ' ') continue;
-            if ((ch == '-' && input.size() == 0) || (ch == '-' && input.size() > 0 && input[input.size() - 1] == '-')) continue;
-            SimpleInput(input, k, ch, curX, curY, maCB_max - 1);
+            SimpleInput(input, k, ch, curX, curY, maCB_max - 1, false, false);
             if (k == NAV_ENTER) break;
             else if (k == NAV_ESC) {
                 CB* tempCB = subListCB.head;
@@ -4780,9 +4780,7 @@ start:
             Gotoxy(curX, curY);
             int ch;
             NavKey k = GetNavKey(ch);
-            if (ch == ' ') continue;
-            if ((ch == '-' && input.size() == 0) || (ch == '-' && input.size() > 0 && input[input.size() - 1] == '-')) continue;
-            SimpleInput(input, k, ch, curX, curY, maCB_max - 1);
+            SimpleInput(input, k, ch, curX, curY, maCB_max - 1, false, false);
             if (k == NAV_ENTER) break;
             else if (k == NAV_ESC) {
                 CB* tempCB = subListCB.head;

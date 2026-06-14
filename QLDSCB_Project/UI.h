@@ -265,7 +265,7 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
 int InputDateTime(string &result, int x, int y,int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false, int errX =-1, int errY=-1) ;
 int InputStringSBD(string &result, int x, int y, int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false);
 bool InputSimpleHK(string& res, NavKey key, int& ch,int x,int y);
-bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width,bool canspace = false);
+bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width,bool canspace = false, bool onlyNums = false);
 
 void Menu_QuanLyMayBay();
 void Menu_QuanLyChuyenBay();
