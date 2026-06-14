@@ -67,7 +67,7 @@ int Find_MB(listMB& dsMB, char* const soHieuMB);
  * @param newMB Con trỏ trỏ đến máy bay mới đã được cấp phát vùng nhớ
  * @return      true nếu thêm thành công, false nếu mảng đầy (n >= 300) hoặc trùng mã
  */
-bool Add_MB(listMB& dsMB, MB* newMB);
+bool Add_MB(listMB& dsMB, MB* newMB, int mod = 0);
 
 /**
  * @brief           Xóa máy bay dựa trên Số hiệu máy bay (Mã duy nhất)
@@ -147,7 +147,7 @@ CB* Find_Active_MB(listCB &dsCB, char* const soHieuMB);
  * @return          true nếu thêm thành công, false nếu trùng mã chuyến bay
  */
 // LƯU Ý: Hàm Add_CB không hề tự động khởi tạo DSV, hãy khởi tạo DSV bằng hàm Init_Tickets
-bool Add_CB(listCB &dsCB, listMB &dsMB, CB* newCB);
+bool Add_CB(listCB &dsCB, listMB &dsMB, CB* newCB, int mod = 0);
 
 // ===================== Các gói thay đổi Thông Tin của một chuyến bay ===================
 
@@ -239,7 +239,7 @@ HK* Find_HK(listCB &dsCB, listHK &dsHK, char* const maCB, char* const cmnd);
  * @param phai  Phái Nam/Nu
  * @return      true nếu thêm thành công, false nếu trùng mã CMND
  */
-bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai);
+bool Add_HK(listHK &dsHK, char* const ho, char* const ten, char* const cmnd, bool phai, int mod = 0);
 
 /**
  * @brief       Kiểm tra hành khách đã mua vé trên chuyến bay này chưa (1 vé/chuyến)
@@ -270,7 +270,7 @@ int Is_Ticket_Booked(listCB &dsCB, listHK &dsHK, char* const maCB, char* const C
  *				-7 Số ghế không hợp lệ
  *             0 Hành khách đặt vé thành công
  */
-int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber);
+int Book_Ticket(listCB &dsCB, listHK &dsHK, char* const maCB, char* const CMND, int seatNumber, int mod = 0);
 
 // --- CÂU D: HỦY VÉ ---
 

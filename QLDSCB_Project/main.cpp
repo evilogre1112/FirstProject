@@ -36,6 +36,9 @@ int main(){
     int slMB = dsMB.slMB ;
     Sort_MB(dsMB,0,slMB-1);
     TruyenThamSo(dsMB,dsCB,dsHK,dsSBD);
+    Set_Data_CB(dsCB, path_file_CB);
+    Set_Data_HK(dsHK, path_file_HK);
+    Set_Data_MB(dsMB, path_file_MB);
     MainScreen();
     cin.ignore();
     return 0;

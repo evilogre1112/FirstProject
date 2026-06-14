@@ -228,7 +228,7 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_
         }
         // ---- 4. thêm HK vào DSV
         tmp->sove = 0;
-        if (!Add_CB(dsCB, dsMB, tmp)) {
+        if (!Add_CB(dsCB, dsMB, tmp, 1)) {
             delete[] tmp->sbDich;
             for (int i = 0; i < tmp->socho; i++) {
                 delete[] tmp->DSV[i];
@@ -260,7 +260,7 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_
             int len = strlen(CMND);
             if(len > 0 && CMND[len-1] == '\r') CMND[len-1] = '\0';
 
-            Book_Ticket(dsCB, dsHK, tmp->maCB, CMND, seatNumber);
+            Book_Ticket(dsCB, dsHK, tmp->maCB, CMND, seatNumber, 1);
         }
         if( tmp->trangThai != 0&& tmp->sove==tmp->socho)
             tmp->trangThai = 2;
@@ -274,7 +274,7 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_
 bool Get_Data_MB(listMB &dsMB, const char *path_file_MB){
     ifstream f(path_file_MB);
     if(!f.is_open()) return false;
-    dsMB.slMB=0;
+    dsMB.slMB = 0;
     char tempSoHieu[soHieuMB_max];
     while(dsMB.slMB < slMB_max&&  f.getline(tempSoHieu, soHieuMB_max, '|')){        
         //đọc đến cuối file
@@ -298,7 +298,7 @@ bool Get_Data_MB(listMB &dsMB, const char *path_file_MB){
         // xóa dáu cách còn lại dấu chống dòng
         f.ignore(100,'\n');
         //dùng hàm Add_MB để thêm vào danh sách máy bay
-        if (!Add_MB(dsMB, tmp)) {
+        if (!Add_MB(dsMB, tmp, 1)) {
         // Nếu Add_MB trả về false (do trùng mã hoặc danh sách đầy 300)
         delete tmp; 
         }
@@ -335,7 +335,7 @@ bool Get_Data_HK(listHK &dsHK, const char *path_file_HK) {
         f >> b_phai;
         f.ignore(1000, '\n'); // Nhảy xuống dòng tiếp theo
 
-        Add_HK(dsHK, b_ho, b_ten, b_cmnd, b_phai);
+        Add_HK(dsHK, b_ho, b_ten, b_cmnd, b_phai, 1);
     }
 
     f.close();
@@ -441,19 +441,46 @@ bool Set_Data_MB(listMB &dsMB, const char *path_file_MB){
     return true;
 }
 
+// Hàm tiện ích dùng để sắp xếp lại dữ liệu để lưu
+void Get_List_Data_HK(HK** list, HK** result, int l, int r, int& count) {
+    if (l > r) return;
+    int m = (l + r) / 2;
+    result[count++] = list[m];
+    Get_List_Data_HK(list, result, l, m - 1, count);
+    Get_List_Data_HK(list, result, m + 1, r, count);
+}
+
 bool Set_Data_HK(listHK &dsHK, const char *path_file_HK){
     ofstream f(path_file_HK);
     if(!f.is_open()) return false;
     if (dsHK.goc == NULL) { f.close(); return true; }
-    // Ham duyet luu theo thu tu NLR
+    
     Stack<HK*> s;
-    s.push(dsHK.goc);
-    while(!s.isEmpty()){
-        HK* temp =s.pop();
-        f << temp->cmnd << '|' << temp->ho << '|' << temp->ten << '|' << temp->phai << '\n';
-        if(temp->right != NULL) s.push(temp->right);
-        if(temp->left != NULL) s.push(temp->left);
+    HK* curr = dsHK.goc;
+    int slHK = 0;
+    HK** dataList = new HK* [dsHK.slHK];
+    while(!s.isEmpty() || curr != NULL){
+        while (curr != NULL) {
+            s.push(curr);
+            curr = curr->left;
+        }
+        curr = s.pop();
+        if (curr != NULL) {
+            dataList[slHK] = curr;
+            slHK++;
+        }
+        curr = curr->right;
     }
+    
+    HK** result = new HK* [dsHK.slHK];
+    int count = 0;
+    Get_List_Data_HK(dataList, result, 0, dsHK.slHK - 1, count);
+    for (int i = 0; i < slHK; i++) {
+        HK* hk = result[i];
+        f << hk->cmnd << '|' << hk->ho << '|' << hk->ten << '|' << hk->phai << '\n';
+    }
+    delete[] dataList;
+    delete[] result;
     f.close();
     return true;
 }
