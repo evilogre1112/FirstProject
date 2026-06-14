@@ -324,7 +324,7 @@ CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sld
  * @return          Danh sách vé trống
  * @note            UI có trách nhiệm delete[] mảng này sau khi in xong để tránh rò rỉ bộ nhớ.
  */
-int* Get_Empty_Seats(listCB &dsCB, char* const maCB, int &sldsVT);
+int* Get_Empty_Seats(listCB &dsCB, char* const maCB, int &sldsVT, string prefix = "");
 
 // -- CÂU H: THỐNG KÊ LƯỢT BAY --
 
