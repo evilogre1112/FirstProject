@@ -4010,7 +4010,7 @@ void FindCBOnTimeAndPlace(string res){
                 DateTime T ;
                 // Vòng lặp do-while giữ Lịch không bị tắt khi đổi tháng HOẶC khi chọn sai ngày
                 while (k == NAV_LEFT || k == NAV_RIGHT){
-                    ClearRegion(StartCalendarX, StartCalendarY, 8*6 + 7, 13); // Xóa sạch không gian trước khi vẽ
+                    ClearRegion(StartCalendarX, StartCalendarY, 8*6 + 7, 10); // Xóa sạch không gian trước khi vẽ
                     k = DrawCalendarWithoutTime(StartCalendarX, StartCalendarY, 8, 1, ti,true);
                     // Nếu người dùng nhấn ENTER để chốt ngày, ta tiến hành kiểm tra
                 }
