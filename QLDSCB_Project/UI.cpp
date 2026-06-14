@@ -3897,7 +3897,7 @@ void FindCBOnTimeAndPlace(string res){
     SmallBox(u,50,2);
     DateTime t ;
     string add = "";
-    int slCB ;
+    int slCB=0 ;
     realTimeUpdateCB(dsCB, dsHK, dsMB);
     CB** CBSearch = Search_CB(dsCB,t,const_cast<char*>(add.c_str()),slCB);
     string ti = time_now();
@@ -3936,11 +3936,9 @@ void FindCBOnTimeAndPlace(string res){
         int totalPages = (slCB == 0) ? 1 : (slCB + itemsPerPage - 1) / itemsPerPage;
         for (int i = 0; i < size; i++) WidthClear += Temp2[i];
         ClearRegion(0, Y + itemsOnThisPage, WidthClear, 14 - itemsOnThisPage);
-
         string m = "Trang " + to_string(currentPage + 1) + "/" + to_string(totalPages) + "  |  Dùng phím ◄/► để chuyển trang.";
         Gotoxy(63, 27);
         SmallBox(m, 50, 1, string(GRAY));
-
         Render_CB_Page(CBSearch,slCB,Y,25,8,currentPage,itemsPerPage,S,Temp,Temp2,Bin);
         if(dsCB.slCB == 0){
             Gotoxy(5, Y);

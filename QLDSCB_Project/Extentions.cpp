@@ -412,7 +412,7 @@ bool Set_Data_CB(listCB &dsCB, const char *path_file_CB){
                 f << (i + 1) << '|' << temp->DSV[i] << '\n';
             }
         }
-
+ 
         // --- 3. Luôn ghi số 0 để làm "điểm dừng" cho mỗi chuyến bay ---
         f << 0 << '\n';
 
@@ -500,7 +500,7 @@ bool Set_Data_CB(CB &CB, const char *path_file_CB){
         if(CB.trangThai == 0) {f << 0 << '|';}
         else f<< 1 <<'|';
         f << CB.soHieuMB << '|';
-        f << CB.socho << '|';;
+        f << CB.socho << '\n';
     // Ghi danh sách vé (vị trí | CMND)
     if(CB.sove > 0) {    
         for (int i = 0; i < CB.socho; i++) {
