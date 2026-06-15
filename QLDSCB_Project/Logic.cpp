@@ -884,6 +884,7 @@ listCB Find_CB_OnRage(listCB &dsCB, char* const query) {
     listCB A;
     A.slCB = 0;
     A.head = NULL;
+    if (dsCB.head == NULL) return A;
     CB* atemp = A.head;
     char temp[maCB_max];
     char prefix[maCB_max];

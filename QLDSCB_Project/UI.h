@@ -10,6 +10,7 @@
 using namespace std;
 
 extern int TotalWidth;
+extern int TotalHeight;
 
 #define boxWidth 60
 
@@ -179,13 +180,27 @@ void SmallBox(string text, int Width = 5, int Height = 40, string color = WHITE)
  */
 void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Width = 15, int Height = 5, string color = WHITE);
 
+
+void PrintMultiLineText(int startX, int startY, const string& text);
 void TruyenThamSo(listMB &A, listCB& B , listHK &C, listSBD &D);
 
-void UiDrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string DateString);
-void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateString);
-NavKey DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString,bool CanPast = false);
-NavKey DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast = false);
-void DrawACat(int x = 59,int y =25);
+void    UiDrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string DateString);
+void    UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateString);
+NavKey  DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString,bool CanPast = false);
+NavKey  DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast = false);
+void    DrawACat(int x = 59,int y =25);
+
+string TranFormSatus(int st);
+string TranFormGender(int st);
+
+NavKey GetNavKey(int &ch);
+NavKey GetNavKey();
+int GetKey(int chosen,int count);
+
+
+NavKey CustomerAddMB();
+NavKey CustomerAddCB();
+NavKey CustomerAddHK(string cmnd);
 
 // Chọn 1 danh sách nhỏ theo shMB, khối hàm hiển thị danh sách nhỏ của MB
 void UiThongTinMB(int x,int y , int width, int height,string s);
@@ -201,21 +216,11 @@ void UiThongTinCB(int x,int y , int width, int height,string MCB);
 int SmallListSoCho(string& res, listCB &dsSubCB, CB*& thisCB, int width, int x, int y, int items);
 void UiThongTinHK(int x,int y , int width, int height,string s);
 
-
-string TranFormSatus(int st);
-string TranFormGender(int st);
-
-NavKey GetNavKey(int &ch);
-NavKey GetNavKey();
-
-int GetKey(int chosen,int count);
-int MainMenuOptionInBoard(string options[], int length);
-
-NavKey CustomerAddMB();
-NavKey CustomerAddCB();
-NavKey CustomerAddHK(string cmnd);
-
 void PrintHeader(string res, int mod, string s, int size, string headers[], string typemode[], int Temp[], int Temp2[],int ResX = 50 , int FindX = 10,int ModeX =90, int ResY = 4);
+
+bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
+bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
+bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
 
 void UiFindMB(string& res, NavKey key, int& ch, listMB& A,int x, int y);
 void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
@@ -224,14 +229,7 @@ void Get_Input_MB(bool IsHighLight, listMB &tmp, int rowOnScreen,int startIndex,
 void It_list_MB(int mode, string res = "");
 void StatiscalMB();
 
-bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
-bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
-
-bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
-
-
 void OnlyPrint_List_CB(listCB& dsCB,int size,int CurrentPage, int itemsPerPage, int Temp[],int Temp2[],int Bin[] );
-
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A, listCB& mainList);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage,int size, int Temp[], int Temp2[],int Bin[]);
 void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
@@ -248,24 +246,25 @@ void RenderHKBySample (HK** displayArr, CB* thisCB,int fields, int currentPage, 
 void Get_Input_HK(bool IsHighLight,HK* arrHK[], int rowOnScreen,int index, int Temp[], int Temp2[] );
 void It_list_HK(int mod, string res);
 
-void BookTicket();
-void HuyChuyen();
-NavKey SeatClear(int x, int y, int xt, int yt, CB* SelectedCB);
-void CancelTicketByCB();
-void CancelTicketByHK(int mod, string res = "");
-NavKey SeatList(int x, int y, int xt, int yt, CB* SelectedCB);
-void EmptySeatList();
+void    BookTicket();
+void    HuyChuyen();
+NavKey  SeatClear(int x, int y, int xt, int yt, CB* SelectedCB);
+void    CancelTicketByCB();
+void    CancelTicketByHK(int mod, string res = "");
+NavKey  SeatList(int x, int y, int xt, int yt, CB* SelectedCB);
+void    EmptySeatList();
+
+
+void RedrawInput(string result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight,string SugestionStr = "");
+int  InputStatus(int &result, int x, int y);
+int  InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false,bool isonlychar = true,bool canspace = true);
+int  InputDateTime(string &result, int x, int y,int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false, int errX =-1, int errY=-1) ;
+int  InputStringSBD(string &result, int x, int y, int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false);
+bool InputSimpleHK(string& res, NavKey key, int& ch,int x,int y);
+bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width,bool canspace = false, bool onlyNums = false);
 
 void RunInNewTab(void (*func)() = [](){});
 void RunInNewTab(NavKey (*func)());
-
-void RedrawInput(string result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight,string SugestionStr = "");
-int InputStatus(int &result, int x, int y);
-int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false,bool isonlychar = true,bool canspace = true);
-int InputDateTime(string &result, int x, int y,int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false, int errX =-1, int errY=-1) ;
-int InputStringSBD(string &result, int x, int y, int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false);
-bool InputSimpleHK(string& res, NavKey key, int& ch,int x,int y);
-bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width,bool canspace = false, bool onlyNums = false);
 
 void Menu_QuanLyMayBay();
 void Menu_QuanLyChuyenBay();
@@ -288,6 +287,8 @@ void Router_Board(int mainMenuIdx,
                   function<void()> func_1 = [](){}, 
                   function<void()> func_2 = [](){}, 
                   function<void()> func_3 = [](){});
+                  
+int MainMenuOptionInBoard(string options[], int length);
 // Menu chính
 void MainScreen();
 
