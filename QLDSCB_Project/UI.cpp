@@ -4081,7 +4081,7 @@ void HuyChuyen() {
     Gotoxy(CorX, CorY[1]);
     SmallBox(options[1], width , Height, string(WHITE));
     PrintMultiLineText(48, 23,string(GRAY) + k + string(RESET));
-    PrintMultiLineText(CorX+4, 20,pic4);
+    PrintMultiLineText(CorX+4, 20,string(YELLOW) + pic4 + string(RESET));
     int select = 1;
     while (true) {
         int k = GetNavKey();
