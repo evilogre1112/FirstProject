@@ -192,7 +192,7 @@ struct MB {
     char loaiMB[loaiMB_max];
     int socho;
     int SLB;
-    markList dsHD;
+    markList dsHD; 
     MB();
     bool set_soHieuMB(char *shmb);
     bool set_loaiMB(char *loai);
