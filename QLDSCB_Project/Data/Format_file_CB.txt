@@ -19,7 +19,7 @@ Chú thích : mã chuyến bay: Gồm 1 chuỗi tối đa 15 chữ và số
             giờ khởi hành: số hh:mm ;hh<24 và mm<60
             cmnd : chuỗi có chứa 12 số
             sân_bay_đích: chuỗi kí tự chứa max
-            trạng thái: số chuyến bay đang [0,1,2,3]
+            trạng thái: số chuyến bay đang [0,1]
             số hiệu máy bay: chuỗi kí tự tối đa 15
             ve ngoi : là vị trí ngồi cảu khách
             số_chỗ_mở :là số chỗ của máy bay có thể bán
