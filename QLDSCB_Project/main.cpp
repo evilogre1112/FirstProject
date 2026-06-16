@@ -1,6 +1,8 @@
 //Hạn chế sử dụng bits/stdc++.h, tốn bộ nhớ
 #ifdef _WIN32
-#include <windows.h> 
+#include <io.h>
+#include <fcntl.h>
+#include <windows.h>
 #else
 #include <clocale>
 #endif
@@ -13,9 +15,7 @@
 
 using namespace std ;
 
-
 int main(){
- 
     listMB dsMB;
     listCB dsCB ;
     listHK dsHK ;
@@ -23,6 +23,14 @@ int main(){
     #ifdef _WIN32
         SetConsoleOutputCP(CP_UTF8);
         SetConsoleCP(CP_UTF8);
+
+        CONSOLE_FONT_INFOEX cfi = {};
+        cfi.cbSize = sizeof(cfi);
+        GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
+
+        wcscpy_s(cfi.FaceName, L"Cascadia Code");  // ← đổi tên font ở đây
+        cfi.dwFontSize.Y = 16;
+        SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
     #else
         setlocale(LC_ALL, "en_US.UTF-8");
     #endif
