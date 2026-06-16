@@ -398,7 +398,7 @@ NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateSt
     while (true){
         NavKey kt = DrawCalendarWithoutTime( x , y, rowpadding , colpadding, DateString ,CanPast);
 
-        if(kt == NAV_RIGHT || kt == NAV_LEFT || kt == NAV_ESC || kt == NAV_BACK) return kt;
+        if(kt == NAV_RIGHT || kt == NAV_LEFT || kt == NAV_ESC || kt == NAV_BACK || kt == NAV_UP) return kt;
 
         DateTime ChossenDay = StringtoTime(DateString);
         int D = ChossenDay.get_dd() ;
@@ -416,9 +416,9 @@ NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateSt
             int ch;
             NavKey key = GetNavKey(ch);
             
-            if (key == NAV_ESC) {
+            if (key == NAV_BACK || key == NAV_ESC || (key == NAV_UNKNOWN && tolower(ch) == 'w')) {
                 DateString = "";
-                return NAV_ESC;
+                return key;
             }
             else if (key == NAV_ENTER) {
                 ChossenDay.set_hh(H);
@@ -531,9 +531,9 @@ NavKey DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,str
             cout << D; // Tháng tương lai thì in màu trắng bình thường
         }
 
-        if (key == NAV_BACK) {
+        if (key == NAV_BACK || key == NAV_ESC || (key == NAV_UNKNOWN && tolower(ch) == 'w')) {
             DateString = "";
-            return NAV_BACK;
+            return key == NAV_UNKNOWN ? NAV_UP : key;
         }
         else if (key == NAV_RIGHT) {
             if (D < Days_In_Month) D++;
@@ -606,9 +606,6 @@ NavKey DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,str
                 DateString = prevMonthStr;
                 return NAV_LEFT;
             }
-        }else if( key == NAV_ESC){
-            DateString = ""; 
-            return NAV_ESC;
         }
         
         int new_cx = x + rowpadding * ((FirstDayOfMonth + D - 1) % 7);
@@ -733,12 +730,24 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
         if (key == NAV_BACK) {
             if (!result.empty()) {
                 unsigned char c = (unsigned char)result.back();
-                if (c >= 0x80) {
+                // Từ 0 đến 127 là mã ASCII chuẩn
+                // 128 đến 255 là mã ASCII có chứa tiếng việt có dấu 
+                // 0x80 là 128 
+                if (c >= 0x80) { // Nếu xoá chữ tiếng việt thì vào vòng này để xoá các bit cuối trước
+                    // unsigned char thực hiện không dấu ( từ 0 đến 255) bit k dấu
+                    // char có bit dấu từ (-128 đến 127) nếu 1 ký tự có bit 1 đầu tiên -> đây là bit dấu âm 
+                    // 0xc0 (hex) -> bin 11000000
+                    // result.back() && 0xc0 lấy byte cuối , để 6 bit cuối là 0 , giữ lại 2 bit đầu
+                    // 0x80 (hex) -> bin 10000000
+                    // "â" trong tiếng việt có 2 byte , result.pop_back() chỉ xoá đi 1 byte ở byte đuôi, byte đầu còn nằm trong chuỗi
+                    // 2 loại byte , byte đầu luôn là 0, 01, 011,...
+                    // byte cuối luôn bắt đầu bằng 10...
+                    // Dòng while ở dưới để xoá byte đuôi 
                     while (!result.empty() && ((unsigned char)result.back() & 0xc0) == 0x80) {
                         result.pop_back();
                     }
                 }
-                if (!result.empty()) result.pop_back();
+                if (!result.empty()) result.pop_back(); // Sau khi xoá byte đuôi thì xoá byte đầu 
                 
                 RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
             }
@@ -1542,8 +1551,7 @@ NavKey CustomerAddCB() {
     SmallBox(text, width , 3, (string)WHITE);
     // --- LOGIC NHẬP LIỆU VÀ ĐIỀU HƯỚNG ---
     string inputs[5] = {"", "", "","",""}; 
-    inputs[1] = time_now(); 
-    UiDrawCalendar(startX+width+3,1,5,1,inputs[1]);
+    UiDrawCalendar(startX+width+3,1,5,1,time_now());
     int currentField = 0; // 0: Mã_CB, 1: Ngày giờ khởi hành, 2: Sbd , 3: shMB, 4: số vé khơi tạo
     while (true) {
         Gotoxy(startX + 5, formY + 12);
@@ -1552,6 +1560,7 @@ NavKey CustomerAddCB() {
         if (currentField == 0) {
             action = InputString(inputs[0], inputX, formY + 2, maCB_max-1, '_', false, false, false, true, false,false);
         } else if (currentField == 1) {
+            if(inputs[1].empty())inputs[1] = time_now();
             string old = inputs[1];
             NavKey k = NAV_LEFT;
             bool dateError = false; //Kiểm tra lỗi ngày quá khứ
@@ -1580,7 +1589,11 @@ NavKey CustomerAddCB() {
             if (k == NAV_ESC) {
                 inputs[1] = old;      // Phục hồi ngày cũ
                 action = NAV_DOWN; // Ép giữ con trỏ lại ô này
-            } else {
+            }if(k == NAV_UP){
+                inputs[1] = inputs[1].size() == 16 ? inputs[1] : old ;
+                action = NAV_UP;
+            } 
+            else {
                 Gotoxy(inputX + 1, formY + 2 + (currentField * 3));
                 cout << inputs[1] ;
                 action = NAV_DOWN;    // Tự động nhảy xuống ô Sân bay đến
@@ -1622,6 +1635,8 @@ NavKey CustomerAddCB() {
                     }else if(action == NAV_ENTER){
                         inputs[3] = s ;
                         if(inputs[4].empty())inputs[4] = to_string(tmp.list[idx]->socho);
+                        else inputs[4] = to_string(min(stoi(inputs[4]),tmp.list[idx]->socho));
+                        
                         Gotoxy(inputX+25, formY + 2 + (currentField * 3));
                         SmallBox(o + string(22-visualLength(o),' ') + AD, 25,1);
                         RedrawInput(inputs[4],inputX, formY + 3 + (size - 1) * 3,3,' ',true,false)  ; 
@@ -1646,13 +1661,19 @@ NavKey CustomerAddCB() {
         } 
         
         else if (action == NAV_UP) { 
-            currentField = (currentField <= 0) ? 3 : currentField - 1;
+            if (currentField == 4)
+                currentField -= 2 ;
+            else
+                currentField = (currentField <= 0) ? 3 : currentField - 1;
         } 
         else if (action == NAV_DOWN) { 
             currentField = (currentField >= 3) ? 0 : currentField + 1;
         }else if(action == NAV_LEFT){
             currentField = (currentField == 3) ? 4 : currentField;
-        }else if (action == NAV_ENTER) { // Nhấn ENTER
+        }else if(action == NAV_RIGHT){
+            currentField = (currentField == 4) ? 3 : currentField ;
+        }
+        else if (action == NAV_ENTER) { // Nhấn ENTER
             if(action == NAV_ENTER && currentField == 3){
                 currentField = (currentField + 1)%5;
                 continue ;
@@ -1689,7 +1710,7 @@ NavKey CustomerAddCB() {
                         string u = "Lỗi: Không được đặt số vé khởi tạo lớn hơn số chỗ của máy bay [" + inputs[3] + "]";
                         SmallBox(u,false,true,false,false,width-2,3,RED);
                     }else if( error_code == "5"){
-                        string u = "Lỗi: Không được đặt số vé khởi tạo nhở hơn 20!";
+                        string u = "Lỗi: Không được đặt số vé khởi tạo nhỏ hơn 20!";
                         SmallBox(u,false,true,false,false,width-2,3,RED);
                     }
                     delete NewCB; 
@@ -2159,6 +2180,9 @@ start:
                 dateSelected = false; // Đánh dấu chưa chọn ngày
                 ClearRegion(inputX, formY + 2 * currentField, visualLength(inputs[1]), 1);
                 action = NAV_DOWN;    // Tự động nhảy xuống ô Sân bay đến
+            }else if(k == NAV_UP){
+                inputs[1] = inputs[1].size() == 16 ? inputs[1] : old ;
+                action = NAV_UP;
             }
             else {
                 dateSelected = true; // Đánh dấu đã chọn ngày
@@ -3595,18 +3619,31 @@ void View_MB_CB(CB* thisCB){
 bool InputSimpleHK(string& res, NavKey key, int& ch,int x,int y) {
     // Xử lý nút xóa (Backspace)
     if (key == NAV_BACK && !res.empty()) {
-        res.pop_back();
-        Gotoxy(x, y);
-        cout << res << "  "; 
+        if (!res.empty()) {
+                unsigned char c = (unsigned char)res.back();
+                if (c >= 0x80) {
+                    while (!res.empty() && ((unsigned char)res.back() & 0xc0) == 0x80) {
+                        res.pop_back();
+                    }
+                }
+                if (!res.empty()) res.pop_back();
+        }
+        RedrawInput(res,x,y,ho_max + ten_max,' ',false,false);
         return true;
     } 
-    // Xử lý gõ chữ cái / số
-    else if ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN && visualLength(res) < cmnd_max) { 
-        res += toupper((char)ch); 
-        Gotoxy(x, y);
-        cout << res; 
-        return true;
+    else if(visualLength(res) < ho_max + ten_max && key == NAV_UNKNOWN){
+        if(!res.empty() && res.back() == ' ' && ch == ' ') return false;
+        if((unsigned char)ch < 128){ 
+            if(ch != ' ' && ch != '-' && !isalnum(ch)) return false ;
+            res += (char)ch; 
+        }else{
+            res += (char)ch;
+        }
+        RedrawInput(res,x,y,ho_max + ten_max,' ',false,false);
+        return true ;
     }
+    // Xử lý gõ chữ cái / số
+    
     return false;
 }
 
@@ -4031,7 +4068,7 @@ void FindCBOnTimeAndPlace(string res){
                 }
                 if(k == NAV_ENTER)  T = StringtoTime(ti);
                 if(k == NAV_BACK) ti = old;
-                if(k == NAV_ESC){
+                if(k == NAV_ESC || k == NAV_UP){
                     ti = old ;
                     if(slCB == 0){
                         delete [] CBSearch;
