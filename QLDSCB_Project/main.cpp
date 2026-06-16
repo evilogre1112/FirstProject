@@ -27,6 +27,7 @@ int main(){
         setlocale(LC_ALL, "en_US.UTF-8");
     #endif
     TotalWidth = GetTerminalWidth();
+    TotalHeight = GetTerminalHeight();
     Get_Data_MB(dsMB,path_file_MB);
     Get_Data_SBD(dsSBD, path_file_SBD);
     Get_Data_HK(dsHK,path_file_HK);

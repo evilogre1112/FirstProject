@@ -35,6 +35,11 @@ static const char* path_file_MB = "Data/DSMB.txt";
 static const char* path_file_HK = "Data/DSHK.txt";
 static const char* path_file_SBD = "Data/DSSBD.txt";
 static const char* path_file_picture = "Data/PicturePlane.txt";
+static const char* path_file_picture001 = "Data/Picture001.txt";
+static const char* path_file_picture002 = "Data/Picture002.txt";
+static const char* path_file_picture003 = "Data/Picture003.txt";
+static const char* path_file_picture004 = "Data/Picture004.txt";
+static const char* path_file_chamngon001 = "Data/Chamngon001.txt";
 
 typedef struct { const char *acc; char plain; } VietPair;
 
@@ -80,6 +85,9 @@ static const VietPair viet_vowels[] = {
 
     {NULL, 0}
 };
+
+
+// Ban đầu Mac, window
 
 enum NavKey {
     NAV_UP,
