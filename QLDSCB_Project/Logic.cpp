@@ -1007,7 +1007,7 @@ string Can_Add_MB(listMB &dsMB, listCB &dsCB, MB* newMB) {
     if (dsMB.slMB >= 300)
         return "1"; // Vượt quá số lượng MB
     if (dsMB.slMB < 20)
-        return "3"; // So cho phai >= 20;
+        return "5"; // So cho phai >= 20;
     int index = find_insert_posMB(dsMB, newMB->soHieuMB);
     if (index == dsMB.slMB)
         return "0";
@@ -1027,7 +1027,7 @@ string Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB) {
 string Can_Edit_MB(listMB &dsMB, listCB &dsCB, char* const soHieuMB, MB* infoUpdate) {
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return "2"; // MB can chinh sua khong ton tai
-    if (infoUpdate->socho < 20) return "3"; // So Cho phai >= 20;
+    if (infoUpdate->socho < 20) return "5"; // So Cho phai >= 20;
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
     markCB* tnode = dsMB.list[index]->dsHD.head;
     if (temp != NULL) { // Có chuyến bay đang sử dụng máy bay này
