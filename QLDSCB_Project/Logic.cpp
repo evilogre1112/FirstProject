@@ -958,17 +958,29 @@ HK** Find_HK_OnRage(listHK &dsHK, char* const query, int &sltk) {
         char hovaten[ho_max + ten_max + 1];
         strcpy(ho, curr->ho);
         strcpy(ten, curr->ten);
-        strip_viet(ho);
-        strip_viet(ten);
-        to_lower(ho);
-        to_lower(ten);
-        strcat(hovaten, ho);
+        strcpy(hovaten, ho);
         strcat(hovaten, " ");
         strcat(hovaten, ten);
+        strip_viet(ho);
+        strip_viet(ten);
+        strip_viet(hovaten);
+        to_lower(ho);
+        to_lower(ten);
+        to_lower(hovaten);
         char prefix[ho_max + ten_max + 1];
         strcpy(prefix, query);
-        
+        strip_viet(prefix);
         to_lower(prefix);
+        int len = strlen(prefix);
+        if (strlen(prefix) > 0 && prefix[len - 1] == ' ') {
+            prefix[len - 1] = '\0';
+            len = strlen(prefix);
+        }
+        if (strlen(prefix) > 0 && prefix[0] == ' ') {
+            for (int i = 0; i < len; i++) {
+                prefix[i] = prefix[i + 1];
+            }
+        }
         if (curr != NULL && (cmp_prefix(curr->cmnd, prefix) || cmp_prefix(ho, prefix) || cmp_prefix(ten, prefix) || cmp_prefix(hovaten, prefix))) {
             result[sltk] = curr;
             sltk++;
