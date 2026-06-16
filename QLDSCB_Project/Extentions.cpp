@@ -173,7 +173,6 @@ NavKey PaginationController(int totalItems, int itemsPerPage, int& currentPage, 
 }
 //=========== các hàm đọc dữ liệu ===========//
 
-
 bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_CB) {
 // Mở file ở chế độ binary để tránh triệt để lỗi dư ký tự \r trên Windows
     ifstream f(path_file_CB);
@@ -606,20 +605,17 @@ int GetMonthFromStr(const string &datetimeStr) {
 
 int GetYearFromStr(const string &datetimeStr) {
     if (datetimeStr.length() < 16) return -1;
-    try { return stoi(datetimeStr.substr(6, 4)); } 
-    catch (...) { return -1; }
+    return stoi(datetimeStr.substr(6, 4));
 }
 
 int GetHourFromStr(const string &datetimeStr) {
     if (datetimeStr.length() < 16) return -1;
-    try { return stoi(datetimeStr.substr(11, 2)); } 
-    catch (...) { return -1; }
+    return stoi(datetimeStr.substr(11, 2));
 }
 
 int GetMinuteFromStr(const string &datetimeStr) {
     if (datetimeStr.length() < 16) return -1;
-    try { return stoi(datetimeStr.substr(14, 2)); } 
-    catch (...) { return -1; }
+    return stoi(datetimeStr.substr(14, 2));
 }
 
 string ToStringDate(DateTime dt) {
