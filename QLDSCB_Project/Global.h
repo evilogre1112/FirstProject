@@ -86,7 +86,6 @@ static const VietPair viet_vowels[] = {
     {NULL, 0}
 };
 
-
 // Ban đầu Mac, window
 
 enum NavKey {
@@ -200,7 +199,7 @@ struct MB {
     char loaiMB[loaiMB_max];
     int socho;
     int SLB;
-    markList dsHD;
+    markList dsHD; 
     MB();
     bool set_soHieuMB(char *shmb);
     bool set_loaiMB(char *loai);

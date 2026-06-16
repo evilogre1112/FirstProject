@@ -94,7 +94,6 @@ struct LineInfo {
 };
 
 
-
 /**
  * @brief Hàm này dùng để đo chiều rộng của terminal hiện tại, tương thích với cả Windows và UNIX (Linux/macOS)
  * @return int Chiều rộng của terminal tính bằng số cột ký tự
@@ -220,7 +219,7 @@ void PrintHeader(string res, int mod, string s, int size, string headers[], stri
 
 bool MODE2_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
 bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int &currentPage, int rowOnScreen,int &itemsPerPage,int Temp[], int Temp2[]);
-bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]);
+bool MODE2_CB(CB* pageNodes[], int &index, int& startIndex, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[],int size);
 
 void UiFindMB(string& res, NavKey key, int& ch, listMB& A,int x, int y);
 void Render_MB_Page(listMB& danhSach, int currentPage, int itemsPerPage);
