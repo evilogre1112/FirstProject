@@ -631,6 +631,7 @@ string ToStringDate(DateTime dt) {
        
     return ss.str();
 }
+
 HK** duyet_HK(listHK& dsHK) {
     if (dsHK.goc == NULL || dsHK.slHK <= 0) {
         return NULL;
