@@ -2197,7 +2197,7 @@ start:
             char sbDich[sbDich_max];
             strcpy(sbDich, inputs[2].c_str());
             int slcb = 0;
-            CB** tempList = Search_CB(dsCB, dateTemp, sbDich, slcb);
+            CB** tempList = Search_CB(dsCB, dateTemp, sbDich, slcb, 1);
             if (slcb == 0) {
                 string t = "Không tìm thấy CB nào phù hợp với ngày KH hoặc sân bay đích mong muốn...";
                 Gotoxy(labelX, formY + 10);
@@ -2270,14 +2270,14 @@ start:
             ClearRegion(inputX + 35, formY + 2 * (currentField - 1), 3, 1);
             Gotoxy(inputX + 35, formY + 2 * (currentField - 1));
             cout << inputs[currentField];
-            action = GetNavKey();
-            if (action == NAV_ESC) {
+            //action = GetNavKey();
+            if (action == NAV_BACK) {
                 currentField--;
                 continue;
             }
-            if (action == NAV_DOWN) {
-                currentField = 0;
-                continue;
+            if (action == NAV_ESC) {
+                ClearScreen();
+                return;
             }
         }
 
@@ -2463,7 +2463,7 @@ start:
             string t = "Hết Ghế!";
             cout << RED << t << RESET;
             delete[] soghe;
-            continue;
+            return NAV_BACK;
         }
         else
         for (int i = 0; i < min(items, sldsVT); i++) {
@@ -2479,6 +2479,12 @@ start:
             ClearRegion(x, y - 2, 3, 1);
             res = "";
 			return NAV_ESC;
+        }
+        if (k == NAV_UP) {
+            ClearRegion(x, y, width + 6, items * 2 - 1);
+            ClearRegion(x, y - 2, 3, 1);
+            res = "";
+            return NAV_BACK;
         }
     }
     int* soghe = Get_Empty_Seats(dsSubCB, maCB, sldsVT, input);
@@ -4466,7 +4472,7 @@ start:
             slCB++;
             tempCB = tempCB->next;
         }
-
+     chon:
         while (true) {
             ClearRegion(0, Y, 50, 8);
             Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
@@ -4533,12 +4539,15 @@ start:
                 slCB = 0;
                 goto nhap;
             }
-            else {
+            else if (action == NAV_ENTER) {
                 break;
             }
         }
         CB* targetCB = Find_CB(dsCB, subCB[selectedCBIndex]->maCB);
-        SeatClear(3, formY + height2 + 10, 7, formY + height2 + 6, targetCB);
+        if (targetCB->socho > 0) {
+            SeatClear(3, formY + height2 + 10, 7, formY + height2 + 6, targetCB);
+        }
+        else goto chon;
         delete[] subCB;
         slCB = 0;
         goto nhap;
@@ -4849,6 +4858,7 @@ start:
             tempCB = tempCB->next;
         }
 
+        chon:
         while (true) {
             ClearRegion(0, Y, 50, 8);
             Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
@@ -4915,11 +4925,16 @@ start:
                 slCB = 0;
                 goto nhap;
             }
-            else {
+            else if (action == NAV_ENTER) {
                 break;
             }
         }
-        SeatList(3, formY + height2 + 10, 7, formY + height2 + 6, subCB[selectedCBIndex]);
+        if (subCB[selectedCBIndex]->socho > 0) {
+            SeatList(3, formY + height2 + 10, 7, formY + height2 + 6, subCB[selectedCBIndex]);
+        }
+        else {
+            goto chon;
+        }
         delete[] subCB;
         slCB = 0;
         goto nhap;

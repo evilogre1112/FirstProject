@@ -205,6 +205,8 @@ bool Add_MB(listMB& dsMB, MB *newMB, int mod) {
     if (dsMB.slMB >= 300) {
         return false;
     }
+    if (newMB == NULL) return false;
+    if (newMB->socho < 20) return false;
     int index = find_insert_posMB(dsMB, newMB->soHieuMB);
     if (index == dsMB.slMB) {
         dsMB.list[index] = newMB;
@@ -251,6 +253,7 @@ bool Del_MB(listMB& dsMB, listCB &dsCB, char* const soHieuMB) {
 bool Edit_MB(listMB& dsMB, listCB& dsCB, char* const soHieuMB, MB *infoUpdate) {
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return false;
+    if (infoUpdate->socho < 20) return false; // Khong cho doi neu so cho moi < 20
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
     markCB* tnode = dsMB.list[index]->dsHD.head;
     if (temp != NULL) {
@@ -756,7 +759,7 @@ HK** Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK) {
     return dsHKCB;
 }
 
-CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sldsCB) {
+CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sldsCB, int mod) {
     if (dsCB.head == NULL) return NULL; // dsCB khong co thong tin
     CB** result = new CB* [dsCB.slCB];
     sldsCB = 0;
@@ -773,25 +776,49 @@ CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sld
         }
         if (validDate && validAddress) {
             if (dateMatch && ss_str(address, temp->sbDich) == 0) {
-                result[sldsCB] = temp;
-                sldsCB++;
+                if (mod == 1 && temp->trangThai == 1) {
+                    result[sldsCB] = temp;
+                    sldsCB++;
+                }
+                else if (mod == 0) {
+                    result[sldsCB] = temp;
+                    sldsCB++;
+                }
             }
         }
         else if (!validDate && validAddress) {
             if (ss_str(address, temp->sbDich) == 0) {
-                result[sldsCB] = temp;
-                sldsCB++;
+                if (mod == 1 && temp->trangThai == 1) {
+                    result[sldsCB] = temp;
+                    sldsCB++;
+                }
+                else if (mod == 0) {
+                    result[sldsCB] = temp;
+                    sldsCB++;
+                }
             }
         }
         else if (validDate && !validAddress) {
             if (dateMatch) {
-                result[sldsCB] = temp;
-                sldsCB++;
+                if (mod == 1 && temp->trangThai == 1) {
+                    result[sldsCB] = temp;
+                    sldsCB++;
+                }
+                else if (mod == 0) {
+                    result[sldsCB] = temp;
+                    sldsCB++;
+                }
             }
         }
         else {
-            result[sldsCB] = temp;
-            sldsCB++;
+            if (mod == 1 && temp->trangThai == 1) {
+                result[sldsCB] = temp;
+                sldsCB++;
+            }
+            else if (mod == 0) {
+                result[sldsCB] = temp;
+                sldsCB++;
+            }
         }
         temp = temp->next;
     }
@@ -979,6 +1006,8 @@ listSBD Find_SBD_OnRage(listSBD &dsSBD, char* const query) {
 string Can_Add_MB(listMB &dsMB, listCB &dsCB, MB* newMB) {
     if (dsMB.slMB >= 300)
         return "1"; // Vượt quá số lượng MB
+    if (dsMB.slMB < 20)
+        return "3"; // So cho phai >= 20;
     int index = find_insert_posMB(dsMB, newMB->soHieuMB);
     if (index == dsMB.slMB)
         return "0";
@@ -998,6 +1027,7 @@ string Can_DeL_MB(listMB &dsMB,listCB &dsCB,char* const soHieuMB) {
 string Can_Edit_MB(listMB &dsMB, listCB &dsCB, char* const soHieuMB, MB* infoUpdate) {
     int index = Find_MB(dsMB, soHieuMB);
     if (index == -1) return "2"; // MB can chinh sua khong ton tai
+    if (infoUpdate->socho < 20) return "3"; // So Cho phai >= 20;
     CB* temp = Find_Active_MB(dsCB, soHieuMB);
     markCB* tnode = dsMB.list[index]->dsHD.head;
     if (temp != NULL) { // Có chuyến bay đang sử dụng máy bay này
