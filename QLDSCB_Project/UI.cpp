@@ -301,7 +301,7 @@ void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateStr
     if (timeFocus == 2) cout << YELLOW; else cout << RESET;
     cout << (M < 10 ? "0" : "") << M << RESET;
 }
-
+//vẽ
 void UiDrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string DateString){
     if (rowpadding < 4) rowpadding = 4;
     
@@ -456,7 +456,7 @@ NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateSt
         }
     }
 }
-
+// vẽ lịch và thao tác nhưng k bao gồm giờ và phút 
 NavKey DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast){
     if (rowpadding < 4) rowpadding = 4;
     string label[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
@@ -495,7 +495,6 @@ NavKey DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,str
         M = 0;
         H = (H + 1) % 24; // Nếu 23h thì vòng lại 0h
     }
-    int timeFocus = 1; // 1: Đang chọn Giờ, 2: Đang chọn Phút
     
     DateTime ChossenDay = StringtoTime(DateString);
     
@@ -736,9 +735,9 @@ int InputString(string &result, int x, int y, int maxLength, char placeholder, b
                 if (c >= 0x80) { // Nếu xoá chữ tiếng việt thì vào vòng này để xoá các bit cuối trước
                     // unsigned char thực hiện không dấu ( từ 0 đến 255) bit k dấu
                     // char có bit dấu từ (-128 đến 127) nếu 1 ký tự có bit 1 đầu tiên -> đây là bit dấu âm 
-                    // 0xc0 (hex) -> bin 11000000
+                    // 0xc0 (hex) -> bin 11000000 AND 1 
                     // result.back() && 0xc0 lấy byte cuối , để 6 bit cuối là 0 , giữ lại 2 bit đầu
-                    // 0x80 (hex) -> bin 10000000
+                    // 0x80 (hex) -> bin 10|000000
                     // "â" trong tiếng việt có 2 byte , result.pop_back() chỉ xoá đi 1 byte ở byte đuôi, byte đầu còn nằm trong chuỗi
                     // 2 loại byte , byte đầu luôn là 0, 01, 011,...
                     // byte cuối luôn bắt đầu bằng 10...
@@ -1054,9 +1053,10 @@ int InputStringSBD(string &result, int x, int y, int maxLength, char placeholder
                 listSBD tmp = Find_SBD_OnRage(dsSBD, const_cast<char*>(result.c_str()));
                 
                 if (tmp.slSBD > 0) {
-                    string match = tmp.list[0].sbDich;
-                    if (match.length() >= visualLength(result)) {
-                        u = match.substr(visualLength(result));
+                    string match = tmp.list[0].sbDich; // match, u chuỗi màu xám gợi ý
+                    // t -> t|ân sơn nhất   
+                    if (visualLength(match) >= visualLength(result)) {
+                        u = match.substr(result.length());
                     } else {
                         u = "";
                     }
@@ -1209,9 +1209,9 @@ void SmallBox(string text, bool ABOVE, bool UNDER, bool LEFT, bool RIGHT,int Wid
     int innerWidth = Width - 2;
     if (innerWidth <= 0) return;
 
-    int totalLinesNeeded = countLinesNeeded(text, innerWidth);
+    int totalLinesNeeded = countLinesNeeded(text, innerWidth); // số ký tự tối đa hiển thị trên 1 hàng 
     int actualLinesToPrint = (totalLinesNeeded > Height) ? Height : totalLinesNeeded;
-    int startTextRow = (Height - actualLinesToPrint) / 2;
+    int startTextRow = (Height - actualLinesToPrint) / 2; // canh giữa 
 
     string lineBorder = "";
     for (int i = 0; i < innerWidth; i++) lineBorder += HZ;
@@ -1233,11 +1233,11 @@ void SmallBox(string text, bool ABOVE, bool UNDER, bool LEFT, bool RIGHT,int Wid
         if (LEFT) cout << VT; else cout << " "; // Nếu không có cạnh trái, để trống để không đè hộp bên cạnh
 
         if (i >= startTextRow && i < startTextRow + actualLinesToPrint) {
-            int currentBytePos = 0; 
-            int tempPos = 0;
+            int currentBytePos = 0; // byte hiện tại 
+            int tempPos = 0; // vị trị
             for(int j = 0; j < i - startTextRow; j++) {
-                tempPos += getLineInfo(text, tempPos, innerWidth).byteCount;
-                while (tempPos < text.length() && text[tempPos] == ' ') tempPos++;
+                tempPos += getLineInfo(text, tempPos, innerWidth).byteCount; // Tính vị trí 1 chữ hoàn chỉnh dính liền để xuống 
+                while (tempPos < text.length() && text[tempPos] == ' ') tempPos++; // vị trí cắt
             }
             
             if (tempPos < text.length()) {
@@ -2796,7 +2796,11 @@ bool MODE3_MB(listMB &SubList,bool IsMainList, int &index, int &current_Row, int
                     string sub = error_code.substr(1);
                     SmallBox("Sửa Thất Bại, Số chỗ không được bé hơn số vé mở bán của CB " + sub + " đang sử dụng máy bay này", 50, 4, string(RED));
                     delete tmp ;
-                }else{
+                }else if (error_code[0] == '5'){
+                    SmallBox("Sửa Thất Bại, Số chỗ không được bé hơn 20", 50, 4, string(RED));
+                    delete tmp ;
+                }
+                else{
                     SmallBox("Sửa Thất Bại, Số Hiệu: " + input[0] +" Bị Trùng", 50, 4, string(RED));
                     delete tmp ;
                 }
@@ -3091,7 +3095,7 @@ void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int current
     }
 }
 // MODE 2 là sữa 
-bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[]){
+bool MODE2_CB(CB* pageNodes[], int &index, int& startIndex, int current_Row, int currentPage, int rowOnScreen, int itemsPerPage, int Temp[], int Temp2[],int size){
     string m = "Đang Hiệu Chỉnh - Dùng ↑/↓ để điều chỉnh trạng thái ENTER để lưu, ESC thoát";
     string u = "";
     string inputs[] = {"","",""}; // Edit 3 field Ngày giờ , Sân Bay đích, trạng thái
@@ -3151,6 +3155,15 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
             RedrawInput(stat, Temp[5] + 1, 8 + rowOnScreen, Temp2[5] - 2, ' ', true, false);
         }
         if( ch == NAV_ENTER){
+            DateTime chossentime = StringtoTime(inputs[0]);
+            DateTime Thistime = StringtoTime(time_now());
+            if(ss_ngay(chossentime,Thistime) < 120){
+                u = "Chuyến bay hiện tại phải cách giờ hiện tại 2 tiếng";
+                Gotoxy(ToaDoBoxX, ToaDoBoxY);
+                SmallBox(u,WidthPerBox,HeightPerBox,string(RED));
+                _getch();
+                continue ;
+            }
             Gotoxy(ToaDoBoxX, ToaDoBoxY); 
             SmallBox("Bạn Có Chắc Muốn Sửa Chuyến Bay Này Chứ? Nhấn ENTER Để Xác Nhận, Phím Bất Kỳ Để Hủy", WidthPerBox,HeightPerBox, string(YELLOW));
             NavKey k = GetNavKey();
@@ -3171,9 +3184,11 @@ bool MODE2_CB(CB* pageNodes[], int &index, int current_Row, int currentPage, int
             tmp->set_sbDich(const_cast<char*>(inputs[1].c_str()));
             tmp->set_trangThai(stoi(inputs[2]));
             int result = Update_CB(dsCB,dsMB,tmp->maCB,tmp);
+
             Gotoxy(ToaDoBoxX, ToaDoBoxY); 
             if (result == 1) { 
                 SmallBox("Đã Chỉnh sửa thành công, bất kì để tiếp tục, Esc để thoát", WidthPerBox,HeightPerBox, string(GREEN));
+                Get_Input_CB(true,pageNodes, rowOnScreen, startIndex, size, Temp, Temp2 );
             } else {
                 tmp->ngayKH = oldTime;
                 tmp->set_sbDich(const_cast<char*>(oldSb.c_str()));
@@ -3355,7 +3370,7 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
                     DrawACat();
                 }
                 else if (mod == 1){
-                    bool isedited = MODE2_CB( pageNodes, rowOnScreen,current_Row,currentPage,rowOnScreen,itemsPerPage,Temp,Temp2 ); 
+                    bool isedited = MODE2_CB( pageNodes, index,startIndex,current_Row,currentPage,rowOnScreen,itemsPerPage,Temp,Temp2,size); 
                     if(isedited) break ;
                 }
                 else if (mod == 2) {

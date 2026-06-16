@@ -86,7 +86,6 @@ static const VietPair viet_vowels[] = {
     {NULL, 0}
 };
 
-
 // Ban đầu Mac, window
 
 enum NavKey {
