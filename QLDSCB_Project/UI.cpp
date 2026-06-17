@@ -4202,7 +4202,7 @@ selectStage:
             ClearRegion(x - 1, y - 1, 77, 9); // Xóa vùng ghế cũ trước khi vẽ lại
             Gotoxy(tempX, tempY + 3);
             cout << WHITE << string(73, '-') << RESET;
-            Gotoxy(tempX + 10, tempY + 4);
+            Gotoxy(tempX + 10, startYT + 4 + 3);
             cout << WHITE << "  L  Ố  I    Đ  I                 L  Ố  I    Đ  I  " << RESET;
             Gotoxy(tempX, tempY + 5);
             cout << WHITE << string(73, '-') << RESET;
@@ -4282,58 +4282,58 @@ selectStage:
         int action = GetNavKey();
         if (action == NAV_ENTER) {
 			if (SelectedCB->DSV[selectedSeat][0] != '\0') {
-                ClearRegion(tempX, tempY - 4, 75, 1); 
+                ClearRegion(tempX, startYT + 4 + 3, 75, 1); 
                 if (SelectedCB->trangThai == 0 || SelectedCB->trangThai == 3) {
-                    Gotoxy(tempX, tempY - 4);
+                    Gotoxy(tempX, startYT + 4 + 3);
 					string s = "Chuyến bay đã bị hủy hoặc hoàn tất, không thể hủy vé của ghế " + to_string(selectedSeat + 1);
 					cout << RED << s << RESET;
                     _getch();
-                    ClearRegion(tempX, tempY - 4, 75, 1);
-                    Gotoxy(tempX + 10, tempY - 4);
+                    ClearRegion(tempX, startYT + 4 + 3, 75, 1);
+                    Gotoxy(tempX + 10, startYT + 4 + 3);
                     cout << WHITE << "  L  Ố  I    Đ  I                 L  Ố  I    Đ  I  " << RESET;
                     continue;
                 }
                 DateTime now = StringtoTime(time_now());
                 if (ss_ngay(SelectedCB->ngayKH, now) <= 60 && isNotPastTime(SelectedCB->ngayKH, now)) {
-                    Gotoxy(tempX, tempY - 4);
+                    Gotoxy(tempX, startYT + 4 + 3);
                     string s = "Không thể hủy vé của ghế " + to_string(selectedSeat + 1) + " vì chuyến bay sắp khởi hành";
                     cout << RED << s << RESET;
                     _getch();
-                    ClearRegion(tempX, tempY - 4, 75, 1);
-                    Gotoxy(tempX + 10, tempY - 4);
+                    ClearRegion(tempX, startYT + 4 + 3, 75, 1);
+                    Gotoxy(tempX + 10, startYT + 4 + 3);
                     cout << WHITE << "  L  Ố  I    Đ  I                 L  Ố  I    Đ  I  " << RESET;
                     continue;
                 }
                 if (ss_ngay(SelectedCB->ngayKH, now) != 0 && !isNotPastTime(SelectedCB->ngayKH, now)) {
-                    Gotoxy(tempX, tempY - 4);
+                    Gotoxy(tempX, startYT + 4 + 3);
                     string s = "Không thể hủy vé của ghế " + to_string(selectedSeat + 1) + " vì chuyến bay đã qua giờ khởi hành";
                     cout << RED << s << RESET;
                     _getch();
-                    ClearRegion(tempX, tempY - 4, 75, 1);
-                    Gotoxy(tempX + 10, tempY - 4);
+                    ClearRegion(tempX, startYT + 4 + 3, 75, 1);
+                    Gotoxy(tempX + 10, startYT + 4 + 3);
                     cout << WHITE << "  L  Ố  I    Đ  I                 L  Ố  I    Đ  I  " << RESET;
                     continue;
                 }
-                Gotoxy(tempX + 5, tempY - 4);
+                Gotoxy(tempX + 5, startYT + 4 + 3);
 				string s = "Bạn có muốn hủy vé của ghế " + to_string(selectedSeat + 1) + " không? ENTER: Đồng ý | ESC: Hủy";
                 cout << YELLOW << s << RESET;
 				int k = GetNavKey();
                 if (k == NAV_ENTER) {
 					Cancel_Ticket(dsCB, dsHK, SelectedCB->maCB, selectedSeat + 1);
-                    ClearRegion(tempX, tempY - 4, 75, 1);
+                    ClearRegion(tempX, startYT + 4 + 3, 75, 1);
 					string s = "Đã hủy vé của ghế " + to_string(selectedSeat + 1) + " thành công! Nhấn phím bất kỳ để tiếp tục...";
-                    Gotoxy(tempX, tempY - 4);
+                    Gotoxy(tempX, startYT + 4 + 3);
                     cout << GREEN << s << RESET;
                     _getch();
                     ClearRegion(84, 22, 35, 7); // Xoa thong tin hanh khach
-                    ClearRegion(tempX, tempY - 4, 75, 1);
-                    Gotoxy(tempX + 10, tempY - 4);
+                    ClearRegion(tempX, startYT + 4 + 3, 75, 1);
+                    Gotoxy(tempX + 10, startYT + 4 + 3);
                     cout << WHITE << "  L  Ố  I    Đ  I                 L  Ố  I    Đ  I  " << RESET;
                     continue;
                 }
                 else if (k != NAV_ENTER){
-                    ClearRegion(tempX, tempY - 4, 75, 1);
-                    Gotoxy(tempX + 10, tempY - 4);
+                    ClearRegion(tempX, startYT + 4 + 3, 75, 1);
+                    Gotoxy(tempX + 10, startYT + 4 + 3);
                     cout << WHITE << "  L  Ố  I    Đ  I                 L  Ố  I    Đ  I  " << RESET;
                     continue;
                 }
