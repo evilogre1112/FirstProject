@@ -312,7 +312,7 @@ HK **Get_DSHKCB(listCB &dsCB, listHK &dsHK, char* const maCB, int &sldsHK);
  * @note            UI có trách nhiệm delete[] mảng này sau khi in xong.
  *                  Nêu Date được đưa vào có dạng 00/00/00 00:00 thì sẽ tìm những chuyến bay theo địa chỉ không quan tâm thời gian, ngược lại địa chỉ cũng tương tự nếu rỗng, còn nếu cả hai cùng rỗng thì sẽ trả về ds có mọi CB
  */
-CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sldsCB);
+CB** Search_CB(listCB &dsCB, const DateTime& date, char* const address, int &sldsCB, int mod = 0);
 
 // -- CÂU G: IN DANH SÁCH VÉ TRỐNG --
 
@@ -449,4 +449,7 @@ void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB);
 void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate);
 
 void CopyMarkList(listCB& A, listHK& dsHK, char* const cmnd);
+
+int HP_CB(CB** dsCB, int l, int r);
+
 #endif
