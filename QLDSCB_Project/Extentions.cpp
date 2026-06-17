@@ -183,13 +183,14 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_
     dsCB.slCB = 0;
     dsCB.head = NULL;
 
-    char ma[maCB_max];
-// Vòng lặp lớn: Đọc từng chuyến bay
-    while (f.getline(ma, maCB_max, '|')) {
-        // Dọn dẹp ký tự xuống dòng bị dính từ vòng lặp trước (nếu có)
+    char ma_raw[maCB_max];
+    // Vòng lặp lớn: Đọc từng chuyến bay
+    while (f.getline(ma_raw, maCB_max, '|')) {
+        char* ma = ma_raw; 
+        
         int len_ma = strlen(ma);
         if (len_ma > 0 && ma[0] == '\n') { 
-            memmove(ma, ma + 1, len_ma); 
+            ma++;       
             len_ma--; 
         }
         if (len_ma > 0 && ma[len_ma - 1] == '\r') {
@@ -220,11 +221,7 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_
         f >> tmp->socho; f.ignore();
         
         // --- 3. Cấp phát mảng vé ---
-        tmp->DSV = new char*[tmp->socho];
-        for (int i = 0; i < tmp->socho; i++) {
-            tmp->DSV[i] = new char[cmnd_max];
-            strcpy(tmp->DSV[i], "\0"); // Mặc định tất cả ghế đều trống
-        }
+        tmp->set_socho(tmp->socho);
         // ---- 4. thêm HK vào DSV
         tmp->sove = 0;
         if (!Add_CB(dsCB, dsMB, tmp, 1)) {
