@@ -111,6 +111,54 @@ DateTime lastDay(DateTime dt);
  */
 DateTime lastDay(string time_str);
 
+/**
+ * @brief Hàm này dùng để đo chiều rộng của terminal hiện tại, tương thích với cả Windows và UNIX (Linux/macOS)
+ * @return int Chiều rộng của terminal tính bằng số cột ký tự
+ */
+int GetTerminalWidth();
+/**
+ * @brief Hàm này dùng để đo chiều dài của terminal hiện tại, tương thích với cả Windows và UNIX (Linux/macOS)
+ * @return int Chiều dài của terminal tính bằng số cột ký tự
+ */
+int GetTerminalHeight() ;
+/**
+ * @brief Xoá màn hình, tương thích với cả Windows và UNIX (Linux/macOS)
+ */
+void ClearScreen();
+
+/**
+ * @brief Hàm này dùng để tính độ dài hiển thị thực tế của một chuỗi, bỏ qua các mã ANSI và tính đúng các ký tự Unicode có thể chiếm nhiều byte
+ * @param s Chuỗi cần tính độ dài hiển thị
+ * @return int Độ dài hiển thị thực tế của chuỗi
+ */
+int visualLength(const string& s);
+
+/**
+ * @brief Hàm này dùng để di chuyển con trỏ đến vị trí (x, y
+ * @param x Tọa độ X (cột) mà con trỏ sẽ di chuyển đến
+ * @param y Tọa độ Y (dòng) mà con trỏ sẽ di
+ */
+void Gotoxy(int x, int y);
+
+/**
+ * @brief Hàm này sẽ trả về vị trí con trỏ hiện tại
+ * @return int Giá trị X của con trỏ hiện tại.
+ */
+int whereX();
+
+/**
+ * @brief Hàm này sẽ trả về vị trí con trỏ hiện tại
+ * @return int Giá trị X của con trỏ hiện tại.
+ */
+int whereY();
+
+NavKey GetNavKey(int &ch);
+NavKey GetNavKey();
+
+
+
+void ClearRegion(int x, int y, int width, int height);
+
 NavKey PaginationController(int totalItems, int itemsPerPage, int& currentPage, int& currentRow,int& key);
 NavKey PaginationController(int totalItems, int itemsPerPage, int& currentPage, int& currentRow);
 

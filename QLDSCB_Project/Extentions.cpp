@@ -11,6 +11,21 @@
 
 using namespace std;
 
+#ifndef _WIN32
+static int currentCursorX = 0;
+static int currentCursorY = 0;
+#endif
+
+#ifdef _WIN32
+    #define WIN32_LEAN_AND_MEAN
+    #include <windows.h>
+    #include <conio.h>
+#else
+    #include <sys/ioctl.h>
+    #include <unistd.h>
+    #include <termios.h>
+#endif
+
 void strip_viet(char *s) {
     char *r = s;   // đọc
     char *w = s;   // ghi
@@ -183,13 +198,14 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_
     dsCB.slCB = 0;
     dsCB.head = NULL;
 
-    char ma[maCB_max];
-// Vòng lặp lớn: Đọc từng chuyến bay
-    while (f.getline(ma, maCB_max, '|')) {
-        // Dọn dẹp ký tự xuống dòng bị dính từ vòng lặp trước (nếu có)
+    char ma_raw[maCB_max];
+    // Vòng lặp lớn: Đọc từng chuyến bay
+    while (f.getline(ma_raw, maCB_max, '|')) {
+        char* ma = ma_raw; 
+        
         int len_ma = strlen(ma);
         if (len_ma > 0 && ma[0] == '\n') { 
-            memmove(ma, ma + 1, len_ma); 
+            ma++;       
             len_ma--; 
         }
         if (len_ma > 0 && ma[len_ma - 1] == '\r') {
@@ -220,11 +236,7 @@ bool Get_Data_CB(listCB &dsCB, listMB &dsMB,listHK &dsHK, const char *path_file_
         f >> tmp->socho; f.ignore();
         
         // --- 3. Cấp phát mảng vé ---
-        tmp->DSV = new char*[tmp->socho];
-        for (int i = 0; i < tmp->socho; i++) {
-            tmp->DSV[i] = new char[cmnd_max];
-            strcpy(tmp->DSV[i], "\0"); // Mặc định tất cả ghế đều trống
-        }
+        tmp->set_socho(tmp->socho);
         // ---- 4. thêm HK vào DSV
         tmp->sove = 0;
         if (!Add_CB(dsCB, dsMB, tmp, 1)) {
@@ -650,4 +662,167 @@ HK** duyet_HK(listHK& dsHK) {
         curr = curr->right;
     }
     return arr;
+}
+
+int visualLength(const string& s) {
+    int length = 0;
+    bool inCode = false;
+    for (size_t i = 0; i < s.length(); i++) {
+        if (s[i] == '\033') {
+            inCode = true;
+            continue; 
+        }
+
+        if (inCode) {
+            if (isalpha((unsigned char)s[i])) {
+                inCode = false;
+            }
+            continue;
+        }
+        if ((unsigned char)(s[i] & 0xc0) != 0x80) {
+            length++;
+        }
+    }
+    return length;
+}
+
+void ClearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+    currentCursorX = 0;
+    currentCursorY = 0;
+#endif
+}
+void Gotoxy(int x, int y) {
+#ifdef _WIN32
+        HANDLE hConsoleOutput;
+        COORD Cursor_an_Pos = { (SHORT)x, (SHORT)y };
+        hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleCursorPosition(hConsoleOutput, Cursor_an_Pos);
+#else
+        currentCursorX = x;
+        currentCursorY = y;
+        cout << "\033[" << y + 1 << ";" << x + 1 << "H" << flush;
+#endif
+}
+
+// Lấy tọa độ X hiện tại của con trỏ
+int whereX() {
+#ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    return csbi.dwCursorPosition.X;
+#else
+    return currentCursorX;
+#endif
+}
+
+int whereY() {
+#ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    return csbi.dwCursorPosition.Y;
+#else
+    return currentCursorY;
+#endif
+}
+
+NavKey GetNavKey(int &ch) {
+    ch = 0;
+#ifdef _WIN32
+    ch = _getch();
+    if (ch == 224 || ch == 0) {
+        ch = _getch();
+        if (ch == 72) return NAV_UP;
+        if (ch == 80) return NAV_DOWN;
+        if (ch == 75) return NAV_LEFT;
+        if (ch == 77) return NAV_RIGHT;
+        return NAV_UNKNOWN;
+    }
+    if (ch == 13) return NAV_ENTER;
+    if (ch == 27) return NAV_ESC;
+    if (ch == 8) return NAV_BACK;
+#else
+    struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    
+    // Bước 1: Block hoàn toàn, đợi ký tự đầu tiên
+    newt.c_cc[VMIN] = 1; 
+    newt.c_cc[VTIME] = 0; 
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    
+    char seq[3];
+    int bytesRead = read(STDIN_FILENO, &seq[0], 1);
+    NavKey result = NAV_UNKNOWN;
+    
+    if (bytesRead == 1) {
+        ch = (unsigned char)seq[0];
+        if (seq[0] == 27) { // Nếu là nút ESC
+            // Bước 2: Chuyển sang Non-blocking (timeout 0.1s) để xem có phải cụm mũi tên không
+            newt.c_cc[VMIN] = 0;
+            newt.c_cc[VTIME] = 1;
+            tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+            
+            if (read(STDIN_FILENO, &seq[1], 1) == 1 && read(STDIN_FILENO, &seq[2], 1) == 1) {
+                if (seq[1] == 91) {
+                    if (seq[2] == 65) result = NAV_UP;
+                    else if (seq[2] == 66) result = NAV_DOWN;
+                    else if (seq[2] == 67) result = NAV_RIGHT;
+                    else if (seq[2] == 68) result = NAV_LEFT;
+                }
+            } else {
+                result = NAV_ESC; // Chỉ là phím ESC đơn thuần
+            }
+        }
+        else if (seq[0] == 10 || seq[0] == 13) result = NAV_ENTER;
+        else if (seq[0] == 127 || seq[0] == 8) result = NAV_BACK;
+    }
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return result;
+#endif
+    return NAV_UNKNOWN;
+}
+
+
+NavKey GetNavKey() {
+    int ch;
+    NavKey key = GetNavKey(ch);
+    if (key == NAV_UNKNOWN) {
+        if (ch == 'w' || ch == 'W') return NAV_UP;
+        if (ch == 's' || ch == 'S') return NAV_DOWN;
+        if (ch == 'a' || ch == 'A') return NAV_LEFT;
+        if (ch == 'd' || ch == 'D') return NAV_RIGHT;
+    }
+    return key;
+}
+int GetTerminalHeight() {
+    #ifdef _WIN32
+        // Code đo chiều cao dành cho Windows
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+        return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    #else
+        // Code đo chiều cao dành cho Mac / Linux
+        struct winsize w;
+        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+        return w.ws_row;
+    #endif
+}
+
+int GetTerminalWidth(){
+      #ifdef _WIN32
+        // Code đo chiều rộng dành cho Windows
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+        return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    #else
+        // Code đo chiều rộng dành cho Mac / Linux
+        struct winsize w;
+        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+        return w.ws_col;
+    #endif
 }

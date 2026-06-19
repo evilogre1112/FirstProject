@@ -1,3 +1,4 @@
+30-000|bi|20
 4L-TGT|Boeing 737-723|132
 4S-ALM|Airbus A330-300|297
 4X-EDM|Boeing 787-9|282

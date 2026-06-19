@@ -6,12 +6,14 @@
 #else
 #include <clocale>
 #endif
+
 #include <iostream>
 #include <iomanip>
 #include "Global.h"
 #include "Logic.h"
 #include "UI.h"
 #include "Extentions.h"
+#include "Input.h"
 
 using namespace std ;
 
@@ -45,6 +47,7 @@ int main(){
     int slMB = dsMB.slMB ;
     Sort_MB(dsMB,0,slMB-1);
     TruyenThamSo(dsMB,dsCB,dsHK,dsSBD);
+    _TruyenThamSo(dsMB,dsCB,dsHK,dsSBD);
     Set_Data_CB(dsCB, path_file_CB);
     Set_Data_HK(dsHK, path_file_HK);
     Set_Data_MB(dsMB, path_file_MB);
