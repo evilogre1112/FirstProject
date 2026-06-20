@@ -172,16 +172,6 @@ bool Update_Time_CB(listCB &dsCB, listMB &dsMB, char* const maCB, const DateTime
 int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor);
 
 
-// ========================================================================================
-
-/**
- * @brief       Huỷ 1 chuyến bay trong danh sách liên kết đơn
- * @param dsCB  Danh sách chuyến bay
- * @param maCB  Chuỗi C15 chứa mã hiệu chuyến bay cần tìm để hủy
- * @return      True nếu huỷ  được và thành công
-*/
-bool Cancel_CB(listCB &dsCB, listMB &dsMB, char* const maCB);
-
 /**
  * @brief       Cho biết trạng thái của chuyến bay trong DSCB.
  * @param dsCB  Danh sách chuyến bay
@@ -449,4 +439,7 @@ void Del_SubDsMB(listMB& SubDsMB, char* const soHieuMB);
 void Edit_SubDsMB(listMB& SubDsMB, char* const soHieuMB, MB* infoUpdate);
 
 void CopyMarkList(listCB& A, listHK& dsHK, char* const cmnd);
+
+int HP_CB(CB** dsCB, int l, int r);
+
 #endif

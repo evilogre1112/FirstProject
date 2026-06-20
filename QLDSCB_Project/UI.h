@@ -67,7 +67,7 @@ extern int TotalHeight;
 #define HL "═"
 #define VL "║"
 #define CL "╠"
-#define CR "╣"
+#define CRR "╣"
 #define AP "▲"
 #define AD "▼"
 #define ARL "◄"  // Hoặc "◀"
@@ -88,114 +88,15 @@ extern int TotalHeight;
 #define DM "◈"
 
 
-struct LineInfo {
-    int byteCount;   // Số byte để dùng trong substr()
-    int visualWidth; // Độ dài hiển thị thực tế để tính căn giữa
-};
-
-
-/**
- * @brief Hàm này dùng để đo chiều rộng của terminal hiện tại, tương thích với cả Windows và UNIX (Linux/macOS)
- * @return int Chiều rộng của terminal tính bằng số cột ký tự
- */
-int GetTerminalWidth();
-/**
- * @brief Hàm này dùng để đo chiều dài của terminal hiện tại, tương thích với cả Windows và UNIX (Linux/macOS)
- * @return int Chiều dài của terminal tính bằng số cột ký tự
- */
-int GetTerminalHeight() ;
-/**
- * @brief Xoá màn hình, tương thích với cả Windows và UNIX (Linux/macOS)
- */
-void ClearScreen();
-
-/**
- * @brief Hàm này dùng để tính độ dài hiển thị thực tế của một chuỗi, bỏ qua các mã ANSI và tính đúng các ký tự Unicode có thể chiếm nhiều byte
- * @param s Chuỗi cần tính độ dài hiển thị
- * @return int Độ dài hiển thị thực tế của chuỗi
- */
-int visualLength(const string& s);
-
-/**
- * @brief Hàm này dùng để tính toán số byte cần đọc từ chuỗi text bắt đầu từ startByte để vừa đủ hiển thị trong maxWidth ký tự, đồng thời trả về độ dài hiển thị thực tế của phần đó
- * @param text Chuỗi văn bản cần hiển thị trong hộp
- * @param startByte Vị trí byte bắt đầu trong chuỗi text để tính toán
- * @param maxWidth Số ký tự tối đa có thể hiển thị trong một dòng của hộp
- * @return LineInfo Cấu trúc chứa số byte cần đọc và độ dài hiển
- */
-LineInfo getLineInfo(const string& text, int startByte, int maxWidth);
-
-/**
- * @brief Hàm này dùng để đếm số dòng cần thiết để hiển thị toàn bộ text trong một hộp có chiều rộng innerWidth, tính cả việc xuống dòng khi vượt quá chiều rộng
- * @param text Chuỗi văn bản cần hiển thị trong hộp
- * @param innerWidth Độ rộng thực tế bên trong hộp, đã trừ đi 2 ký tự viền
- * @return int Số dòng cần thiết để hiển thị toàn bộ text trong hộp
- */
-int countLinesNeeded(const string& text, int innerWidth) ;
-
-/**
- * @brief Hàm này dùng để di chuyển con trỏ đến vị trí (x, y
- * @param x Tọa độ X (cột) mà con trỏ sẽ di chuyển đến
- * @param y Tọa độ Y (dòng) mà con trỏ sẽ di
- */
-void Gotoxy(int x, int y);
-
-/**
- * @brief Hàm này sẽ trả về vị trí con trỏ hiện tại
- * @return int Giá trị X của con trỏ hiện tại.
- */
-int whereX();
-
-/**
- * @brief Hàm này sẽ trả về vị trí con trỏ hiện tại
- * @return int Giá trị X của con trỏ hiện tại.
- */
-int whereY();
-
-/**
- * @brief Hàm này dùng để vẽ một hộp đơn giản chỉ có tiêu đề ở giữa, với tùy chọn có/không cạnh trên và dưới
- * @param text Nội dung tiêu đề sẽ được căn giữa trong hộp
- * @param ABOVE Nếu true, vẽ cạnh trên của hộp, nếu false thì không
- * @param UNDER Nếu true, vẽ cạnh dưới của hộp, nếu false thì không
- */
-void PrintBox(string text,bool ABOVE , bool UNDER );
-
-void ClearRegion(int x, int y, int width, int height);
-
-/**
- * @brief hàm SmallBox nhưng ít tham số hơn
- */
-void SmallBox(string text, int Width = 5, int Height = 40, string color = WHITE) ;
-/**
- * @brief Hàm này dùng để vẽ một hộp nhỏ với tùy chọn có/không cạnh
- * @param text Nội dung sẽ được hiển thị trong hộp
- * @param ABOVE Nếu true, vẽ cạnh trên của hộp, nếu false thì không
- * @param UNDER Nếu true, vẽ cạnh dưới của hộp, nếu false thì không
- * @param LEFT Nếu true, vẽ cạnh trái của hộp, nếu false thì không
- * @param RIGHT Nếu true, vẽ cạnh phải của hộp, nếu false thì không
- * @param Height Chiều cao của hộp
- * @param Width Chiều rộng của hộp
- * @param color Màu sắc của hộp
- */
-void SmallBox(string text = "" , bool ABOVE = true , bool UNDER = true , bool LEFT = true , bool RIGHT = true, int Width = 15, int Height = 5, string color = WHITE);
-
-
-void PrintMultiLineText(int startX, int startY, const string& text);
 void TruyenThamSo(listMB &A, listCB& B , listHK &C, listSBD &D);
 
-void    UiDrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string DateString);
-void    UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateString);
-NavKey  DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateString,bool CanPast = false);
-NavKey  DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast = false);
-void    DrawACat(int x = 59,int y =25);
-
+/**
+ * @brief trã về mã màu tương ứng với trạng thái st
+ * @param st mã trạng thái 
+ */
 string TranFormSatus(int st);
-string TranFormGender(int st);
 
-NavKey GetNavKey(int &ch);
-NavKey GetNavKey();
 int GetKey(int chosen,int count);
-
 
 NavKey CustomerAddMB();
 NavKey CustomerAddCB();
@@ -254,14 +155,6 @@ NavKey  SeatList(int x, int y, int xt, int yt, CB* SelectedCB);
 void    EmptySeatList();
 
 
-void RedrawInput(string result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight,string SugestionStr = "");
-int  InputStatus(int &result, int x, int y);
-int  InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers = false, bool isCenter = false,bool isHighlight = false, bool isUppercase = false,bool isonlychar = true,bool canspace = true);
-int  InputDateTime(string &result, int x, int y,int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false, int errX =-1, int errY=-1) ;
-int  InputStringSBD(string &result, int x, int y, int maxLength, char placeholder, bool isCenter = false, bool isHighlight = false);
-bool InputSimpleHK(string& res, NavKey key, int& ch,int x,int y);
-bool SimpleInput(string& res, NavKey key, int& ch, int x, int y,int width,bool canspace = false, bool onlyNums = false);
-
 void RunInNewTab(void (*func)() = [](){});
 void RunInNewTab(NavKey (*func)());
 
@@ -273,9 +166,7 @@ void Menu_ThongKeLuotBay();
 void Menu_InDanhSachHanhKhach();
 
 // Các hàm Ui hiển thị trước
-void ViewQLMB();
-void ViewQLCB();
-void ViewQLHK();
+void ViewQL(int idx);
 
 void Router_B(int mainMenuIdx, function<void()> func_1 = [](){}, 
                   function<void()> func_2 = [](){}, 
@@ -291,7 +182,5 @@ int MainMenuOptionInBoard(string options[], int length);
 // Menu chính
 void MainScreen();
 
-// Hàm này sẽ đọc phím bấm của người dùng và trả về một giá trị NavKey tương ứng
-NavKey GetNavKey();
 
 #endif

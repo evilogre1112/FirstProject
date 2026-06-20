@@ -553,22 +553,6 @@ int Update_CB(listCB &dsCB, listMB &dsMB, char* const maCB, CB* infor) {
     return true;
 }
 
-bool Cancel_CB(listCB &dsCB, listMB &dsMB, char* const maCB) {
-    CB* temp = Find_CB(dsCB,  maCB);
-    if (temp == NULL) return false; // Chuyen bay khong ton tai
-    if (temp->trangThai == 3 || temp->trangThai == 0) return false; // Da hoat tat hoac bi huy -> khong huy
-    if (temp->sove > 0) return false; // Da co khach -> khong huy
-    temp->trangThai = 0;
-    int index = Find_MB(dsMB, temp->soHieuMB);
-    delMarkMB(dsMB.list[index], maCB);
-    //for (int i = 0; i < temp->socho; i++)
-    //    delete[] temp->DSV[i];
-    //delete[] temp->DSV;
-    //temp->DSV = NULL;
-    //temp->socho = 0;
-    Set_Data_CB(dsCB, path_file_CB);
-    return true;
-}
 
 int Status_CB(listCB &dsCB, char* const maCB) {
     CB* temp = Find_CB(dsCB, maCB);
@@ -1018,13 +1002,15 @@ listSBD Find_SBD_OnRage(listSBD &dsSBD, char* const query) {
 string Can_Add_MB(listMB &dsMB, listCB &dsCB, MB* newMB) {
     if (dsMB.slMB >= 300)
         return "1"; // Vượt quá số lượng MB
-    if (dsMB.slMB < 20)
+    if (newMB->socho < 20)
         return "5"; // So cho phai >= 20;
     int index = find_insert_posMB(dsMB, newMB->soHieuMB);
     if (index == dsMB.slMB)
         return "0";
     if (ss_str(dsMB.list[index]->soHieuMB, newMB->soHieuMB) == 0)
         return "2"; // Trùng số hiệu MB
+    if(newMB->socho < socho_max)
+        return "4";
     return "0";
 }
 

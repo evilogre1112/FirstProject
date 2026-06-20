@@ -5,12 +5,9 @@
 #include <cstring>
 #include "Logic.h"
 #include "Extentions.h"
+#include "Draw.h"
+#include "Input.h"
 // Chỉ thêm windows.h nếu đang chạy trên Windows
-#ifndef _WIN32
-static int currentCursorX = 0;
-static int currentCursorY = 0;
-#endif
-
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
     #include <windows.h>
@@ -109,676 +106,27 @@ int MenusSize[] = {
 int TotalWidth = 0;
 int TotalHeight = 0;
 
-NavKey GetNavKey(int &ch) {
-    ch = 0;
-#ifdef _WIN32
-    ch = _getch();
-    if (ch == 224 || ch == 0) {
-        ch = _getch();
-        if (ch == 72) return NAV_UP;
-        if (ch == 80) return NAV_DOWN;
-        if (ch == 75) return NAV_LEFT;
-        if (ch == 77) return NAV_RIGHT;
-        return NAV_UNKNOWN;
-    }
-    if (ch == 13) return NAV_ENTER;
-    if (ch == 27) return NAV_ESC;
-    if (ch == 8) return NAV_BACK;
-#else
-    struct termios oldt, newt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    newt.c_cc[VMIN] = 0;
-    newt.c_cc[VTIME] = 1;
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    char seq[3];
-    int bytesRead = read(STDIN_FILENO, &seq[0], 1);
-    NavKey result = NAV_UNKNOWN;
-    if (bytesRead == 1) {
-        ch = (unsigned char)seq[0];
-        if (seq[0] == 27) {
-            if (read(STDIN_FILENO, &seq[1], 1) == 1 && read(STDIN_FILENO, &seq[2], 1) == 1) {
-                if (seq[1] == 91) {
-                    if (seq[2] == 65) result = NAV_UP;
-                    else if (seq[2] == 66) result = NAV_DOWN;
-                    else if (seq[2] == 67) result = NAV_RIGHT;
-                    else if (seq[2] == 68) result = NAV_LEFT;
-                }
-            } else {
-                result = NAV_ESC;
-            }
-        }
-        else if (seq[0] == 10 || seq[0] == 13) result = NAV_ENTER;
-        else if (seq[0] == 127 || seq[0] == 8) result = NAV_BACK;
-    }
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    return result;
-#endif
-    return NAV_UNKNOWN;
-}
-
-NavKey GetNavKey() {
-    int ch;
-    NavKey key = GetNavKey(ch);
-    if (key == NAV_UNKNOWN) {
-        if (ch == 'w' || ch == 'W') return NAV_UP;
-        if (ch == 's' || ch == 'S') return NAV_DOWN;
-        if (ch == 'a' || ch == 'A') return NAV_LEFT;
-        if (ch == 'd' || ch == 'D') return NAV_RIGHT;
-    }
-    return key;
-}
-int GetTerminalHeight() {
-    #ifdef _WIN32
-        // Code đo chiều cao dành cho Windows
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-    #else
-        // Code đo chiều cao dành cho Mac / Linux
-        struct winsize w;
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-        return w.ws_row;
-    #endif
-}
-
-int GetTerminalWidth(){
-      #ifdef _WIN32
-        // Code đo chiều rộng dành cho Windows
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        return csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    #else
-        // Code đo chiều rộng dành cho Mac / Linux
-        struct winsize w;
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-        return w.ws_col;
-    #endif
-}
-
-void ClearScreen() {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-    currentCursorX = 0;
-    currentCursorY = 0;
-#endif
-}
-void Gotoxy(int x, int y) {
-#ifdef _WIN32
-        HANDLE hConsoleOutput;
-        COORD Cursor_an_Pos = { (SHORT)x, (SHORT)y };
-        hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-        SetConsoleCursorPosition(hConsoleOutput, Cursor_an_Pos);
-#else
-        currentCursorX = x; // Lưu lại vết con trỏ
-        currentCursorY = y;
-        printf("\033[%d;%dH", y + 1, x + 1); 
-        fflush(stdout);     // Ép terminal nhả bộ đệm và vẽ ngay lập tức
-#endif
-}
-
-
-// Lấy tọa độ X hiện tại của con trỏ
-int whereX() {
-#ifdef _WIN32
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    return csbi.dwCursorPosition.X;
-#else
-    return currentCursorX; 
-#endif
-}
-
-// Lấy tọa độ Y hiện tại của con trỏ
-int whereY() {
-#ifdef _WIN32
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    return csbi.dwCursorPosition.Y;
-#else
-    return currentCursorY;
-#endif
-}
-
-void DrawACat(int x  ,int y){
-    Gotoxy(x, y);
-    cout << " /\\_/\\";
-    Gotoxy(x, y+1);
-    cout <<"( o.o )";
-    Gotoxy(x, y+2);
-    cout << " > ^ <";
-}
-void UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateString){
-    if (rowpadding < 4) rowpadding = 4;
-
-    int year = GetYearFromStr(DateString);
-    int month = GetMonthFromStr(DateString);
-    int SelectedDay = GetDayFromStr(DateString);
-    int hours = GetHourFromStr(DateString);
-    int minute = GetMinuteFromStr(DateString);
-    int Days_In_Month = daysInMonth(month, year);
-    // Lấy mốc thời gian thực tế ngoài đời để tô màu chuẩn xác
-    UiDrawCalendarWithoutTime(x , y,rowpadding , colpadding,DateString);
-    
-    // --- BẮT ĐẦU VẼ KHUNG GIỜ/PHÚT CO GIÃN ĐỘNG ---
-    int calWidth = rowpadding * 7; 
-    int timeY = y + colpadding * 6 + 7;
-    
-    // Bóp nhỏ cụm Giờ/Phút lại (Tổng rộng khoảng 28 ký tự)
-    int timeStartX = x ; 
-
-    Gotoxy(timeStartX, timeY); cout << "Giờ" ;
-    Gotoxy(timeStartX + 4, timeY - 1); SmallBox(string(3,' ') + AD, 8, 1); // Rộng 8
-    
-    Gotoxy(timeStartX + 14, timeY); cout << "Phút" ;
-    Gotoxy(timeStartX + 19, timeY - 1); SmallBox(string(3,' ') + AD, 8, 1); // Rộng 8 
-
-    int H = hours; 
-    int M = ((minute + 14) / 15) * 15; 
-    
-    // Nếu phút nhảy lên 60 thì reset về 0 và tăng 1 giờ
-    if (M == 60) {
-        M = 0;
-        H = (H + 1) % 24; // Nếu 23h thì vòng lại 0h
-    }
-    int timeFocus = 1; // 1: Đang chọn Giờ, 2: Đang chọn Phút
-
-    int textY = timeY;
-    // Dịch tọa độ in số (cách viền trái box 2 ký tự)
-    int hourX = timeStartX + 4 + 2; 
-    int minX = timeStartX + 19 + 2;
-    
-    // 1. In Giờ
-    Gotoxy(hourX, textY);
-    if (timeFocus == 1) cout << YELLOW; else cout << RESET;
-    cout << (H < 10 ? "0" : "") << H << RESET;
-    
-    // 2. In Phút
-    Gotoxy(minX, textY);
-    if (timeFocus == 2) cout << YELLOW; else cout << RESET;
-    cout << (M < 10 ? "0" : "") << M << RESET;
-}
-//vẽ
-void UiDrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string DateString){
-    if (rowpadding < 4) rowpadding = 4;
-    
-    string label[] = {"Sun","Mon","Tue","Wed","Thur","Fri","Sat"};
-    int size = 7 ;
-    int lens = visualLength(DateString);
-    Gotoxy(x + (rowpadding*7)/2 - lens/2 , y);
-    cout << DateString ; 
-    int year = GetYearFromStr(DateString);
-    int month = GetMonthFromStr(DateString);
-    int SelectedDay = GetDayFromStr(DateString);
-    int hours = GetHourFromStr(DateString);
-    int minute = GetMinuteFromStr(DateString);
-    int Days_In_Month = daysInMonth(month, year);
-    // Lấy mốc thời gian thực tế ngoài đời để tô màu chuẩn xác
-    string nowStr = time_now();
-    int realMonth = GetMonthFromStr(nowStr);
-    int realYear = GetYearFromStr(nowStr);
-    int realToday = GetDayFromStr(nowStr);
-    // dd/mtmt/yyyy hh:mm
-    DateTime a ;
-    a.set_dd(1);
-    a.set_mt(month);
-    a.set_yy(year);
-    a.set_hh(0);
-    a.set_mm(0);
-    int FirstDayOfMonth = Get_Weekday(a);
-    for(int i = 0 ; i < 7; i++){
-        Gotoxy(x + rowpadding * i, y + 2);
-        cout << label[i];
-    }
-    // VẼ NGÀY TĨNH
-    for(int Day = 1 ; Day <= Days_In_Month; Day++){
-        int cx = x + rowpadding * ((FirstDayOfMonth + Day - 1) % 7);
-        int cy = y + ((FirstDayOfMonth + Day - 1) / 7) * colpadding + 5;
-        
-        Gotoxy(cx, cy);
-        
-        // Chỉ tô xám quá khứ hoặc xanh hôm nay nếu đang vẽ tháng hiện tại
-        if (month == realMonth && year == realYear) {
-            if (Day < realToday) cout << GRAY;
-            else if (Day == realToday) cout << GREEN;
-        }
-        
-        // Vẽ ngoặc cho ngày đang được chọn (SelectedDay)
-        if (Day == SelectedDay){
-            Gotoxy(cx - 3, cy); cout << "[";
-            Gotoxy(cx + 3, cy); cout << "]";
-            Gotoxy(cx, cy);
-        }
-        
-        cout << Day << RESET;
-    }    
-}
-
-NavKey DrawCalendar(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast){
-    if (rowpadding < 4) rowpadding = 4;
-    int lens = visualLength(DateString);
-    Gotoxy(x + (rowpadding*7)/2 - lens/2 , y);
-    cout << DateString ; 
-    int year = GetYearFromStr(DateString);
-    int month = GetMonthFromStr(DateString);
-    int SelectedDay = GetDayFromStr(DateString);
-    int hours = GetHourFromStr(DateString);
-    int minute = GetMinuteFromStr(DateString);
-    int Days_In_Month = daysInMonth(month, year);
-   
-    // --- VẼ KHUNG GIỜ/PHÚT CO GIÃN ĐỘNG ---
-    int calWidth = rowpadding * 7; 
-    int timeY = y + colpadding * 6 + 7;
-    
-    // Bóp nhỏ cụm Giờ/Phút lại (Tổng rộng khoảng 28 ký tự)
-    int timeStartX = x ; 
-
-    int H = hours; 
-    int M = ((minute + 14) / 15) * 15; 
-
-    if (M == 60) {
-        M = 0;
-        H = (H + 1) % 24;
-    }
-    
-    int timeFocus = 1; // 1: Đang chọn Giờ, 2: Đang chọn Phút
-
-    int textY = timeY;
-    // Dịch tọa độ in số (cách viền trái box 2 ký tự)
-    int hourX = timeStartX + 4 + 2; 
-    int minX = timeStartX + 19 + 2;
-    
-    UiDrawCalendar(x, y, rowpadding, colpadding, DateString);
-    
-    // Nếu đang ở tháng hiện tại, mốc nhỏ nhất là realToday. Nếu là tháng tương lai, mốc nhỏ nhất là 1.
- 
-    while (true){
-        NavKey kt = DrawCalendarWithoutTime( x , y, rowpadding , colpadding, DateString ,CanPast);
-
-        if(kt == NAV_RIGHT || kt == NAV_LEFT || kt == NAV_ESC || kt == NAV_BACK || kt == NAV_UP) return kt;
-
-        DateTime ChossenDay = StringtoTime(DateString);
-        int D = ChossenDay.get_dd() ;
-        while(true){
-            // In Giờ
-            Gotoxy(hourX, textY);
-            if (timeFocus == 1) cout << YELLOW; else cout << RESET;
-            cout << (H < 10 ? "0" : "") << H << RESET;
-            
-            // In Phút
-            Gotoxy(minX, textY);
-            if (timeFocus == 2) cout << YELLOW; else cout << RESET;
-            cout << (M < 10 ? "0" : "") << M << RESET;
-
-            int ch;
-            NavKey key = GetNavKey(ch);
-            
-            if (key == NAV_BACK || key == NAV_ESC || (key == NAV_UNKNOWN && tolower(ch) == 'w')) {
-                DateString = "";
-                return key;
-            }
-            else if (key == NAV_ENTER) {
-                ChossenDay.set_hh(H);
-                ChossenDay.set_mm(M);
-                DateString = ToStringDate(ChossenDay);
-                return NAV_ENTER;
-            }
-            
-            // Quay về Lịch (phím W)
-            else if (key == NAV_UNKNOWN && tolower(ch) == 'w') {
-                // Trả lại màu sáng bình thường cho Giờ/Phút trước khi thoát lên trên
-                Gotoxy(hourX, textY); cout << (H < 10 ? "0" : "") << H;
-                Gotoxy(minX, textY); cout << (M < 10 ? "0" : "") << M;
-                ChossenDay.set_hh(H);
-                ChossenDay.set_mm(M);
-                DateString = ToStringDate(ChossenDay);
-                break; // Break vòng lặp này -> Vòng lặp tổng sẽ quay ngược lên vòng chọn Ngày
-            }
-            
-            // Đảo Focus giữa Giờ và Phút
-            else if (key == NAV_LEFT || key == NAV_RIGHT) {
-                timeFocus = (timeFocus == 1) ? 2 : 1;
-            }
-            else if (key == NAV_UNKNOWN && tolower(ch) == 'h') timeFocus = 1;
-            else if (key == NAV_UNKNOWN && tolower(ch) == 'm') timeFocus = 2;
-            
-            else if (key == NAV_UP) {
-                if (timeFocus == 1) H = (H + 1) % 24;
-                else M = (M + 15) % 60;
-            }
-            else if (key == NAV_DOWN) {
-                if (timeFocus == 1) H = (H - 1 + 24) % 24;
-                else M = (M - 15 + 60) % 60;
-            }
-        }
-    }
-}
-// vẽ lịch và thao tác nhưng k bao gồm giờ và phút 
-NavKey DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast){
-    if (rowpadding < 4) rowpadding = 4;
-    string label[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
-    int size = 7 ;
-    int lens = visualLength(DateString);
-    Gotoxy(x + (rowpadding*7)/2 - lens/2 , y);
-    cout << DateString ; 
-    int year = GetYearFromStr(DateString);
-    int month = GetMonthFromStr(DateString);
-    int SelectedDay = GetDayFromStr(DateString);
-    int hours = GetHourFromStr(DateString);
-    int minute = GetMinuteFromStr(DateString);
-    int Days_In_Month = daysInMonth(month, year);
-    // Lấy mốc thời gian thực tế ngoài đời để tô màu chuẩn xác
-    string nowStr = time_now();
-    int realMonth = GetMonthFromStr(nowStr);
-    int realYear = GetYearFromStr(nowStr);
-    int realToday = GetDayFromStr(nowStr);
-   
-    // dd/mtmt/yyyy hh:mm
-    DateTime a ;
-    a.set_dd(1);
-    a.set_mt(month);
-    a.set_yy(year);
-    a.set_hh(0);
-    a.set_mm(0);
-    int FirstDayOfMonth = Get_Weekday(a);
-    
-    UiDrawCalendarWithoutTime(x , y,rowpadding , colpadding,DateString);
-    
-    int H = hours; 
-    int M = ((minute + 14) / 15) * 15; 
-    
-    // Nếu phút nhảy lên 60 thì reset về 0 và tăng 1 giờ
-    if (M == 60) {
-        M = 0;
-        H = (H + 1) % 24; // Nếu 23h thì vòng lại 0h
-    }
-    
-    DateTime ChossenDay = StringtoTime(DateString);
-    
-    // Nếu đang ở tháng hiện tại, mốc nhỏ nhất là realToday. Nếu là tháng tương lai, mốc nhỏ nhất là 1.
-    int D = ChossenDay.get_dd() ;
-
-    int minDay = (!CanPast && month == realMonth && year == realYear) ? realToday : 1;
-    
-    int initial_cx = x + rowpadding * ((FirstDayOfMonth + D - 1) % 7);
-    int initial_cy = y + ((FirstDayOfMonth + D - 1) / 7) * colpadding + 5;
-
-    Gotoxy(initial_cx - 3, initial_cy); cout << "[";
-    Gotoxy(initial_cx + 3, initial_cy); cout << "]";
-    
+int GetKey(int chosen,int count){
     while(true){
-        int ch ;
-        NavKey key = GetNavKey(ch);
-        int old_cx = x + rowpadding * ((FirstDayOfMonth + D - 1) % 7);
-        int old_cy = y + ((FirstDayOfMonth + D - 1) / 7) * colpadding + 5;
-        
-        Gotoxy(old_cx - 3, old_cy); cout << " "; 
-        Gotoxy(old_cx + 3, old_cy); cout << " ";
-        Gotoxy(old_cx, old_cy);
-        
-
-        if (month == realMonth && year == realYear) {
-            if (D < realToday) cout << GRAY << D << RESET; 
-            else if (D == realToday) cout << GREEN << D << RESET;
-            else cout << D;
-        }else if (year < realYear || (year == realYear && month < realMonth)) {
-            cout << GRAY << D << RESET; // Thêm dòng này
-        }else {
-            cout << D; // Tháng tương lai thì in màu trắng bình thường
+        NavKey key = GetNavKey();
+        switch (key) {
+            case NAV_UP:
+                chosen = (chosen - 1 >= 0) ? chosen - 1 : count - 1;
+                return chosen;
+            case NAV_DOWN:
+                chosen = (chosen + 1 < count) ? chosen + 1 : 0;
+                return chosen;
+            case NAV_ENTER:
+                return 999; 
+            case NAV_ESC:
+                return 1000; // Thoát không chọn
         }
-
-        if (key == NAV_BACK || key == NAV_ESC || (key == NAV_UNKNOWN && tolower(ch) == 'w')) {
-            DateString = "";
-            return key == NAV_UNKNOWN ? NAV_UP : key;
-        }
-        else if (key == NAV_RIGHT) {
-            if (D < Days_In_Month) D++;
-        } 
-        else if (key == NAV_LEFT) {
-            if (D > 1) {
-                D = max(minDay, D - 1); 
-            }
-        }
-        else if (key == NAV_DOWN) {
-            if (D + 7 <= Days_In_Month) D += 7;
-            else {
-                ChossenDay.set_dd(D); 
-                Gotoxy(old_cx - 3, old_cy); cout << "["; 
-                Gotoxy(old_cx + 3, old_cy); cout << "]";
-                Gotoxy(old_cx, old_cy);
-                cout << CYAN << D << RESET;
-                DateString = ToStringDate(ChossenDay);
-                break;
-            }            
-        }
-        else if (key == NAV_UP) {
-            // Đã fix: Dùng minDay để chặn nhảy lên tuần quá khứ
-            if ((D - 7) >= minDay) D -= 7;
-        }
-        else if (key == NAV_ENTER){
-            ChossenDay.set_dd(D);
-            ChossenDay.set_hh(H);
-            ChossenDay.set_mm(M); 
-            Gotoxy(old_cx - 3, old_cy); cout << "["; 
-            Gotoxy(old_cx + 3, old_cy); cout << "]";
-            Gotoxy(old_cx, old_cy);
-            cout << CYAN << D << RESET;
-            DateString = ToStringDate(ChossenDay);
-            return NAV_ENTER;
-        }
-        else if (key == NAV_UNKNOWN && tolower(ch) == 'd') {
-            ChossenDay.set_dd(Days_In_Month); 
-            DateString = NextDay(ChossenDay); 
-            return NAV_RIGHT; 
-        }
-        else if (key == NAV_UNKNOWN && tolower(ch) == 'a') {
-            int current_d = ChossenDay.get_dd(); 
-            int m = ChossenDay.get_mt() - 1;
-            int y = ChossenDay.get_yy();
-            
-            if (m < 1) { m = 12; y--; }
-            
-            int maxDays = daysInMonth(m, y);
-            if (current_d > maxDays) current_d = maxDays;
-            
-            DateTime temp = ChossenDay;
-            temp.set_dd(current_d);
-            temp.set_mt(m);
-            temp.set_yy(y);
-            
-            string prevMonthStr = ToStringDate(temp); 
-            
-            // Kiểm tra xem ngày tính ra có bị rơi vào quá khứ không?
-            if (!CanPast && IsGreaterTime(time_now(), prevMonthStr) == 1) { 
-                // Nếu lùi về TRÚNG tháng hiện tại ngoài đời -> Bẻ nó về đúng ngày hôm nay
-                if (m == realMonth && y == realYear) {
-                    temp.set_dd(realToday);
-                    DateString = ToStringDate(temp);
-                    return NAV_LEFT;
-                }
-                // Còn nếu lùi về hụt qua hẳn tháng trước (ví dụ tháng 4) -> Bị chặn, không làm gì cả
-            } else {
-                // Tương lai hợp lệ -> Nhảy lịch bình thường
-                DateString = prevMonthStr;
-                return NAV_LEFT;
-            }
-        }
-        
-        int new_cx = x + rowpadding * ((FirstDayOfMonth + D - 1) % 7);
-        int new_cy = y + ((FirstDayOfMonth + D - 1) / 7) * colpadding + 5;
-        
-        Gotoxy(new_cx - 3, new_cy); cout << "[";
-        Gotoxy(new_cx + 3, new_cy); cout << "]";
     }
-    return NAV_UNKNOWN;   
 }
 
 string TranFormSatus(int st){
      string SelectedColors[] = {RED, GREEN, YELLOW, CYAN};
      return SelectedColors[st];
-}
-
-string TranFormGender(int st){
-     string SelectedColors[] = {"Nam","Nữ"};
-     return SelectedColors[st];
-}
-
-
-int visualLength(const string& s) {
-    int length = 0;
-    bool inCode = false;
-    for (size_t i = 0; i < s.length(); i++) {
-        if (s[i] == '\033') {
-            inCode = true;
-            continue; 
-        }
-
-        if (inCode) {
-            if (isalpha((unsigned char)s[i])) {
-                inCode = false;
-            }
-            continue;
-        }
-        if ((unsigned char)(s[i] & 0xc0) != 0x80) {
-            length++;
-        }
-    }
-    return length;
-}
-
-// Hàm bổ trợ để vẽ lại nội dung nhập liệu (hỗ trợ căn giữa)
-void RedrawInput(string result, int x, int y, int maxLength, char placeholder, bool isCenter,bool isHighlight,string SugestionStr) {
-    // 1. Xóa sạch vùng nhập liệu cũ bằng placeholder
-    Gotoxy(x, y);
-    if (isHighlight) cout << HIGHLIGHT; // Bật màu nền nếu cần
-    cout << string(maxLength, placeholder);
-    if (isHighlight) cout << RESET;
-
-    // 2. Tính toán vị trí x bắt đầu in dựa trên visualLength 
-    int printX = x;
-    if (isCenter) {
-        int vLen = visualLength(result + SugestionStr); 
-        printX = x + (maxLength - vLen) / 2;
-    }
-
-    // 3. In kết quả thực tế lên màn hình
-    Gotoxy(printX, y);
-    if (isHighlight) cout << HIGHLIGHT;
-    cout << result;
-    if (SugestionStr != "") {
-        cout << GRAY << SugestionStr << RESET;
-        if (isHighlight) cout << HIGHLIGHT;
-    }
-    if (isHighlight) cout << RESET;
-    Gotoxy(printX + visualLength(result), y);
-}
-
-int InputStatus(int &result, int x, int y) {
-    string Label[] = {"Huỷ Chuyến", "Còn Vé", "Hết Vé", "Hoàn Tất"};
-    string Color[4];
-    string SelectedColors[] = {RED, GREEN, YELLOW, CYAN};
-    string gap(5, ' '); // Khoảng cách giữa 2 lựa chọn
-
-    while (true) {
-        // LUÔN ĐƯA CON TRỎ VỀ VỊ TRÍ CŨ TRƯỚC KHI IN
-        Gotoxy(x, y);
-        for(int i = 0 ; i < 4 ; i++) {
-            if (result == i) {
-                Color[i] = SelectedColors[i];
-            } else {
-                Color[i] = GRAY;
-            }
-        }
-
-        for(int i = 0 ; i < 4 ;i++){
-            cout << Color[i] << SQ << Label[i] << RESET;
-            cout << gap;
-        }
-
-        int ch;
-        NavKey key = GetNavKey(ch); 
-
-        if (key == NAV_UP) return NAV_UP;
-        if (key == NAV_DOWN) return NAV_DOWN;
-        if (key == NAV_ENTER) return NAV_ENTER;
-        if (key == NAV_ESC) return NAV_ESC;
-
-        if (key == NAV_RIGHT) {
-            result = (result + 1 > 3) ? 0 : result + 1; 
-        } else if (key == NAV_LEFT) {
-            result = (result - 1 < 0) ? 3 : result - 1; 
-        }
-    }
-}
-
-
-// Trả về: 0 (ESC), 1 (ENTER), 2 (UP), 3 (DOWN)
-int InputString(string &result, int x, int y, int maxLength, char placeholder, bool onlyNumbers, bool isCenter, bool isHighlight, bool isUppercase,bool isonlychar, bool canspace ) {
-    // Vẽ lần đầu tiên
-    RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-
-    while (true) {
-        int ch;
-        NavKey key = GetNavKey(ch); 
-
-        if (key != NAV_UNKNOWN && key != NAV_BACK) return key;
-
-        if (key == NAV_BACK) {
-            if (!result.empty()) {
-                unsigned char c = (unsigned char)result.back();
-                // Từ 0 đến 127 là mã ASCII chuẩn
-                // 128 đến 255 là mã ASCII có chứa tiếng việt có dấu 
-                // 0x80 là 128 
-                if (c >= 0x80) { // Nếu xoá chữ tiếng việt thì vào vòng này để xoá các bit cuối trước
-                    // unsigned char thực hiện không dấu ( từ 0 đến 255) bit k dấu
-                    // char có bit dấu từ (-128 đến 127) nếu 1 ký tự có bit 1 đầu tiên -> đây là bit dấu âm 
-                    // 0xc0 (hex) -> bin 11000000 AND 1 
-                    // result.back() && 0xc0 lấy byte cuối , để 6 bit cuối là 0 , giữ lại 2 bit đầu
-                    // 0x80 (hex) -> bin 10|000000
-                    // "â" trong tiếng việt có 2 byte , result.pop_back() chỉ xoá đi 1 byte ở byte đuôi, byte đầu còn nằm trong chuỗi
-                    // 2 loại byte , byte đầu luôn là 0, 01, 011,...
-                    // byte cuối luôn bắt đầu bằng 10...
-                    // Dòng while ở dưới để xoá byte đuôi 
-                    while (!result.empty() && ((unsigned char)result.back() & 0xc0) == 0x80) {
-                        result.pop_back();
-                    }
-                }
-                if (!result.empty()) result.pop_back(); // Sau khi xoá byte đuôi thì xoá byte đầu 
-                
-                RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-            }
-        } 
-        else if (visualLength(result) < maxLength) {
-            if (result.empty() && ch == ' ') continue;
-            if (!canspace && ch == ' ') continue ; 
-            if(!result.empty() && result.back() == ' ' && ch == ' ') continue;
-            // Phân loại xử lý dựa trên bảng mã ASCII (0-127) và UTF-8 (>= 128)
-            if ((unsigned char)ch < 128) {
-                // VÙNG ASCII (Ký tự tiếng Anh, số, dấu)
-                
-                // Ràng buộc số và chữ
-                if (onlyNumbers && !isdigit(ch)) continue; 
-                if (isonlychar && isdigit(ch)) continue;
-                
-                if (ch != ' ' && ch != '-' && !isalnum(ch)) continue; 
-
-                char finalChar = (isUppercase) ? (char)toupper(ch) : (char)ch;
-                result += finalChar;
-
-            } else {
-                // UTF-8 (Byte của tiếng Việt có dấu, ký tự đặc biệt)
-                if (!canspace && ch == ' ') continue ; 
-                if (onlyNumbers) continue; // Nếu chỉ nhập số thì chặn luôn các ký tự UTF-8
-                
-                result += (char)ch;
-            }
-
-            RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-        }
-    }
 }
 
 int InputGender(int &result, int x, int y) {
@@ -812,333 +160,7 @@ int InputGender(int &result, int x, int y) {
     }
 }
 
-int InputDateTime(string &result, int x, int y, int maxLength , char placeholder, bool isCenter, bool isHighlight, int errX, int errY) {
-    string errMsg = "";
-    RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-    if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1);
 
-    while (true) {
-        int ch;
-        NavKey key = GetNavKey(ch); 
-        errMsg = ""; 
-
-        if (key == NAV_ENTER) {
-            if (visualLength(result) < 16) {
-                errMsg = "Lỗi: Vui lòng nhập đầy đủ thời gian (dd/mm/yyyy hh:mm)!";
-                if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1);
-                Gotoxy(errX, errY);
-                cout << errMsg;
-                RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-                continue; 
-            }
-             if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1);
-            return key;
-        }
-
-        if (key != NAV_UNKNOWN && key != NAV_BACK) {
-             if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1);
-            return key;
-        }
-
-        if (key == NAV_BACK) { 
-            if (!result.empty()) {
-                char last = result.back();
-                if (last == '/' || last == ' ' || last == ':') {
-                    result.pop_back();
-                }
-                if (!result.empty()) {
-                    result.pop_back();
-                }
-                if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1); 
-                RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-            }
-            continue;
-        } 
-        
-        if (visualLength(result) < 16) {
-            if (!isdigit(ch)) continue; 
-
-            int len = visualLength(result);
-            
-            // Cắt chuỗi lấy thời gian hiện tại
-            string now_str = time_now();
-            int curDay   = GetDayFromStr(now_str);
-            int curMonth = GetMonthFromStr(now_str);
-            int curYear  = GetYearFromStr(now_str);
-            int curHour  = GetHourFromStr(now_str);
-            int curMin   = GetMinuteFromStr(now_str);
-
-            // 1. Kiểm tra Ngày
-            if (len == 0 && (ch < '0' || ch > '3')) { errMsg = "Lỗi: Ngày phải bắt đầu từ 0 đến 3"; }
-            if (len == 1) {
-                if (result[0] == '3' && (ch < '0' || ch > '1')) { errMsg = "Lỗi: Ngày không hợp lệ!"; }
-                if (result[0] == '0' && ch == '0') { errMsg = "Lỗi: Ngày không thể là 00!"; }
-            }
-
-            // 2. Kiểm tra Tháng
-            if (len == 3 && (ch < '0' || ch > '1')) { errMsg = "Lỗi: Tháng phải bắt đầu từ 0 hoặc 1!"; }
-            if (len == 4) {
-                if (result[3] == '1' && (ch < '0' || ch > '2')) { errMsg = "LỗiP: Tháng không hợp lệ!"; }
-                if (result[3] == '0' && ch == '0') { errMsg = "Lỗi: Tháng không thể là 00!"; }
-
-                int d = (result[0] - '0') * 10 + (result[1] - '0');
-                int m = (result[3] - '0') * 10 + (ch - '0');
-                if (d == 31 && (m == 2 || m == 4 || m == 6 || m == 9 || m == 11)) { errMsg = "Loi: Thang nay khong co ngay 31!"; }
-                if (d >= 30 && m == 2) { errMsg = "Lỗi: Tháng 2 không có ngày 30, 31!"; }
-            }
-
-            // 3. Kiểm tra Năm (Bỏ giới hạn 1900-2100, chỉ chặn năm quá khứ)
-            if (len >= 6 && len <= 9) {
-                int y_prefix = 0;
-                int cur_prefix = 0;
-                
-                // So sánh từng chữ số được gõ với tiền tố của năm hiện tại
-                if (len == 6) {
-                    y_prefix = ch - '0';
-                    cur_prefix = curYear / 1000;
-                } else if (len == 7) {
-                    y_prefix = (result[6] - '0') * 10 + (ch - '0');
-                    cur_prefix = curYear / 100;
-                } else if (len == 8) {
-                    y_prefix = (result[6] - '0') * 100 + (result[7] - '0') * 10 + (ch - '0');
-                    cur_prefix = curYear / 10;
-                } else if (len == 9) {
-                    y_prefix = (result[6] - '0') * 1000 + (result[7] - '0') * 100 + (result[8] - '0') * 10 + (ch - '0');
-                    cur_prefix = curYear;
-
-                    // Nếu gõ xong năm thì tiện thể kiểm tra luôn năm nhuận và ngày/tháng quá khứ
-                    int d = (result[0] - '0') * 10 + (result[1] - '0');
-                    int m = (result[3] - '0') * 10 + (result[4] - '0');
-                    
-                    if (d == 29 && m == 2) {
-                        bool isLeap = (y_prefix % 400 == 0) || (y_prefix % 4 == 0 && y_prefix % 100 != 0);
-                        if (!isLeap) { errMsg = "Lỗi: Năm bạn nhập không phải là năm nhuận!"; }
-                    }
-
-                    if (y_prefix == curYear && (m < curMonth || (m == curMonth && d < curDay))) {
-                        errMsg = "Lỗii: Không được nhập ngày tháng trong quá khứ!";
-                    }
-                }
-
-                // Nếu bất kỳ lúc nào tiền tố đang gõ nhỏ hơn tiền tố năm nay -> Chắc chắn là năm quá khứ
-                if (y_prefix < cur_prefix) {
-                    errMsg = "Lỗi: Năm không được trong quá khứ!";
-                }
-            }
-
-            // 4. Kiểm tra Giờ & Quá khứ
-            if (len == 11 && (ch < '0' || ch > '2')) { errMsg = "Lỗi: Giờ phải bắt đầu từ 0 đến 2!"; }
-            if (len == 12) {
-                if (result[11] == '2' && (ch < '0' || ch > '3')) { errMsg = "Lỗi: Giờ tối đa là 23!"; }
-
-                int d = (result[0] - '0') * 10 + (result[1] - '0');
-                int m = (result[3] - '0') * 10 + (result[4] - '0');
-                int y_input = stoi(result.substr(6, 4));
-                int h = (result[11] - '0') * 10 + (ch - '0');
-
-                if (y_input == curYear && m == curMonth && d == curDay && h < curHour) {
-                    errMsg = "Lỗi: Giờ này đã qua rồi, vui lòng nhập giờ khác!";
-                }
-            }
-
-            // 5. Kiểm tra Phút & Quá khứ
-            if (len == 14) {
-                if (ch != '0' && ch != '1' && ch != '3' && ch != '4') { 
-                    errMsg = "Lỗi: Phút chỉ được là 00, 15, 30 hoặc 45!"; 
-                }
-            }
-            if (len == 15) {
-                if ((result[14] == '0' && ch != '0') || 
-                    (result[14] == '1' && ch != '5') || 
-                    (result[14] == '3' && ch != '0') || 
-                    (result[14] == '4' && ch != '5')) {
-                    errMsg = "Lỗi: Phút chỉ được là 00, 15, 30 hoặc 45!";
-                } else {
-                    int d = (result[0] - '0') * 10 + (result[1] - '0');
-                    int m = (result[3] - '0') * 10 + (result[4] - '0');
-                    int y_input = stoi(result.substr(6, 4));
-                    int h = stoi(result.substr(11, 2));
-                    int minVal = (result[14] - '0') * 10 + (ch - '0');
-
-                    if (y_input == curYear && m == curMonth && d == curDay && h == curHour && minVal < curMin) {
-                        errMsg = "Lỗi: Thời gian này đã trôi qua rồi!";
-                    }
-                }
-            }
-
-            // Xử lý hiển thị hoặc nạp ký tự
-            if (!errMsg.empty() && errX != -1 && errY != -1) {
-                ClearRegion(errX, errY, 60, 1);
-                Gotoxy(errX, errY);
-                cout << RED << errMsg << RESET;
-                RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-                continue; 
-            }
-
-             if(errX != -1 && errY != -1)ClearRegion(errX, errY, 60, 1); 
-            
-            result += (char)ch;
-
-            len = visualLength(result); 
-            if ((len == 2 || len == 5) && len < maxLength) {
-                result += '/';
-            } else if (len == 10 && len < maxLength) {
-                result += ' ';
-            } else if (len == 13 && len < maxLength) {
-                result += ':';
-            }
-
-            RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-        }
-    }
-}
-
-int InputStringSBD(string &result, int x, int y, int maxLength, char placeholder, bool isCenter, bool isHighlight) {
-    // Vẽ lần đầu tiên
-    bool isonlychar = true ;
-    bool isUppercase = false ;
-    string u = "";
-    RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight);
-
-    while (true) {
-        int ch;
-        NavKey key = GetNavKey(ch); 
-        bool isChanged = false;
-        if(key == NAV_ENTER){
-            if(result.empty()) return key;
-            listSBD tmp = Find_SBD_OnRage(dsSBD, const_cast<char*>(result.c_str()));
-            result = tmp.list[0].sbDich;
-            return key ;
-        }
-        if (key != NAV_UNKNOWN && key != NAV_BACK) return key;
-
-        if (key == NAV_BACK) {
-            if (!result.empty()) {
-                unsigned char c = (unsigned char)result.back();
-                if (c >= 0x80) {
-                    while (!result.empty() && ((unsigned char)result.back() & 0xc0) == 0x80) {
-                        result.pop_back();
-                    }
-                }
-                if (!result.empty()) result.pop_back();
-                
-               isChanged = true;
-            }
-        } 
-        else if (visualLength(result) < maxLength) {
-            if (result.empty() && ch == ' ') continue;
-            // Phân loại xử lý dựa trên bảng mã ASCII (0-127) và UTF-8 (>= 128)
-            if ((unsigned char)ch < 128) {
-                // VÙNG ASCII (Ký tự tiếng Anh, số, dấu)
-                
-                // Ràng buộc số và chữ
-                if (isonlychar && isdigit(ch)) continue;
-                
-                if (ch != ' ' && ch != '-' && !isalnum(ch)) continue; 
-
-                char finalChar = (isUppercase) ? (char)toupper(ch) : (char)ch;
-                result += finalChar;
-
-            } else {
-                // UTF-8 (Byte của tiếng Việt có dấu, ký tự đặc biệt)
-                result += (char)ch;
-            }
-            isChanged = true;
-           
-        }
-        if (isChanged) {
-            if (result.empty()) {
-                u = "";
-            } else {
-                listSBD tmp = Find_SBD_OnRage(dsSBD, const_cast<char*>(result.c_str()));
-                
-                if (tmp.slSBD > 0) {
-                    string match = tmp.list[0].sbDich; // match, u chuỗi màu xám gợi ý
-                    // t -> t|ân sơn nhất   
-                    if (visualLength(match) >= visualLength(result)) {
-                        u = match.substr(result.length());
-                    } else {
-                        u = "";
-                    }
-                } else {
-                    u = "";
-                }
-            }
-        }
-        RedrawInput(result, x, y, maxLength, placeholder, isCenter, isHighlight,u);
-    }
-}
-
-
-// Hàm này trả về số byte và độ dài hiển thị của một dòng con trong chuỗi text bắt đầu từ startByte, với độ rộng tối đa maxWidth
-LineInfo getLineInfo(const string& text, int startByte, int maxWidth) {
-    int bytes = 0;
-    int visual = 0;
-    int lastSpaceByte = -1;
-    int lastSpaceVisual = -1;
-    int textLen = text.length();
-    bool inANSI = false;
-
-    int i = startByte;
-    while (i < textLen) {
-        // Kiểm tra bắt đầu mã ANSI
-        if (text[i] == '\033') {
-            inANSI = true;
-        }
-
-        if (inANSI) {
-            bytes++;
-            // Mã ANSI kết thúc bằng chữ cái (thường là 'm')
-            if (isalpha((unsigned char)text[i])) inANSI = false;
-            i++;
-            continue; // Không tăng visual khi đang ở trong mã ANSI
-        }
-
-        unsigned char c = (unsigned char)text[i];
-        int step = 1;
-        if (c >= 192) {
-            if (c >= 240) step = 4; //Emoji
-            else if (c >= 224) step = 3; // Tiếng Việt , Trung Hàn
-            else step = 2; //các chữ có dấu cơ bản
-        }
-
-        // Nếu thêm 1 ký tự visual mà vượt quá maxWidth
-        if (visual + 1 > maxWidth) {
-            if (lastSpaceByte != -1) {
-                return { lastSpaceByte - startByte, lastSpaceVisual };
-            }
-            return { bytes, visual };
-        }
-
-        if (c == ' ') {
-            lastSpaceByte = i + step; // Bao gồm cả khoảng trắng để substr cắt đúng
-            lastSpaceVisual = visual + 1;
-        }
-
-        bytes += step;
-        visual += 1;
-        i += step;
-    }
-    return { bytes, visual };
-}
-//Ham này đếm số dòng cần thiết để hiển thị toàn bộ text trong một hộp có độ rộng innerWidth, dựa trên việc gọi getLineInfo liên tục cho đến hết text
-// innerWidth là độ rộng thực tế bên trong hộp, đã trừ đi 2 ký tự viền
-int countLinesNeeded(const string& text, int innerWidth) {
-    if (innerWidth <= 0) return 0;
-    int count = 0;
-    int currentByte = 0;
-    int textLen = text.length();
-
-    while (currentByte < textLen) {
-        LineInfo info = getLineInfo(text, currentByte, innerWidth);
-        if (info.byteCount == 0) break;
-        currentByte += info.byteCount;
-        while (currentByte < textLen && text[currentByte] == ' ') currentByte++;
-        
-        count++;
-    }
-    return count;
-}
 
 void ClearRegion(int x, int y, int width, int height) {
     string blank(width, ' '); // Tạo sẵn chuỗi khoảng trắng
@@ -1147,124 +169,6 @@ void ClearRegion(int x, int y, int width, int height) {
         cout << blank; 
     }
     Gotoxy(x,y);
-}
-
-void PrintBox(string text, bool ABOVE , bool UNDER ){
-    //Tính khoảng trắng lề trái để đẩy toàn bộ khung ra giữa màn hình
-    int marginLeft = (TotalWidth > boxWidth) ? (TotalWidth - boxWidth)/2 : 0;
-    string margin = string(marginLeft,' ');   // Tạo chuỗi khoảng trắng đẩy lề
-    string line = "";               // Tạo chuỗi đường kẻ ngang cho viền trên và dưới
-    for(int i=0;i<boxWidth-2;i++) line += "═";
-    // Chèn khoảng trắng lề trái vào trước viền trên và dưới
-    string above , under ;
-    ABOVE ? above = margin + "╔" + line + "╗" : above = margin + "║" + string(boxWidth-2,' ') + "║";
-    UNDER ? under = margin + "╚" + line + "╝" : under = margin + "║" + string(boxWidth-2,' ') + "║";
-    // Tính toán để căn giữa phần chữ bên trong khung
-    int textLen = visualLength(text);
-    int padleft = (boxWidth - 2 - textLen)/2 ;
-    int padright = boxWidth - 2 - textLen - padleft ;
-    cout << above << endl ; 
-    cout << margin << "║" << string(padleft,' ') << text << string(padright,' ') << "║" << endl ;
-    cout << under << endl ;
-}
-int GetKey(int chosen,int count){
-    while(true){
-        NavKey key = GetNavKey();
-        switch (key) {
-            case NAV_UP:
-                chosen = (chosen - 1 >= 0) ? chosen - 1 : count - 1;
-                return chosen;
-            case NAV_DOWN:
-                chosen = (chosen + 1 < count) ? chosen + 1 : 0;
-                return chosen;
-            case NAV_ENTER:
-                return 999; 
-            case NAV_ESC:
-                return 1000; // Thoát không chọn
-        }
-    }
-}
-
-void PrintMultiLineText(int startX, int startY, const string& text) {
-    stringstream ss(text);
-    string line;
-    int currentY = startY;
-
-    // Tách chuỗi theo từng ký tự '\n'
-    while (getline(ss, line, '\n')) {
-        Gotoxy(startX, currentY); // Di chuyển đến đúng tọa độ X, và Y hiện tại
-        cout << line;
-        currentY++;               // Tăng Y lên cho dòng tiếp theo
-    }
-}
-
-void SmallBox(string text, int Width, int Height, string color) {
-    SmallBox(text, true, true, true, true, Width, Height, color); // Gọi hàm gốc với các giá trị mặc định
-}
-
-// Hàm này dùng để vẽ một hộp nhỏ với nhiều tùy chọn hơn như có/không cạnh trên/dưới/trái/phải, chiều cao, chiều rộng và màu sắc của text
-void SmallBox(string text, bool ABOVE, bool UNDER, bool LEFT, bool RIGHT,int Width, int Height, string color ) {
-    int startX = whereX();
-    int startY = whereY();
-    int innerWidth = Width - 2;
-    if (innerWidth <= 0) return;
-
-    int totalLinesNeeded = countLinesNeeded(text, innerWidth); // số ký tự tối đa hiển thị trên 1 hàng 
-    int actualLinesToPrint = (totalLinesNeeded > Height) ? Height : totalLinesNeeded;
-    int startTextRow = (Height - actualLinesToPrint) / 2; // canh giữa 
-
-    string lineBorder = "";
-    for (int i = 0; i < innerWidth; i++) lineBorder += HZ;
-
-    // --- 1. Vẽ cạnh trên ---
-    if (ABOVE) {
-        Gotoxy(startX, startY);
-        // Nếu không có LEFT/RIGHT thì dùng HZ để nối dài đường kẻ
-        cout << RESET << (LEFT ? TLC : HZ) << lineBorder << (RIGHT ? TRC : HZ);
-    }
-
-    // --- 2. Vẽ phần thân ---
-    int bodyStartRow = startY + (ABOVE ? 1 : 0);
-
-    for (int i = 0; i < Height; i++) {
-        Gotoxy(startX, bodyStartRow + i);
-        
-        cout << RESET; 
-        if (LEFT) cout << VT; else cout << " "; // Nếu không có cạnh trái, để trống để không đè hộp bên cạnh
-
-        if (i >= startTextRow && i < startTextRow + actualLinesToPrint) {
-            int currentBytePos = 0; // byte hiện tại 
-            int tempPos = 0; // vị trị
-            for(int j = 0; j < i - startTextRow; j++) {
-                tempPos += getLineInfo(text, tempPos, innerWidth).byteCount; // Tính vị trí 1 chữ hoàn chỉnh dính liền để xuống 
-                while (tempPos < text.length() && text[tempPos] == ' ') tempPos++; // vị trí cắt
-            }
-            
-            if (tempPos < text.length()) {
-                LineInfo info = getLineInfo(text, tempPos, innerWidth);
-                string currentLine = text.substr(tempPos, info.byteCount);
-                int padLeft = (innerWidth - info.visualWidth) / 2;
-                int padRight = innerWidth - info.visualWidth - padLeft;
-                cout << string(padLeft, ' ') << color << currentLine << RESET << string(padRight, ' ');
-            } else cout << string(innerWidth, ' ');
-            
-        } else {
-            cout << string(innerWidth, ' ');
-        }
-
-        cout << RESET;
-        if (RIGHT) cout << VT; else cout << " ";
-    }
-
-    // --- 3. Vẽ cạnh dưới ---
-    int footerRow = bodyStartRow + Height;
-    if (UNDER) {
-        Gotoxy(startX, footerRow);
-        cout << RESET << (LEFT ? BLC : HZ) << lineBorder << (RIGHT ? BRC : HZ);
-    }
-
-    // Đưa con trỏ về dòng cuối cùng đã vẽ để whereY() của hộp sau trả về đúng vị trí đó
-    Gotoxy(startX, footerRow); 
 }
 
 // Hàm phục vụ MB trở xuống
@@ -1335,26 +239,30 @@ NavKey CustomerAddMB() {
                 
                 // --- Đã điền đủ: Tiến hành kiểm tra logic và hỏi lưu ---
                 int soCho = stoi(inputs[2]);
-                if (soCho < 20 || soCho > socho_max) {
+                MB* NewMB = new MB; 
+                strcpy(NewMB->soHieuMB, inputs[0].c_str());
+                strcpy(NewMB->loaiMB, inputs[1].c_str());
+                NewMB->socho = soCho;
+                string error = Can_Add_MB(dsMB,dsCB, NewMB);
+                if (error != "0"){
                     Gotoxy(startX + 5, formY + 12);
-                    cout << RED << "Lỗi: Số chỗ phải từ 20 đến " << socho_max << "! Bấm phím bất kỳ..." << RESET;
+                    if(error == "1"){
+                        cout << RED << "Lỗi: Danh sách chuyến bay đã đầy!" << RESET;  
+                    }else if(error == "5" || error == "4" ){
+                        cout << RED << "Lỗi: Số chỗ phải từ 20 đến " << socho_max << "! Bấm phím bất kỳ..." << RESET;
+                        currentField = 2; // Ép con trỏ nhảy về ô Số chỗ để sửa
+                    }else if(error == "2"){
+                        cout << RED << "Lỗi: Số hiệu [" << inputs[0] << "] đã tồn tại! Bấm phím bất kỳ..." << RESET;
+                        currentField = 0; 
+                    }
+                    delete NewMB ;
                     _getch(); 
-                    currentField = 2; // Ép con trỏ nhảy về ô Số chỗ để sửa
                     continue;
+                    Gotoxy(startX, formY + 15);
+                    SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
                 }
 
                 Gotoxy(startX, formY + 15);
-               
-                if (Find_MB(dsMB, const_cast<char*>(inputs[0].c_str())) != -1) { 
-                    Gotoxy(startX + 15, formY + 12);
-                    cout << RED << "Lỗi: Số hiệu [" << inputs[0] << "] đã tồn tại! Bấm phím bất kỳ..." << RESET;
-                    _getch(); 
-                    
-                    Gotoxy(startX, formY + 15);
-                    SmallBox("ENTER/DOWN: Tiếp tục - UP: Lên trên - ESC: Hủy", (int)width, (int)3, (string)WHITE);
-                    currentField = 0; 
-                    continue;
-                }
                 SmallBox("Xác nhận thêm máy bay này? (ENTER: Đồng ý - ESC: Quay lại sửa)", (int)width, (int)3, (string)YELLOW);
                 
                 bool isConfirm = false;
@@ -1379,10 +287,7 @@ NavKey CustomerAddMB() {
                     SmallBox("ĐANG LƯU DỮ LIỆU...", (int)width, (int)3, (string)GREEN);
 
                     Gotoxy(startX + 12, formY + 18);
-                    MB* NewMB = new MB; 
-                    strcpy(NewMB->soHieuMB, inputs[0].c_str());
-                    strcpy(NewMB->loaiMB, inputs[1].c_str());
-                    NewMB->socho = soCho;
+                  
                     Add_MB(dsMB, NewMB);
                     cout << YELLOW << "Đã lưu thành công! Nhấn phím bất kỳ để tiếp tục, ESC để thoát." << RESET;
                   
@@ -1523,6 +428,13 @@ NavKey CustomerAddCB() {
     string gap(5, ' '); // Khoảng cách giữa 2 lựa chọn
     int size = 4 ;
     string o = "Hãy Chọn Máy Bay";
+    string tutorial[] = {"Khi đang chọn ngày hãy :","+ W để nhảy lên ", "+ D tháng sau","+ A tháng trước","+ Chú ý tắt Unikey","+ Backspace để bỏ qua ngày"};
+    for(int i = 0 ; i < 6;i++){
+        int start = 2;
+        if(i != 0) start = 3;
+        Gotoxy(start,15 + i);
+        cout << GRAY << tutorial[i] << RESET;
+    }
     // Đổi khoảng cách từ (i * 4) thành (i * 2)
     for (int i = 0; i < size; i++) {
        
@@ -1695,24 +607,19 @@ NavKey CustomerAddCB() {
                 string error_code = Can_Add_CB(dsCB, dsMB, NewCB);
                 if(error_code != "0") {
                     Gotoxy(startX+1, formY + 20);
+                    string u ;
                     if(error_code == "1") {
-                        string u = "Lỗi: Số hiệu [" + inputs[3] + "] không tồn tại!";
-                        SmallBox(u,false,true,true,false,width-2,3,RED); // tính cả hai cái viền của box xung quanh
-                    }
-                    else if(error_code == "2") {
-                        string u = "Lỗi: Máy bay có số hiệu [" + inputs[3] + "] đang thực hiện chuyến bay khác vào thời điểm này! hãy đặt cách nhau 24h giữa 2 chuyến bay có cùng số hiệu máy bay.";
-                        SmallBox(u,false,true,false,false,width-2,3,RED);
-                    }
-                    else if(error_code == "3") {
-                        string u = "Lỗi: Trùng mã chuyến bay!";
-                        SmallBox(u,false,true,false,false,width-2,3,RED);
+                        u = "Lỗi: Số hiệu [" + inputs[3] + "] không tồn tại!";
+                    }else if(error_code == "2") {
+                        u = "Lỗi: Máy bay có số hiệu [" + inputs[3] + "] đang thực hiện chuyến bay khác vào thời điểm này! hãy đặt cách nhau 24h giữa 2 chuyến bay có cùng số hiệu máy bay.";
+                    }else if(error_code == "3") {
+                        u = "Lỗi: Trùng mã chuyến bay!";
                     }else if(error_code == "4") {
-                        string u = "Lỗi: Không được đặt số vé khởi tạo lớn hơn số chỗ của máy bay [" + inputs[3] + "]";
-                        SmallBox(u,false,true,false,false,width-2,3,RED);
+                        u = "Lỗi: Không được đặt số vé khởi tạo lớn hơn số chỗ của máy bay [" + inputs[3] + "]";
                     }else if( error_code == "5"){
-                        string u = "Lỗi: Không được đặt số vé khởi tạo nhỏ hơn 20!";
-                        SmallBox(u,false,true,false,false,width-2,3,RED);
+                        u = "Lỗi: Không được đặt số vé khởi tạo nhỏ hơn 20!";
                     }
+                    SmallBox(u,false,true,true,false,width-2,3,RED); // tính cả hai cái viền của box xung quanh
                     delete NewCB; 
                     _getch(); 
                     ClearRegion(startX+1, formY + 20, width-2, 3);
@@ -2587,27 +1494,6 @@ void UiThongTinHK(int x, int y, int width, int height, string s) {
     cout << "Phái: ";
     Gotoxy(startX + 9, formY + 4);
     cout << (ThisHK->phai == 0 ? "Nam" : "Nữ");
-}
-
-// Khối hàm thực hiện In danh sách MB và các thao tác sữa xoá ở đây 
-bool SimpleInput(string& res, NavKey key, int& ch, int x, int y, int width, bool canspace, bool onlyNums) {
-    bool isChanged = false; 
-    if (key == NAV_BACK && !res.empty()) {
-        res.pop_back();
-        Gotoxy(x, y);
-        cout << res << "  ";
-        isChanged = true;
-    } 
-    else if (visualLength(res) < width && (( (!res.empty() && res.back() != ' ' && ch == ' ') || ((isalnum(ch) || ch == '-') && key == NAV_UNKNOWN) ) )) { 
-        if ((char)ch == ' ' && !canspace) return false ; 
-        if (((char)ch < '0' || (char)ch > '9') && onlyNums) return false;
-        if (((char)ch == '-' && res.size() == 0) || ((char)ch == '-' && res.size() > 0 && res[res.size() - 1] == '-')) return false;
-        res += toupper((char)ch); 
-        Gotoxy(x, y);
-        cout << res; 
-        isChanged = true;
-    }
-    return isChanged;
 }
 
 void UiFindMB(string& res, NavKey key, int& ch, listMB& A, int x, int y) {
@@ -3633,40 +2519,9 @@ void View_MB_CB(CB* thisCB){
     t = to_string(dsMB.list[thisMB]->socho);
     SmallBox(t,18,1);
    
-
     _getch();
 }
 
-bool InputSimpleHK(string& res, NavKey key, int& ch,int x,int y) {
-    // Xử lý nút xóa (Backspace)
-    if (key == NAV_BACK && !res.empty()) {
-        if (!res.empty()) {
-                unsigned char c = (unsigned char)res.back();
-                if (c >= 0x80) {
-                    while (!res.empty() && ((unsigned char)res.back() & 0xc0) == 0x80) {
-                        res.pop_back();
-                    }
-                }
-                if (!res.empty()) res.pop_back();
-        }
-        RedrawInput(res,x,y,ho_max + ten_max,' ',false,false);
-        return true;
-    } 
-    else if(visualLength(res) < ho_max + ten_max && key == NAV_UNKNOWN){
-        if(!res.empty() && res.back() == ' ' && ch == ' ') return false;
-        if((unsigned char)ch < 128){ 
-            if(ch != ' ' && ch != '-' && !isalnum(ch)) return false ;
-            res += (char)ch; 
-        }else{
-            res += (char)ch;
-        }
-        RedrawInput(res,x,y,ho_max + ten_max,' ',false,false);
-        return true ;
-    }
-    // Xử lý gõ chữ cái / số
-    
-    return false;
-}
 
 bool UiFindHK(string& res, NavKey key, int& ch, HK**& arrHK, int& totalItems) {
     int X = 20 , Y = 4 ;
@@ -4475,8 +3330,8 @@ start:
         Gotoxy(startX + width1 - 20, formY + 7);
         SmallBox("", 20, 1, string(WHITE));
         Gotoxy(startX + width1 - 18, formY + 8);
-        int curX = whereX();
-        int curY = whereY();
+        int curX = startX + width1 - 18;
+        int curY = formY + 8;
     nhap:
         while (true) {
             currentPage = 0;
@@ -4860,8 +3715,8 @@ start:
         Gotoxy(startX + width1 - 20, formY + 7);
 		SmallBox("", 20, 1, string(WHITE));
         Gotoxy(startX + width1 - 18, formY + 8);
-        int curX = whereX();
-        int curY = whereY();
+        int curX = startX + width1 - 18;
+        int curY = formY + 8;
     nhap:
         while (true) {
             currentPage = 0;
@@ -5014,41 +3869,21 @@ void Tutorial(){
 
 // Phần của các Router và Hàm đồ hoạ giao diện nhìn cơ bản ở đây
 
-void ViewQLMB(){
+void ViewQL(int idx){
+   
+    int A[] = {3,4,2};
     int startX = 1 ;
     int startY = 22;
     int lenght = MenusSize[3];
+    if(idx > 2){
+        ClearRegion(startX,startY,130,7);
+        return ; 
+    }
+    string* Sub = Menus[A[idx]];
     Gotoxy(startX,startY);
     int space = 3 ;
     for(int i = 0 ; i < lenght ;i++){
-        SmallBox(subOptions4[i],20,5);
-        startX = whereX();
-        Gotoxy(startX + 20 + space, startY);
-    }  
-}
-
-void ViewQLCB(){
-    int startX = 1 ;
-    int startY = 22;
-    int lenght = MenusSize[4];
-    Gotoxy(startX,startY);
-    int space = 3 ;
-    for(int i = 0 ; i < lenght ;i++){
-        SmallBox(subOptions5[i],20,5);
-        startX = whereX();
-        Gotoxy(startX + 20 + space, startY);
-    }  
-}
-
-
-void ViewQLHK(){
-    int startX = 1 ;
-    int startY = 22;
-    int lenght = MenusSize[2];
-    Gotoxy(startX,startY);
-    int space = 3 ;
-    for(int i = 0 ; i < lenght ;i++){
-        SmallBox(subOptions3[i],20,5);
+        SmallBox(Sub[i],20,5);
         startX = whereX();
         Gotoxy(startX + 20 + space, startY);
     }  
@@ -5152,9 +3987,7 @@ void Router_Board(int mainMenuIdx, function<void()> func_1,
             Gotoxy(whereX(),whereY() + 1);
         }
         if(mainMenuIdx == 0){ 
-            if(chosen == 0) ViewQLMB();
-            else if(chosen == 1) ViewQLCB() ;
-            else ViewQLHK();
+            ViewQL(chosen);
         }
         // 3. Bắt phím điều khiển
         NavKey key = GetNavKey();
@@ -5314,8 +4147,10 @@ void MainScreen(){
                         "4. Thoát"};
     while(true){
         ClearScreen();
+        Gotoxy(0,0);
         SmallBox("Quản lí chuyến Bay Nội Địa",120,3);
         // nhảy xuống dòng do SmallBox k tự động xuống dòng
+
         Gotoxy(whereX(),whereY()+2);
         int chosen = MainMenuOptionInBoard(options,sizeof(options)/sizeof(string));
         if(chosen >= 0 && chosen <= 1)
