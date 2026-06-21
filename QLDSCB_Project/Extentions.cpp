@@ -695,6 +695,7 @@ void ClearScreen() {
     currentCursorY = 0;
 #endif
 }
+
 void Gotoxy(int x, int y) {
 #ifdef _WIN32
         HANDLE hConsoleOutput;
@@ -825,4 +826,15 @@ int GetTerminalWidth(){
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
         return w.ws_col;
     #endif
+}
+
+CB** ConvertListToArray(listCB& List, int& count){
+    CB** subCB = new CB * [List.slCB];
+    count = 0 ;
+    CB* tempCB = List.head;
+    while (tempCB != NULL) {
+        subCB[count++] = tempCB;
+        tempCB = tempCB->next;
+    }
+    return subCB;
 }

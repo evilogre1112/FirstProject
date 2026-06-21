@@ -133,7 +133,7 @@ void OnlyPrint_List_CB(listCB& dsCB,int size,int CurrentPage, int itemsPerPage, 
 void UiFindCB(string& res, NavKey key, int& ch, listCB& A, listCB& mainList);
 void Render_CB_Page(listCB& danhSach, int currentPage, int itemsPerPage,int size, int Temp[], int Temp2[],int Bin[]);
 void Render_CB_Page(CB** CBSearch, int slCB,int Y,int errX,int errY, int currentPage, int itemsPerPage, int size, int Temp[], int Temp2[], int Bin[]);
-void Get_Input_CB(bool IsHighLight,CB* pageNodes[], int rowOnScreen,int startIndex,int size, int Temp[], int Temp2[] );
+void Get_Input_CB(bool IsHighLight,CB* pageNodes[],int Y, int rowOnScreen,int startIndex,int size, int Temp[], int Temp2[],int Bin[] );
 void It_list_CB(int mod, listCB& A, string res = "", string cmnd = "");
 void View_DSHK_CB(CB* thisCB);
 void View_MB_CB(CB* thisCB);
@@ -149,10 +149,9 @@ void It_list_HK(int mod, string res);
 void    BookTicket();
 void    HuyChuyen();
 NavKey  SeatClear(int x, int y, int xt, int yt, CB* SelectedCB);
-void    CancelTicketByCB();
 void    CancelTicketByHK(int mod, string res = "");
 NavKey  SeatList(int x, int y, int xt, int yt, CB* SelectedCB);
-void    EmptySeatList();
+void    ManageFlightTickets(int mode) ;
 
 
 void RunInNewTab(void (*func)() = [](){});

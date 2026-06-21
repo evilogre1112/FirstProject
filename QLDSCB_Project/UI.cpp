@@ -429,10 +429,11 @@ NavKey CustomerAddCB() {
     int size = 4 ;
     string o = "Hãy Chọn Máy Bay";
     string tutorial[] = {"Khi đang chọn ngày hãy :","+ W để nhảy lên ", "+ D tháng sau","+ A tháng trước","+ Chú ý tắt Unikey","+ Backspace để bỏ qua ngày"};
-    for(int i = 0 ; i < 6;i++){
-        int start = 2;
-        if(i != 0) start = 3;
-        Gotoxy(start,15 + i);
+    int start = 2;
+    Gotoxy(start,15); cout << GRAY << tutorial[0] << RESET;
+    start = 3 ;
+    for(int i = 1 ; i < 6;i++){
+        Gotoxy(start,16 + i);
         cout << GRAY << tutorial[i] << RESET;
     }
     // Đổi khoảng cách từ (i * 4) thành (i * 2)
@@ -714,6 +715,7 @@ int SmallListMCB( string& res, CB* &thisCB, int width, int x, int y, int items, 
         int ch ;
         NavKey key = GetNavKey(ch);
         if(key == NAV_ESC) return NAV_ESC;
+        if(key == NAV_RIGHT) return NAV_RIGHT;
         if(key == NAV_DOWN){
             if (pos_op + here + 1 < A.slCB) { // Nếu chưa chạm đáy danh sách thật
                 if (pos_op + 1 < items) {
@@ -943,6 +945,7 @@ NavKey CustomerAddHK(string cmnd) {
 }
 
 void BookTicket() {
+  
 start:
     realTimeUpdateCB(dsCB, dsHK, dsMB);
     int width = 120;
@@ -970,6 +973,7 @@ start:
 
     int labelX = startX + 2;
     int inputX = startX + 25;
+    
     string labels[] = { "CMND", "Ngày Giờ Khởi Hành", "Sân Bay Đích", "Chuyến Bay", "Số Ghế" };
 
     for (int i = 0; i <= labels->size(); i++) {
@@ -995,6 +999,12 @@ start:
 
     string inputs[5] = { "", "", "", "", "" };
     int currentField = 0;
+    auto Printerr = [&](string u) { // [&] tự động lấy labelX, formY và currentField ở bên ngoài vào
+        Gotoxy(labelX, formY + 10);
+        cout << RED << u << RESET;
+        _getch();
+        ClearRegion(labelX, formY + 10, visualLength(u), 1);
+    };
     int action = 0;
     inputs[1] = time_now();
     bool dateSelected = false; // Cờ để kiểm soát việc đã chọn ngày hay chưa
@@ -1009,12 +1019,9 @@ start:
                 return;
             }
             if (inputs[0].size() < 12) {
-                Gotoxy(labelX, formY + 10);
                 string t = "Vui lòng điền một cmnd hợp lệ có đủ 12 chữ số!";
-                cout << RED << t << RESET;
+                Printerr(t);
                 currentField = 0;
-                _getch();
-                ClearRegion(labelX, formY + 10, visualLength(t), 1);
                 continue;
             }
             char cmnd[cmnd_max];
@@ -1069,11 +1076,8 @@ start:
                 if (k == NAV_ENTER) {
                     // Nếu thời gian hiện tại LỚN HƠN thời gian vừa chọn -> Lỗi quá khứ
                     if (IsGreaterTime(time_now(), inputs[1]) == 1) {
-                        Gotoxy(labelX, formY + 10);
                         string u = "Lỗi: Thời gian khởi hành không được ở trong quá khứ! Bấm phím bất kỳ...";
-                        cout << RED << u << RESET;
-                        _getch();
-                        ClearRegion(labelX, formY + 10, visualLength(u), 1);
+                        Printerr(u);
                         dateError = true; // Bật cờ lỗi để vòng lặp while quay lại mở Lịch
                     }
                 }
@@ -1131,10 +1135,7 @@ start:
             CB** tempList = Search_CB(dsCB, dateTemp, sbDich, slcb, 1);
             if (slcb == 0) {
                 string t = "Không tìm thấy CB nào phù hợp với ngày KH hoặc sân bay đích mong muốn...";
-                Gotoxy(labelX, formY + 10);
-                cout << RED << t << RESET;
-                _getch();
-                ClearRegion(labelX, formY + 10, visualLength(t), 1);
+                Printerr(t);
                 currentField = 1; // Quay về ô ngày giờ khởi hành để chọn lại
                 continue;
             }
@@ -1155,13 +1156,13 @@ start:
             action = SmallListMCB(inputs[currentField], tempCB, 20, inputX, formY + 2 * currentField - 1, 3, subCB, startX + 84, startY + 17, 35, 8);
             ClearRegion(inputX, startY + 2 * currentField + 4, 10, 5); // Xóa box thông tin chuyến bay phụ sau khi chọn xong
             if (action == NAV_ESC) {
+                return ;
+            }
+            if(action == NAV_RIGHT){
                 currentField++;
                 continue;
             }
-            if (action == NAV_UP) {
-                currentField--;
-                continue;
-            }
+           
             if (tempCB != NULL) {
                 inputs[currentField] = string(tempCB->maCB);
                 Gotoxy(inputX, formY + 2 * currentField);
@@ -1186,11 +1187,8 @@ start:
         else if (currentField == 4) {
             ClearRegion(inputX + 35, formY + 2 * (4 - 1), 3, 1);
             if (inputs[3].empty()) {
-                Gotoxy(labelX, formY + 10);
                 string t = "Vui lòng chọn chuyến bay trước khi chọn số ghế!";
-                cout << RED << t << RESET;
-                _getch();
-                ClearRegion(labelX, formY + 10, visualLength(t), 1);
+                Printerr(t);
                 currentField = 3; // Quay về ô chuyến bay để chọn lại
                 continue;
             }
@@ -1241,25 +1239,19 @@ start:
                 bool empty = false;
                 for (int i = 0; i < 5; i++) {
                     if (inputs[i].empty() || dateSelected == false) {
-                        empty = true;
-                        Gotoxy(labelX, formY + 10);
                         string t = "Vui lòng điền đầy đủ thông tin!";
-                        cout << RED << t << RESET;
+                        Printerr(t);
+                        empty = true;
                         currentField = i;
-                        _getch();
-                        ClearRegion(labelX, formY + 10, visualLength(t), 1);
                         break;
                     }
                 }
                 if (!empty) {
                     // Xử lý logic đặt vé ở đây
                     if (inputs[0].size() < 12) {
-                        Gotoxy(labelX, formY + 10);
                         string t = "Vui lòng điền một cmnd hợp lệ có đủ 12 chữ số!";
-                        cout << RED << t << RESET;
+                        Printerr(t);
                         currentField = 0;
-                        _getch();
-                        ClearRegion(labelX, formY + 10, visualLength(t), 1);
                         continue;
                     }
                     char cmnd[cmnd_max];
@@ -1294,58 +1286,36 @@ start:
                     switch (result[0]) {
                     case '1':
                         errorMsg = "Lỗi: Chuyến bay không tồn tại!";
-                        cout << RED << errorMsg << RESET;
                         currentField = 3;
-                        errorCode = true;
-                        _getch();
                         break;
                     case '2':
                         errorMsg = "Lỗi: Hành khách không tồn tại!";
-                        cout << RED << errorMsg << RESET;
                         currentField = 0;
-                        errorCode = true;
-                        _getch();
                         break;
                     case '3':
                         errorMsg = "Lỗi: Hành khách đã đặt vé trên chuyến bay này!";
-                        cout << RED << errorMsg << RESET;
                         currentField = 3;
-                        errorCode = true;
-                        _getch();
                         break;
                     case '4':
                         errorMsg = "Lỗi: Chuyến bay đã hết vé hoặc không còn hoạt động!";
-                        cout << RED << errorMsg << RESET;
                         currentField = 3;
-                        errorCode = true;
-                        _getch();
                         break;
                     case '5':
                         errorMsg = "Lỗi: Đã có khách đặt vé tại ghế số " + inputs[4] + "!";
-                        cout << RED << errorMsg << RESET;
                         currentField = 4;
-                        errorCode = true;
-                        _getch();
                         break;
                     case '6':
                         errorMsg = "Lỗi: Đăng ký nhiều chuyến thì ngày KH phải cách nhau ít nhất 1 ngày!";
-                        cout << RED << errorMsg << RESET;
                         currentField = 4;
-                        errorCode = true;
-                        _getch();
                         break;
                     case '7':
                         errorMsg = "Lỗi: Số ghế không hợp lệ (Số ghế phải > 0 và <= số vé mở bán)!";
-                        cout << RED << errorMsg << RESET;
                         currentField = 4;
-                        errorCode = true;
-                        _getch();
                         break;
                     }
-                    ClearRegion(labelX, formY + 10, 70, 1);
-                    if (errorCode == true) {
-                        ClearRegion(inputX + 35, formY + 2 * (4 - 1), 3, 1);
-                        continue; // Nếu có lỗi thì không hỏi đặt vé nữa, cứ ở lại ô đó để sửa
+                    if (!errorMsg.empty()) {
+                        Printerr(errorMsg);
+                        continue; 
                     }
                     Gotoxy(labelX, formY + 10);
                     string s = "Bạn có đồng ý đặt vé không ? (ENTER: Tiếp Tục | ESC: Thoát)";
@@ -1992,6 +1962,8 @@ bool MODE2_CB(CB* pageNodes[], int &index, int& startIndex, int current_Row, int
     int ToaDoLichX = 40;
     int ToaDoLichY = 0 ;
     int width = 40 ;
+    int Y = 8 ;
+    int Bin[] = {1,1,1,1,1,1};
     string Colors[] = {RED,GREEN,YELLOW};
     inputs[0] = ToStringDate(pageNodes[index]->ngayKH) ;
     inputs[1] = pageNodes[index]->sbDich ;
@@ -2074,7 +2046,7 @@ bool MODE2_CB(CB* pageNodes[], int &index, int& startIndex, int current_Row, int
             Gotoxy(ToaDoBoxX, ToaDoBoxY); 
             if (result == 1) { 
                 SmallBox("Đã Chỉnh sửa thành công, bất kì để tiếp tục, Esc để thoát", WidthPerBox,HeightPerBox, string(GREEN));
-                Get_Input_CB(true,pageNodes, rowOnScreen, startIndex, size, Temp, Temp2 );
+                Get_Input_CB(true,pageNodes,Y, rowOnScreen, startIndex, size, Temp, Temp2,Bin);
             } else {
                 tmp->ngayKH = oldTime;
                 tmp->set_sbDich(const_cast<char*>(oldSb.c_str()));
@@ -2100,26 +2072,39 @@ void OnlyPrint_List_CB(listCB& A,int size,int CurrentPage,int itemsPerPage,int T
      Render_CB_Page(A, CurrentPage,itemsPerPage,size, Temp, Temp2,Bin);
 }
 
-void Get_Input_CB(bool IsHighLight,CB* pageNodes[], int rowOnScreen,int startIndex,int size, int Temp[], int Temp2[] ){
-    string s ;
-    int index = rowOnScreen + startIndex;// rowOnScreen + startIndex
+void Get_Input_CB(bool IsHighLight, CB* pageNodes[], int Y, int rowOnScreen, int startIndex, int size, int Temp[], int Temp2[], int Bin[]) {
+    string s;
+    int index = rowOnScreen + startIndex;
     CB* SelectedNode = pageNodes[rowOnScreen];
-    for(int i = 0; i < size ;i++){
-        Gotoxy(Temp[i],8 + rowOnScreen);
-        if(i == 0) s = to_string(index+1);
-        else if(i == 1){
-            s = SelectedNode->maCB;
-        }else if (i == 2){
-            s = ToStringDate(SelectedNode->ngayKH);
-        }else if (i == 3){
-            s = to_string(SelectedNode->socho);
-        }else if (i == 4){
-            s = SelectedNode->sbDich;
-        }else{
-            s = TranFormSatus(SelectedNode->trangThai);
-            SmallBox(SQ,false, false,true, true, Temp2[i],1,s);
+    
+    int pha = 0; // Biến giữ nhịp để đồng bộ mảng giao diện (Temp, Temp2) khi có cột bị ẩn
+
+    for (int j = 0; j < size; j++) {
+        if (Bin[j] == 1) {
+            Gotoxy(Temp[j - pha], Y + rowOnScreen);
+            
+            if (j == 0) {
+                s = to_string(index + 1);
+            } else if (j == 1) {
+                s = SelectedNode->maCB;
+            } else if (j == 2) {
+                s = ToStringDate(SelectedNode->ngayKH);
+            } else if (j == 3) {
+                s = to_string(SelectedNode->socho); 
+            } else if (j == 4) {
+                s = SelectedNode->sbDich;
+            } else {
+                s = TranFormSatus(SelectedNode->trangThai);
+                SmallBox(SQ, false, false, true, true, Temp2[j - pha], 1, s);
+            }
+            
+            if (j != 5) {
+                SmallBox(s, false, false, true, true, Temp2[j - pha], 1, IsHighLight ? HIGHLIGHT : WHITE);
+            }
+        } else {
+            // Nếu Bin[j] == 0 (cột bị ẩn), tăng biến pha để bỏ qua khoảng cách UI của cột đó
+            pha++;
         }
-        if(i!= 5)SmallBox(s,false, false,true, true, Temp2[i],1, IsHighLight ? HIGHLIGHT : WHITE);
     }
 }
 
@@ -2129,22 +2114,16 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
     int Temp[] = { 10,20,50,80,90,105 };
     int Temp2[] = { 10,30,30,10,15,10 };
     int Bin[] = { 1,1,1,1,1,1 };
+    int PosSizeNote[] = {70,24,50,4}; 
     string typemode[] = { "In danh sách","Hiệu Chỉnh/Huỷ Chuyến","Hủy Vé Theo Hành Khách","Thông tin kỹ thuật" };
     string headers[] = { "STT","Mã Chuyến Bay", "Ngày Khởi Hành", "Số Vé","Sân bay đích","Status" };
-    string q[] = { "","","","" };
-    string Type[] = { RED, GREEN, YELLOW, CYAN };
-    q[0] = Type[0] + SQ + RESET + ": Chuyến bay bị huỷ ";
-    q[1] = Type[1] + SQ + RESET + ": Chuyến bay còn vé ";
-    q[2] = Type[2] + SQ + RESET + ": Chuyến bay hết vé ";
-    q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất ";
+    int Y = 8 ;
     start:
     ClearScreen();
     realTimeUpdateCB(dsCB, dsHK, dsMB);
     string header[] = {"Danh Sách Chuyến Bay","Danh Sách Chuyến Bay","Danh Sách Chuyến Bay Đã Được Đặt Theo Số CMND: " + cmnd,"Danh Sách Chuyến Bay"};
     PrintHeader(res, mod, header[mod], size, headers, typemode, Temp, Temp2, (TotalWidth / 2) - (visualLength(header[mod]) / 2));
-    Gotoxy(70,24);
-    string u = "  " + q[0] + q[1] +"    " +q[2] + q[3];
-    SmallBox(u,50,4);
+    DrawNote1(PosSizeNote[0],PosSizeNote[1],PosSizeNote[2],PosSizeNote[3]);
     int currentPage = 0;
     int current_Row = 0;
     const int itemsPerPage = 12; // Ví dụ: màn hình chỉ chứa được 12 CB
@@ -2200,11 +2179,11 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
             int oldPage = currentPage; 
             int oldRow = rowOnScreen;
             CB* SelectedNode = pageNodes[rowOnScreen];
-            Get_Input_CB(true,pageNodes, rowOnScreen, startIndex, size, Temp, Temp2 );
+            Get_Input_CB(true,pageNodes,Y, rowOnScreen, startIndex, size, Temp, Temp2,Bin);
             NavKey ch =  PaginationController(tmp.slCB, itemsPerPage, currentPage, current_Row);
             Gotoxy(5, 24);
             SmallBox(m,50,4,string(GRAY));
-            Get_Input_CB(false,pageNodes, rowOnScreen, startIndex, size, Temp, Temp2 );
+            Get_Input_CB(false,pageNodes,Y, rowOnScreen, startIndex, size, Temp, Temp2,Bin);
             rowOnScreen = current_Row ;
             if(ch == NAV_UP&& oldRow == 0){
                 tmp.Clear(); 
@@ -2246,12 +2225,10 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
                 break; 
             }else if (ch == NAV_ENTER){
                 if(mod == 0){
-                    
                     View_DSHK_CB(SelectedNode);
                     ClearScreen();
                     PrintHeader(res, mod, "Danh Sách Chuyến Bay", size, headers,typemode, Temp, Temp2);
-                    Gotoxy(70,24);
-                    SmallBox(u,50,4);
+                    DrawNote1(PosSizeNote[0],PosSizeNote[1],PosSizeNote[2],PosSizeNote[3]);
                     Render_CB_Page(tmp, currentPage, itemsPerPage,size,Temp,Temp2,Bin);
                     DrawACat();
                 }
@@ -2302,8 +2279,7 @@ void It_list_CB(int mod, listCB& A, string res, string cmnd){
                     View_MB_CB(SelectedNode);
                     ClearScreen();
                     PrintHeader(res, mod, "Danh Sách Chuyến Bay", size, headers,typemode, Temp, Temp2);
-                    Gotoxy(70,24);
-                    SmallBox(u,50,4);
+                    DrawNote1(PosSizeNote[0],PosSizeNote[1],PosSizeNote[2],PosSizeNote[3]);
                     Render_CB_Page(tmp, currentPage, itemsPerPage,size,Temp,Temp2,Bin);
                     DrawACat();
                 }
@@ -2808,19 +2784,12 @@ void FindCBOnTimeAndPlace(string res){
     int Temp[] = {0,10,40,50,0,0};
     int Temp2[] ={10,30,10,10,0,0};
     int Bin[] = {1,1,0,1,0,1};
+    int PosSizeNote[] = {63,19,50,2}; 
     string typemode[] = {"Tìm Chuyến Bay Theo Ngày Khởi Hành/Sân Bay Đích",};
     //string headers[] = {"STT","Mã Chuyến Bay", "Ngày Khởi Hành", "Số Vé","Sân bay đích","Status"};
     string headers[] = {"STT","Mã Chuyến Bay", "Vé Trống","Status"};
     PrintHeader(res, 0, "Danh Sách Chuyến Bay", size, headers,typemode, Temp, Temp2,-1,-1,3,1);
-    string q[] = {"","","",""};
-    string Type[] = {RED, GREEN, YELLOW, CYAN};
-    q[0] = Type[0] + SQ + RESET + ": Chuyến bay bị huỷ " ;
-    q[1] = Type[1] + SQ + RESET + ": Chuyến bay còn vé " ;
-    q[2] = Type[2] + SQ + RESET + ": Chuyến bay hết vé " ;
-    q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất " ;
-    Gotoxy(63,19);
-    string u = "  " + q[0] + q[1] +"    " +q[2] + q[3];
-    SmallBox(u,50,2);
+    DrawNote1(PosSizeNote[0],PosSizeNote[1],PosSizeNote[2],PosSizeNote[3]);
     DateTime t ;
     string add = "";
     int slCB=0 ;
@@ -3013,7 +2982,7 @@ void HuyChuyen() {
         SmallBox(options[select%2],width , Height, string(WHITE));
         
         if (k == NAV_ENTER) {
-			if (select == 1) CancelTicketByCB();
+			if (select == 1) ManageFlightTickets(2) ;
 			else CancelTicketByHK(1, "");
             goto start;
         }
@@ -3225,242 +3194,7 @@ selectStage:
     }
     return NAV_ENTER;
 }
-void CancelTicketByCB() {
-start:
-    realTimeUpdateCB(dsCB, dsHK, dsMB);
-    int width = 120;
-    int width1 = 80;
-    int width2 = 39;
-    int height = 28;
-    int height2 = 9;
-    int startX = (GetTerminalWidth() - width) / 2;
-    int formY = 2;
-    int startY = 0;
-    ClearScreen();
 
-    Gotoxy(startX + width1 + 1, formY - 1);
-    SmallBox("THÔNG TIN CHUYẾN BAY", (int)width2, (int)1, (string)YELLOW);
-
-    Gotoxy(startX + width1 + 1, formY + 2);
-    SmallBox("", (int)width2, (int)height2 + 1, (string)WHITE);
-
-    Gotoxy(startX + width1 + 1, formY + height2 + 5);
-    SmallBox("THÔNG TIN KHÁCH HÀNG", (int)width2, (int)1, (string)YELLOW);
-
-    Gotoxy(startX + width1 + 1, formY + height2 + 8);
-    SmallBox("", (int)width2, (int)height2, (string)WHITE);
-
-    Gotoxy(0, formY + height2 + 5);
-    SmallBox("", (int)width1, (int)height2 + 3, (string)WHITE);
-
-    Gotoxy(0, formY + height2 + 2);
-    SmallBox("◄/► : Sang Trái / Sang Phải | ▲/▼ : Đi Lên / Đi Xuống | ESC : Thoát", (int)width1, (int)1, (string)GRAY);
-
-    int Y = 4;
-    int col = 1;
-    int StartCalendarX = 64;
-    int StartCalendarY = 1;
-    int field = 5;
-    int size = 4;
-    int S = 6;
-    int Temp[] = { 0,10,40,0,0,0 };
-    int Temp2[] = { 10,30,10,0,0,0 };
-    int Bin[] = { 1,1,0,0,0,1 };
-
-    string typemode[] = { "Kiểm Tra Danh Sách Vé Và Hủy Vé", };
-    string headers[] = { "STT","Mã Chuyến Bay","Status","" };
-    PrintHeader("", 0, "Danh Sách Chuyến Bay", size, headers, typemode, Temp, Temp2, -1, -1, 1, 0);
-    string q[] = { "","","","" };
-    string Type[] = { RED, GREEN, YELLOW, CYAN };
-    q[0] = Type[0] + SQ + RESET + ": Chuyến bay bị huỷ";
-    q[1] = Type[1] + SQ + RESET + ": Chuyến bay còn vé";
-    q[2] = Type[2] + SQ + RESET + ": Chuyến bay hết vé";
-    q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất";
-    ClearRegion(startX + width1 - 30, formY, 10, 8);
-    Gotoxy(startX + width1 - 30, formY - 1);
-    SmallBox("", 30, 6, string(WHITE));
-    Gotoxy(startX + width1 - 26, formY + 1);
-    cout << q[0];
-    Gotoxy(startX + width1 - 26, formY + 2);
-    cout << q[1];
-    Gotoxy(startX + width1 - 26, formY + 3);
-    cout << q[2];
-    Gotoxy(startX + width1 - 26, formY + 4);
-    cout << q[3];
-
-    const int itemsPerPage = 6;
-    int currentPage = 0;
-
-    int slCB = 0;
-    DateTime dateTemp = DateTime();
-    char Address[sbDich_max];
-    Address[0] = '\0';
-
-    string input;
-    int action;
-    listCB subListCB;
-
-    CB** subCB = new CB * [dsCB.slCB];
-    CB* tempCB = dsCB.head;
-    while (tempCB != NULL) {
-        subCB[slCB] = tempCB;
-        slCB++;
-        tempCB = tempCB->next;
-    }
-
-    Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
-    delete[] subCB;
-    slCB = 0;
-
-    int selectedCBIndex = 0;
-    int currentRow = 0;
-    if (dsCB.slCB == 0) {
-        Gotoxy(startX + 1, startY + 4);
-        cout << RED << "Không có dữ liệu chuyến bay nào!...";
-        _getch();
-        return;
-    }
-    while (true) {
-    startS:
-        slCB = 0;
-        char Prefix[maCB_max];
-        string input;
-        Gotoxy(startX + width1 - 30, formY + 8);
-        cout << " Tìm Kiếm: ";
-        Gotoxy(startX + width1 - 20, formY + 7);
-        SmallBox("", 20, 1, string(WHITE));
-        Gotoxy(startX + width1 - 18, formY + 8);
-        int curX = startX + width1 - 18;
-        int curY = formY + 8;
-    nhap:
-        while (true) {
-            currentPage = 0;
-            selectedCBIndex = 0;
-            currentRow = 0;
-            Gotoxy(curX, curY);
-            int ch;
-            NavKey k = GetNavKey(ch);
-            SimpleInput(input, k, ch, curX, curY, maCB_max - 1, false, false);
-            if (k == NAV_ENTER) break;
-            else if (k == NAV_ESC) {
-                CB* tempCB = subListCB.head;
-                while (tempCB != NULL) {
-                    CB* toDelete = tempCB;
-                    tempCB = tempCB->next;
-                    delete toDelete;
-                }
-                ClearScreen();
-                return;
-            }
-
-            //strcpy(Prefix, input.c_str());
-            subListCB = Find_CB_OnRage(dsCB, const_cast<char*>(input.c_str()));
-            subCB = new CB * [subListCB.slCB];
-            CB* tempCB = subListCB.head;
-            while (tempCB != NULL) {
-                subCB[slCB] = tempCB;
-                slCB++;
-                tempCB = tempCB->next;
-            }
-
-            ClearRegion(0, Y, 50, 8);
-            Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
-            delete[] subCB;
-            slCB = 0;
-        }
-        slCB = 0;
-        //strcpy(Prefix, input.c_str());
-        subListCB = Find_CB_OnRage(dsCB, const_cast<char*>(input.c_str()));
-        if (subListCB.slCB == 0) goto nhap;
-        subCB = new CB* [subListCB.slCB];
-        CB* tempCB = subListCB.head;
-        while (tempCB != NULL) {
-            subCB[slCB] = tempCB;
-            slCB++;
-            tempCB = tempCB->next;
-        }
-     chon:
-        while (true) {
-            ClearRegion(0, Y, 50, 8);
-            Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
-            Gotoxy(Temp[0], Y + currentRow);
-            SmallBox(to_string(selectedCBIndex + 1), false, false, true, true, Temp2[0], 1, HIGHLIGHT);
-            Gotoxy(Temp[1], Y + currentRow);
-            SmallBox(subCB[selectedCBIndex]->maCB, false, false, true, true, Temp2[1], 1, HIGHLIGHT);
-
-            UiThongTinCB(startX + width1 + 3, formY, 35, 7, subCB[selectedCBIndex]->maCB);
-            action = GetNavKey();
-            if (action == NAV_UP) {
-                currentRow--;
-                if (currentRow < 0) {
-                    currentRow = 0;
-                    continue;
-                }
-                selectedCBIndex--;
-                if (selectedCBIndex < 0) selectedCBIndex = 0;
-                continue;
-            }
-            else if (action == NAV_DOWN) {
-                currentRow++;
-                selectedCBIndex++;
-                if (currentRow >= itemsPerPage || selectedCBIndex >= slCB) {
-                    if (selectedCBIndex >= slCB) {
-                        selectedCBIndex = 0;
-                        currentRow = 0;
-                        currentPage = 0;
-                        continue;
-                    }
-                    if (currentPage + 1 < (slCB + itemsPerPage - 1) / itemsPerPage) {
-                        currentPage++;
-                        currentRow = 0;
-                        continue;
-                    }
-                }
-            }
-            else if (action == NAV_RIGHT) {
-                if (currentPage + 1 < (slCB + itemsPerPage - 1) / itemsPerPage) {
-                    currentPage++;
-                    currentRow = 0;
-                }
-                else {
-                    currentPage = 0;
-                    currentRow = 0;
-                }
-                selectedCBIndex = currentPage * itemsPerPage + currentRow;
-                continue;
-            }
-            else if (action == NAV_LEFT) {
-                if (currentPage - 1 >= 0) {
-                    currentPage--;
-                    currentRow = 0;
-                }
-                else {
-                    currentPage = (slCB + itemsPerPage - 1) / itemsPerPage - 1;
-                    currentRow = 0;
-                }
-                selectedCBIndex = currentPage * itemsPerPage + currentRow;
-                continue;
-            }
-            else if (action == NAV_ESC) {
-                delete[] subCB;
-                slCB = 0;
-                goto nhap;
-            }
-            else if (action == NAV_ENTER) {
-                break;
-            }
-        }
-        CB* targetCB = Find_CB(dsCB, subCB[selectedCBIndex]->maCB);
-        if (targetCB->socho > 0) {
-            SeatClear(3, formY + height2 + 10, 7, formY + height2 + 6, targetCB);
-        }
-        else goto chon;
-        delete[] subCB;
-        slCB = 0;
-        goto nhap;
-    }
-
-}
 void CancelTicketByHK(int mod, string res) {
     It_list_HK(mod, res);
 }
@@ -3473,13 +3207,21 @@ NavKey SeatList(int x, int y, int xt, int yt, CB* SelectedCB) {
     int startXT = xt;
     int startYT = yt;
     int action;
+    //Những cái cố định ít thay đổi thì không cần nhét vào vòng lặp 
+    Gotoxy(startXT - 5, startYT);
+    SmallBox("IN", (int)6, (int)1, (string)YELLOW);
+    Gotoxy(startXT + 64, startYT);
+    SmallBox("OUT", (int)7, (int)1, (string)YELLOW);
+    Gotoxy(x, y + 2);
+    cout << WHITE << string(73,'-') << RESET;
+    Gotoxy(x + 10, y + 3);
+    cout << WHITE << "  L  Ố  I    Đ  I                 L  Ố  I    Đ  I  " << RESET;
+    Gotoxy(x, y + 4);
+    cout << WHITE << string(73, '-') << RESET;
 selectStage:
     while (true) {
         int tempX = startXT, tempY = startYT;
-        Gotoxy(tempX - 5, tempY);
-        SmallBox("IN", (int)6, (int)1, (string)YELLOW);
-        Gotoxy(tempX + 64, tempY);
-        SmallBox("OUT", (int)7, (int)1, (string)YELLOW);
+        // Vẽ header riêng sau đó mới vẽ ghế , không nhét hai cái này vào cùng 1 vòng lặp tránh nháy màn hình
         for (int i = 0; i < 10; i++) {
             Gotoxy(tempX + 3, tempY);
             SmallBox("", (int)5, (int)1, (string)WHITE);
@@ -3488,32 +3230,28 @@ selectStage:
             else if (i <= stage) cout << GREEN << char('A' + i) << RESET;
             else cout << RED << char('A' + i) << RESET;
             tempX = tempX + 6;
-            int startSeat = stageSelected * 60;
-            int seatNumber = min(60, seatCount - (stageSelected * 60));
-            int tempX = x;
-            int tempY = y - 1;
-            int countRow = 0;
-            int row = 1;
-            ClearRegion(x - 1, y - 1, 77, 9); // Xóa vùng ghế cũ trước khi vẽ lại
-            Gotoxy(tempX, tempY + 3);
-            cout << WHITE << string(73,'-') << RESET;
-            Gotoxy(tempX + 10, tempY + 4);
-            cout << WHITE << "  L  Ố  I    Đ  I                 L  Ố  I    Đ  I  " << RESET;
-            Gotoxy(tempX, tempY + 5);
-            cout << WHITE << string(73, '-') << RESET;
-            for (int i = 0; i < seatNumber; i++) {
-                if (countRow == 15) {
-                    tempX = x;
-                    tempY = tempY + 2;
-                    countRow = 0;
-                    row++;
-                    if (row == 3) tempY+=2;
-                }
-                Gotoxy(tempX + 5 * countRow, tempY);
-                if (SelectedCB->DSV[startSeat + i][0] != '\0') cout << (startSeat + i + 1);
-                else cout << GRAY << (startSeat + i + 1) << RESET;
-                countRow++;
+        }
+        ClearRegion(x - 1, y-1, 77, 3); // Xóa vùng ghế cũ trước khi vẽ lại
+        ClearRegion(x - 1, y+5, 77, 3); // Xóa vùng ghế cũ trước khi vẽ lại
+        int startSeat = stageSelected * 60;
+        int seatNumber = min(60, seatCount - (stageSelected * 60));
+        int seatX = x;
+        int seatY = y - 1;
+        int countRow = 0;
+        int row = 1;
+        // Vẽ ghế 
+        for (int j = 0; j < seatNumber; j++) {
+            if (countRow == 15) {
+                seatX = x;
+                seatY = seatY + 2;
+                countRow = 0;
+                row++;
+                if (row == 3) seatY += 2;
             }
+            Gotoxy(seatX + 5 * countRow, seatY);
+            if (SelectedCB->DSV[startSeat + j][0] != '\0') cout << (startSeat + j + 1);
+            else cout << GRAY << (startSeat + j + 1) << RESET;
+            countRow++;
         }
         action = GetNavKey();
         if (action == NAV_ESC) {
@@ -3609,9 +3347,9 @@ selectStage:
     return NAV_ENTER;
 }
 
-// Hàm hiện thị danh sách ghế trống của chuyến bay
-void EmptySeatList() {
+void ManageFlightTickets(int mode) {
 start:
+    realTimeUpdateCB(dsCB, dsHK, dsMB);
     int width = 120;
     int width1 = 80;
     int width2 = 39;
@@ -3621,7 +3359,6 @@ start:
     int formY = 2;
     int startY = 0;
     ClearScreen();
-
 
     Gotoxy(startX + width1 + 1, formY - 1);
     SmallBox("THÔNG TIN CHUYẾN BAY", (int)width2, (int)1, (string)YELLOW);
@@ -3642,56 +3379,34 @@ start:
     SmallBox("◄/► : Sang Trái / Sang Phải | ▲/▼ : Đi Lên / Đi Xuống | ESC : Thoát", (int)width1, (int)1, (string)GRAY);
 
     int Y = 4;
-    int col = 1;
-    int StartCalendarX = 64;
-    int StartCalendarY = 1;
-    int field = 5;
     int size = 4;
     int S = 6;
     int Temp[] = { 0,10,40,0,0,0 };
     int Temp2[] = { 10,30,10,0,0,0 };
     int Bin[] = { 1,1,0,0,0,1 };
 
-    string typemode[] = { "Kiểm Tra Danh Sách Vé Trống Của Chuyến Bay", };
-    string headers[] = { "STT","Mã Chuyến Bay","Status",""};
+    // kiểm tra mode 
+    string typemode[1];
+    if (mode == 1) {
+        typemode[0] = "Kiểm Tra Danh Sách Vé Trống Của Chuyến Bay";
+    } else if (mode == 2) {
+        typemode[0] = "Kiểm Tra Danh Sách Vé Và Hủy Vé";
+    }
+
+    string headers[] = { "STT","Mã Chuyến Bay","Status","" };
     PrintHeader("", 0, "Danh Sách Chuyến Bay", size, headers, typemode, Temp, Temp2, -1, -1, 1, 0);
-    string q[] = { "","","","" };
-    string Type[] = { RED, GREEN, YELLOW, CYAN };
-    q[0] = Type[0] + SQ + RESET + ": Chuyến bay bị huỷ";
-    q[1] = Type[1] + SQ + RESET + ": Chuyến bay còn vé";
-    q[2] = Type[2] + SQ + RESET + ": Chuyến bay hết vé";
-    q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất";
-	ClearRegion(startX + width1 - 30, formY, 10, 8);
+    ClearRegion(startX + width1 - 30, formY, 10, 8);
     Gotoxy(startX + width1 - 30, formY - 1);
-	SmallBox("", 30, 6, string(WHITE));
-    Gotoxy(startX + width1 - 26, formY + 1);
-    cout << q[0];
-    Gotoxy(startX + width1 - 26, formY + 2);
-    cout << q[1];
-    Gotoxy(startX + width1 - 26, formY + 3);
-    cout << q[2];
-	Gotoxy(startX + width1 - 26, formY + 4);
-    cout << q[3];
+    DrawNote2(startX, formY, width1);
 
     const int itemsPerPage = 6;
     int currentPage = 0;
-
     int slCB = 0;
-    DateTime dateTemp = DateTime();
-    char Address[sbDich_max];
-    Address[0] = '\0';
-
     string input;
     int action;
     listCB subListCB;
 
-    CB** subCB = new CB *[dsCB.slCB];
-    CB* tempCB = dsCB.head;
-    while (tempCB != NULL) {
-        subCB[slCB] = tempCB;
-        slCB++;
-        tempCB = tempCB->next;
-    }
+    CB** subCB = ConvertListToArray(dsCB, slCB);
 
     Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
     delete[] subCB;
@@ -3705,18 +3420,18 @@ start:
         _getch();
         return;
     }
+
     while (true) {
     startS:
         slCB = 0;
-        char Prefix[maCB_max];
-        string input;
         Gotoxy(startX + width1 - 30, formY + 8);
         cout << " Tìm Kiếm: ";
         Gotoxy(startX + width1 - 20, formY + 7);
-		SmallBox("", 20, 1, string(WHITE));
+        SmallBox("", 20, 1, string(WHITE));
         Gotoxy(startX + width1 - 18, formY + 8);
         int curX = startX + width1 - 18;
         int curY = formY + 8;
+        
     nhap:
         while (true) {
             currentPage = 0;
@@ -3726,6 +3441,7 @@ start:
             int ch;
             NavKey k = GetNavKey(ch);
             SimpleInput(input, k, ch, curX, curY, maCB_max - 1, false, false);
+            
             if (k == NAV_ENTER) break;
             else if (k == NAV_ESC) {
                 CB* tempCB = subListCB.head;
@@ -3738,115 +3454,80 @@ start:
                 return;
             }
 
-            //strcpy(Prefix, input.c_str());
             subListCB = Find_CB_OnRage(dsCB, const_cast<char*>(input.c_str()));
-            subCB = new CB * [subListCB.slCB];
-            CB* tempCB = subListCB.head;
-            while (tempCB != NULL) {
-                subCB[slCB] = tempCB;
-                slCB++;
-                tempCB = tempCB->next;
-            }
+            subCB = ConvertListToArray(subListCB, slCB); 
 
             ClearRegion(0, Y, 50, 8);
             Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
             delete[] subCB;
             slCB = 0;
         }
+        
         slCB = 0;
-        //strcpy(Prefix, input.c_str());
         subListCB = Find_CB_OnRage(dsCB, const_cast<char*>(input.c_str()));
         if (subListCB.slCB == 0) goto nhap;
-        subCB = new CB * [subListCB.slCB];
-        CB* tempCB = subListCB.head;
-        while (tempCB != NULL) {
-            subCB[slCB] = tempCB;
-            slCB++;
-            tempCB = tempCB->next;
-        }
-
-        chon:
+        subCB = ConvertListToArray(subListCB, slCB); 
+        
+    chon:
         while (true) {
-            ClearRegion(0, Y, 50, 8);
-            Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
-            Gotoxy(Temp[0], Y + currentRow);
-			SmallBox(to_string(selectedCBIndex + 1), false, false, true, true, Temp2[0], 1, HIGHLIGHT);
-            Gotoxy(Temp[1], Y + currentRow);
-            SmallBox(subCB[selectedCBIndex]->maCB, false, false, true, true, Temp2[1], 1, HIGHLIGHT);
-
-			UiThongTinCB(startX + width1 + 3, formY, 35, 7, subCB[selectedCBIndex]->maCB);
-            action = GetNavKey();
+            int startIndex = currentPage * itemsPerPage;
+            selectedCBIndex = startIndex + currentRow;
+        
+            Get_Input_CB(true, subCB + startIndex, Y, currentRow, startIndex, size, Temp, Temp2, Bin);
+            UiThongTinCB(startX + width1 + 3, formY, 35, 7, subCB[selectedCBIndex]->maCB);
+            
+            int oldPage = currentPage;
+            int oldRow = currentRow;
+            int oldStartIndex = oldPage * itemsPerPage;
+            
+            action = PaginationController(slCB, itemsPerPage, currentPage, currentRow);
+            
+            Get_Input_CB(false, subCB + oldStartIndex, Y, oldRow, oldStartIndex, size, Temp, Temp2, Bin);
+            
             if (action == NAV_UP) {
-                currentRow--;
-                if (currentRow < 0) {
-                    currentRow = 0;
-                    continue;
-                }
-                selectedCBIndex--;
-                if (selectedCBIndex < 0) selectedCBIndex = 0;
-                continue;
-            }
-            else if (action == NAV_DOWN) {
-                currentRow++;
-                selectedCBIndex++;
-                if (currentRow >= itemsPerPage || selectedCBIndex >= slCB) {
-                    if (selectedCBIndex >= slCB) {
-                        selectedCBIndex = 0;
-                        currentRow = 0;
-                        currentPage = 0;
-                        continue;
-                    }
-                    if (currentPage + 1 < (slCB + itemsPerPage - 1) / itemsPerPage) {
-                        currentPage++;
-                        currentRow = 0;
-                        continue;
-                    }
-                }
-            }
-            else if (action == NAV_RIGHT) {
-                if (currentPage + 1 < (slCB + itemsPerPage - 1) / itemsPerPage) {
-                    currentPage++;
-                    currentRow = 0;
-                }
-                else {
-                    currentPage = 0;
-                    currentRow = 0;
-                }
-				selectedCBIndex = currentPage * itemsPerPage + currentRow;
-                continue;
-            }
-            else if (action == NAV_LEFT) {
-                if (currentPage - 1 >= 0) {
+                if (oldRow == 0 && currentPage > 0) {
                     currentPage--;
-                    currentRow = 0;
+                    currentRow = itemsPerPage - 1; 
+                } else if (oldRow == 0 && currentPage == 0) {
+                    delete[] subCB;
+                    slCB = 0;
+                    goto nhap; 
                 }
-                else {
-                    currentPage = (slCB + itemsPerPage - 1) / itemsPerPage - 1;
-                    currentRow = 0;
-                }
-				selectedCBIndex = currentPage * itemsPerPage + currentRow;
-                continue;
-            }
+            } 
             else if (action == NAV_ESC) {
                 delete[] subCB;
                 slCB = 0;
                 goto nhap;
-            }
+            } 
             else if (action == NAV_ENTER) {
                 break;
             }
+
+            if (currentPage != oldPage) {
+                ClearRegion(0, Y, 50, 8); 
+                Render_CB_Page(subCB, slCB, Y, 8, 8, currentPage, itemsPerPage, S, Temp, Temp2, Bin);
+            }
         }
-        if (subCB[selectedCBIndex]->socho > 0) {
-            SeatList(3, formY + height2 + 10, 7, formY + height2 + 6, subCB[selectedCBIndex]);
+        
+        // kiểm tra mode 
+        CB* targetCB = Find_CB(dsCB, subCB[selectedCBIndex]->maCB);
+        if (targetCB->socho > 0) {
+            if (mode == 1) {
+                // Mode 1: Xem ghế trống
+                SeatList(3, formY + height2 + 10, 7, formY + height2 + 6, targetCB);
+            } else if (mode == 2) {
+                // Mode 2: Hủy vé
+                SeatClear(3, formY + height2 + 10, 7, formY + height2 + 6, targetCB);
+            }
         }
         else {
             goto chon;
         }
+        
         delete[] subCB;
         slCB = 0;
         goto nhap;
     }
-
 }
 
 void Tutorial(){
@@ -4122,7 +3803,7 @@ void Menu_QuanLyHanhKhach() {
     Router_B(2, 
         []() { RunInNewTab(BookTicket); }, // Đặt vé
         []() { RunInNewTab(HuyChuyen); }, // Hủy vé
-        []() { RunInNewTab(EmptySeatList); },  // Xóa
+        []() { RunInNewTab([]() { ManageFlightTickets(1);}); },  // Xóa
         []() { RunInNewTab([]() { It_list_HK(0); }); }  // DS Hành Khách 
     );
 }

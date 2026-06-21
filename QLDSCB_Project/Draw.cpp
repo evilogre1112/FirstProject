@@ -533,3 +533,34 @@ NavKey DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,str
     }
     return NAV_UNKNOWN;   
 }
+
+void DrawNote2(int startX , int formY, int width1){
+    string q[] = {"","","",""};
+    string Type[] = { RED, GREEN, YELLOW, CYAN };
+    q[0] = Type[0] + SQ + RESET + ": Chuyến bay bị huỷ";
+    q[1] = Type[1] + SQ + RESET + ": Chuyến bay còn vé";
+    q[2] = Type[2] + SQ + RESET + ": Chuyến bay hết vé";
+    q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất";
+    Gotoxy(startX + width1 - 30, formY - 1);
+	SmallBox("", 30, 6, string(WHITE));
+    Gotoxy(startX + width1 - 26, formY + 1);
+    cout << q[0];
+    Gotoxy(startX + width1 - 26, formY + 2);
+    cout << q[1];
+    Gotoxy(startX + width1 - 26, formY + 3);
+    cout << q[2];
+	Gotoxy(startX + width1 - 26, formY + 4);
+    cout << q[3];
+}
+
+void DrawNote1(int x , int y , int width , int height){
+    string q[] = {"","","",""};
+    string Type[] = { RED, GREEN, YELLOW, CYAN };
+    q[0] = Type[0] + SQ + RESET + ": Chuyến bay bị huỷ ";
+    q[1] = Type[1] + SQ + RESET + ": Chuyến bay còn vé ";
+    q[2] = Type[2] + SQ + RESET + ": Chuyến bay hết vé ";
+    q[3] = Type[3] + SQ + RESET + ": Chuyến bay hoàn tất ";
+    Gotoxy(x,y);
+    string u = "  " + q[0] + q[1] +"    " +q[2] + q[3];
+    SmallBox(u,width,height);
+}

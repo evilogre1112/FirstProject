@@ -76,5 +76,6 @@ NavKey  DrawCalendar(int x, int y,int rowpadding , int colpadding, string& DateS
 NavKey  DrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string& DateString,bool CanPast = false);
 void    UiDrawCalendarWithoutTime(int x , int y,int rowpadding , int colpadding,string DateString);
 void    UiDrawCalendar(int x , int y,int rowpadding , int colpadding,string DateString);
-
+void    DrawNote2(int startX , int formY, int width1);
+void    DrawNote1(int x , int y , int width , int height);
 #endif

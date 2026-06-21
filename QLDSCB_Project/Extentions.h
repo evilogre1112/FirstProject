@@ -155,8 +155,6 @@ int whereY();
 NavKey GetNavKey(int &ch);
 NavKey GetNavKey();
 
-
-
 void ClearRegion(int x, int y, int width, int height);
 
 NavKey PaginationController(int totalItems, int itemsPerPage, int& currentPage, int& currentRow,int& key);
@@ -275,4 +273,7 @@ bool Set_Data_HK(HK &HK, const char *path_file_HK);
  * @return Mảng các con trỏ HK** đã được sắp xếp theo thứ tự CMND 
  */
 HK** duyet_HK(listHK& dsHK);
+
+// Biến list CB thành mảng con trỏ
+CB** ConvertListToArray(listCB& List, int& count);
 #endif
