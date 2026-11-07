@@ -172,6 +172,7 @@ long long toMinutes(DateTime dt);
 
 long long ss_ngay(DateTime const &a, DateTime const &b);
 
+
 // Hàm lấy Ngày (DD) - Cắt 2 ký tự từ vị trí 0
 int GetDayFromStr(const string &datetimeStr);
 // Hàm lấy Tháng (MM) - Cắt 2 ký tự từ vị trí 3

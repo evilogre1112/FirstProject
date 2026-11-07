@@ -1,96 +1,162 @@
-# ✈️ Đồ án CTDL & GT: Quản lý các chuyến bay nội địa
+<div align="center">
 
-Dự án quản lý vận hành hàng không, tập trung vào tối ưu hóa việc lưu trữ thông tin máy bay, điều phối chuyến bay và quản lý đặt vé của hành khách thông qua các cấu trúc dữ liệu thuần túy.
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0ea5e9,100:1e3a8a&height=220&section=header&text=QLDSCB&fontSize=72&fontColor=ffffff&animation=fadeIn&fontAlignY=38" alt="QLDSCB banner" width="100%"/>
 
----
+# ✈️ Quản Lý Chuyến Bay Nội Địa
 
-### 🛠 Cấu trúc dữ liệu sử dụng
+**Điều phối chuyến bay, đặt vé và quản lý hành khách — ngay trên màn hình Console.**
+Giao diện trực quan, thao tác hoàn toàn bằng bàn phím, xây dựng từ cấu trúc dữ liệu thuần túy.
 
-| Đối tượng | Cấu trúc dữ liệu | Chi tiết thông tin |
-| --- | --- | --- |
-| **Máy bay (MB)** | `Mảng con trỏ` | Tối đa 300 máy bay. Số hiệu MB (C15 - Duy nhất), Loại MB (C40), Số chỗ (≥ 20). |
-| **Chuyến bay (CB)** | `Danh sách liên kết đơn` | Mã CB (C15 - Duy nhất), Ngày giờ khởi hành, Sân bay đến, Trạng thái (0-3), Số hiệu MB, Danh sách vé cho biết thông tin vé trên chuyến bay. (Luôn tăng dần theo Mã CB). |
-| **Hành khách (HK)** | `Cây Nhị phân Tìm kiếm (BST)` | Số CMND (Duy nhất), Họ, Tên, Phái. |
-| **Danh sách Vé (DSV)** | `Mảng/Dãy số` | Số vé (1 đến Số chỗ), Số CMND hành khách đã đặt. |
+<br/>
 
-> **Trạng thái chuyến bay:** 0: Hủy chuyến | 1: Còn vé | 2: Hết vé | 3: Hoàn tất.
+![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
+![Console UI](https://img.shields.io/badge/Console-UI-0ea5e9?style=for-the-badge&logo=windowsterminal&logoColor=white)
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![No STL](https://img.shields.io/badge/No-STL-ef4444?style=for-the-badge)
+![Data Structures](https://img.shields.io/badge/CTDL%20%26%20GT-1e3a8a?style=for-the-badge)
 
----
+<br/>
 
-### 🚀 Danh sách chức năng chính
+<img src="./docs/screenshots/ve-trong-so-do-ghe.png" alt="Sơ đồ ghế và thông tin khách hàng" width="90%"/>
 
-* [ ] **a. Quản lý Máy bay:** Cập nhật  danh sách máy bay.  $\color{cyan}{\text{(Thêm/Xóa/Hiệu chỉnh)}}$ $\color{green}{\text{(đã hoàn thành)}}$
-* [ ] **b. Quản lý Chuyến bay:** $\color{green}{\text{(đã hoàn thành)}}$
-    * Lập chuyến bay mới. 
-    * Hiệu chỉnh ngày giờ khởi hành. 
-    * Hủy chuyến. 
-    * $\color{Red}{\text{DSCB luôn có thứ tự tăng dần theo mã chuyến bay}}$ 
-
-
-* [ ] **c. Đặt vé:** $\color{green}{\text{(đã hoàn thành)}}$
-    * Kiểm tra CMND: Nếu mới thì cập nhật vào **Cây BST**(Danh sách khách hàng), nếu có rồi thì in thông tin kiểm tra. 
-    * Mỗi khách chỉ được mua 1 vé/chuyến.
-    * nếu hành khách chưa có số CMND thì yêu cầu nhập thông tin hành khách trước
-
-
-* [ ] **d. Hủy vé:** Cho phép hành khách hủy vé đã đặt trên chuyến bay.
-* [ ] **e. In danh sách hành khách:** Dựa vào mã chuyến bay, in danh sách theo mẫu kết xuất. $\color{green}{\text{(đã hoàn thành)}}$
-* [ ] **f. Tra cứu chuyến bay:** Tìm chuyến bay theo ngày `dd/mm/yyyy`  và nơi đến `XXXXX` mà còn vé. `cho biết cụ thể số lượng slot trống và giờ bay.` $\color{green}{\text{(đã hoàn thành)}}$
-* [ ] **g. In danh sách vé trống:** Liệt kê các số vé chưa có người đặt của một chuyến bay X.
-* [ ] **h. Thống kê lượt bay:** In danh sách máy bay và số lượt thực hiện chuyến bay, sắp xếp **giảm dần** theo số lượt.$\color{green}{\text{(đã hoàn thành)}}$
-
----
-
-### 📄 Mẫu Kết xuất Dữ liệu (Reports)
-
-#### **1. Danh sách hành khách thuộc chuyến bay**
-
-<h3 align="center">
-DANH SÁCH HÀNH KHÁCH THUỘC CHUYẾN BAY:  ###### [Mã CB] 
-
-<i>Ngày giờ: dd/mm/yyyy hh:mm - Nơi đến: xxxxxxxxxxx </i>
-</h3>
-
-<div align = "center">
-
-| STT | SỐ VÉ | SỐ CMND | HỌ TÊN | PHÁI |
-| --- | --- | --- | --- | --- |
-| 1 | 15 | 001099XXXXXX | Nguyễn Văn An | Nam |
-
-</div>
-
-#### **2. Thống kê lượt thực hiện chuyến bay**
-
-<div align = "center">
-
-| Số hiệu máy bay | Số lượt thực hiện |
-| --- | --- |
-| VN-A123 | 50 |
-| VN-A456 | 42 |
+<sub>Sơ đồ ghế trực quan — chọn ghế, xem ngay thông tin chuyến bay và hành khách.</sub>
 
 </div>
 
 ---
 
-### 📖 Bảng chú thích thuật ngữ
+## 🌟 Điểm nổi bật
 
-Để đảm bảo tính thống nhất trong quá trình phát triển giữa các thành viên, toàn bộ dự án tuân thủ các ký hiệu và quy định sau:
+<table>
+<tr>
+<td width="33%" valign="top">
 
-| Ký hiệu | Ý nghĩa đầy đủ | Ghi chú kỹ thuật |
+### 🎨 Giao diện đẹp ngay trong Console
+Khung viền, màu sắc trạng thái, ảnh ASCII art và lịch tháng — một ứng dụng terminal nhưng không hề "khô khan".
+
+</td>
+<td width="33%" valign="top">
+
+### ⌨️ Điều khiển bằng phím
+Di chuyển bằng mũi tên, xác nhận bằng `ENTER`, thoát bằng `ESC`. Không cần chuột, thao tác nhanh và mượt.
+
+</td>
+<td width="33%" valign="top">
+
+### 🧠 Xây dựng từ con số 0
+Không dùng STL. Toàn bộ dữ liệu được quản lý bằng mảng con trỏ, danh sách liên kết, cây BST do nhóm tự cài đặt.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📸 Giao diện sản phẩm
+
+<table>
+<tr>
+<td width="50%" align="center">
+<img src="./docs/screenshots/lap-chuyen-bay.png" alt="Lập chuyến bay mới"/>
+<br/><b>🛫 Lập chuyến bay mới</b>
+<br/><sub>Chọn ngày giờ bằng lịch tháng, chọn máy bay từ danh sách.</sub>
+</td>
+<td width="50%" align="center">
+<img src="./docs/screenshots/tim-chuyen-bay.png" alt="Tìm chuyến bay theo ngày và sân bay"/>
+<br/><b>🔎 Tra cứu chuyến bay</b>
+<br/><sub>Lọc theo ngày khởi hành và sân bay đến, hiển thị số vé trống.</sub>
+</td>
+</tr>
+<tr>
+<td width="50%" align="center">
+<img src="./docs/screenshots/thong-so-may-bay.png" alt="Thông số kỹ thuật máy bay"/>
+<br/><b>🛩️ Quản lý máy bay</b>
+<br/><sub>Xem thông số: mã, loại máy bay, số ghế tối đa.</sub>
+</td>
+<td width="50%" align="center">
+<img src="./docs/screenshots/huy-ve.png" alt="Menu hủy vé"/>
+<br/><b>🎫 Hủy vé linh hoạt</b>
+<br/><sub>Hủy theo chuyến bay hoặc theo hành khách.</sub>
+</td>
+</tr>
+</table>
+
+---
+
+## ✨ Bạn có thể làm gì với QLDSCB?
+
+| | Tính năng | Mô tả |
+| :---: | :--- | :--- |
+| 🛩️ | **Quản lý máy bay** | Thêm, xóa, hiệu chỉnh thông tin máy bay (tối đa 300 máy bay). |
+| 🛫 | **Quản lý chuyến bay** | Lập chuyến bay mới, đổi ngày giờ khởi hành, hủy chuyến. Danh sách luôn được sắp xếp theo mã chuyến bay. |
+| 🎟️ | **Đặt vé** | Kiểm tra CMND, tự động thêm hành khách mới, mỗi khách chỉ mua một vé trên mỗi chuyến. |
+| ❌ | **Hủy vé** | Hủy vé theo chuyến bay hoặc theo hành khách. |
+| 👥 | **Danh sách hành khách** | In danh sách hành khách của một chuyến bay theo mẫu có sẵn. |
+| 🔎 | **Tra cứu chuyến bay** | Tìm theo ngày `dd/mm/yyyy` và nơi đến, cho biết giờ bay và số chỗ còn trống. |
+| 💺 | **Xem vé trống** | Sơ đồ ghế của chuyến bay, ghế nào còn trống nhìn là thấy. |
+| 📊 | **Thống kê lượt bay** | Danh sách máy bay xếp hạng giảm dần theo số lượt thực hiện chuyến bay. |
+
+### 🚦 Trạng thái chuyến bay nhìn là hiểu
+
+| Màu | Ý nghĩa |
+| :---: | :--- |
+| 🟥 | Chuyến bay bị hủy |
+| 🟩 | Chuyến bay còn vé |
+| 🟨 | Chuyến bay hết vé |
+| 🟦 | Chuyến bay hoàn tất |
+
+---
+
+## 🧩 Bên trong ứng dụng
+
+Mỗi đối tượng được chọn cấu trúc dữ liệu phù hợp nhất với cách nó được sử dụng:
+
+| Đối tượng | Cấu trúc dữ liệu | Vì sao chọn? |
 | :--- | :--- | :--- |
-| **CTDL & GT** | Cấu trúc dữ liệu và Giải thuật | Nền tảng chính của đồ án (tuyệt đối không dùng thư viện STL). |
-| **BST** | Binary Search Tree | Cây nhị phân tìm kiếm, dùng để quản lý danh sách hành khách. |
-| **DSV** | Danh sách vé | Gồm các vé, mỗi vé có số ghế và cmnd |
-| **MB** | Máy bay | Đối tượng lưu trữ trong mảng con trỏ (tối đa 300). |
-| **CB** | Chuyến bay | Đối tượng lưu trữ trong danh sách liên kết đơn. |
-| **DSCB** | Danh sách chuyến bay | Luôn được sắp xếp tăng dần theo mã khi thêm mới (Insert). |
-| **CMND** | Chứng minh nhân dân | Khóa chính (Key) kiểu số hoặc chuỗi để định danh hành khách. |
-| **C15, C40** | Chuỗi ký tự (String/Char) | Ví dụ: `C15` tương đương `char[16]` (đã bao gồm ký tự `\0`). |
-| **STT** | Số thứ tự | Chỉ số hiển thị trên giao diện (không lưu trong file). |
-| **Trạng thái** | 0, 1, 2, 3 | Các mã số đại diện cho tình trạng vận hành của chuyến bay. |
-| **dd/mm/yyyy** | Ngày/Tháng/Năm | Định dạng chuẩn khi nhập liệu và hiển thị ngày khởi hành. |
-| **hh:mm** | Giờ:Phút | Định dạng chuẩn cho thời gian cất cánh. |
+| 🛩️ **Máy bay** | Mảng con trỏ | Truy cập nhanh theo chỉ số, tối đa 300 máy bay. |
+| 🛫 **Chuyến bay** | Danh sách liên kết đơn | Chèn chuyến mới mà vẫn giữ thứ tự theo mã chuyến bay. |
+| 🧑 **Hành khách** | Cây nhị phân tìm kiếm (BST) | Tìm và kiểm tra CMND trùng lặp nhanh. |
+| 🎫 **Vé** | Mảng | Mỗi vé tương ứng một ghế, lưu CMND người đặt. |
 
 ---
 
-[Bảng phân chia Khối lượng Công việc](./WORK_DISTRIBUTION/WORK_DISTRIBUTION.md)
+## ⌨️ Phím điều khiển nhanh
+
+| Phím | Chức năng |
+| :---: | :--- |
+| `←` `→` `↑` `↓` | Di chuyển giữa các mục, ghế hoặc trang |
+| `ENTER` | Xác nhận và tiếp tục |
+| `ESC` | Hủy hoặc thoát màn hình hiện tại |
+| `D` / `A` | Chuyển sang tháng sau / tháng trước khi chọn ngày |
+| `Backspace` | Bỏ qua bước chọn ngày |
+
+> 💡 **Lưu ý:** hãy **tắt Unikey** khi sử dụng chương trình để tránh lỗi nhập liệu.
+
+---
+
+## 🚀 Chạy thử
+
+```bash
+git clone https://github.com/evilogre1112/FirstProject.git
+```
+
+1. Mở project bằng IDE hỗ trợ C++ (Dev-C++, Visual Studio, Code::Blocks, ...).
+2. Build và chạy chương trình.
+3. Nên dùng **Windows Terminal** và phóng to cửa sổ để hiển thị đầy đủ giao diện.
+
+---
+
+## 👥 Nhóm thực hiện
+
+Đồ án môn **Cấu trúc dữ liệu & Giải thuật**.
+Xem chi tiết phần việc của từng thành viên tại [Bảng phân chia khối lượng công việc](./WORK_DISTRIBUTION/WORK_DISTRIBUTION.md).
+
+<div align="center">
+
+<br/>
+
+⭐ Nếu thấy dự án thú vị, hãy tặng nhóm một ngôi sao nhé!
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0ea5e9,100:1e3a8a&height=100&section=footer" alt="footer" width="100%"/>
+
+</div>
