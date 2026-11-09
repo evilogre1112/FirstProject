@@ -17,7 +17,7 @@ Giao diện trực quan, thao tác hoàn toàn bằng bàn phím, xây dựng t�
 
 <br/>
 
-<img src="./docs/screenshots/ve-trong-so-do-ghe.png" alt="Sơ đồ ghế và thông tin khách hàng" width="90%"/>
+<img src="./docs/Screenshots/ve-trong-so-do-ghe.png" alt="Sơ đồ ghế và thông tin khách hàng" width="90%"/>
 
 <sub>Sơ đồ ghế trực quan — chọn ghế, xem ngay thông tin chuyến bay và hành khách.</sub>
 
@@ -57,24 +57,24 @@ Không dùng STL. Toàn bộ dữ liệu được quản lý bằng mảng con t
 <table>
 <tr>
 <td width="50%" align="center">
-<img src="./docs/screenshots/lap-chuyen-bay.png" alt="Lập chuyến bay mới"/>
+<img src="./docs/Screenshots/lap-chuyen-bay.png" alt="Lập chuyến bay mới"/>
 <br/><b>🛫 Lập chuyến bay mới</b>
 <br/><sub>Chọn ngày giờ bằng lịch tháng, chọn máy bay từ danh sách.</sub>
 </td>
 <td width="50%" align="center">
-<img src="./docs/screenshots/tim-chuyen-bay.png" alt="Tìm chuyến bay theo ngày và sân bay"/>
+<img src="./docs/Screenshots/tim-chuyen-bay.png" alt="Tìm chuyến bay theo ngày và sân bay"/>
 <br/><b>🔎 Tra cứu chuyến bay</b>
 <br/><sub>Lọc theo ngày khởi hành và sân bay đến, hiển thị số vé trống.</sub>
 </td>
 </tr>
 <tr>
 <td width="50%" align="center">
-<img src="./docs/screenshots/thong-so-may-bay.png" alt="Thông số kỹ thuật máy bay"/>
+<img src="./docs/Screenshots/thong-so-may-bay.png" alt="Thông số kỹ thuật máy bay"/>
 <br/><b>🛩️ Quản lý máy bay</b>
 <br/><sub>Xem thông số: mã, loại máy bay, số ghế tối đa.</sub>
 </td>
 <td width="50%" align="center">
-<img src="./docs/screenshots/huy-ve.png" alt="Menu hủy vé"/>
+<img src="./docs/Screenshots/huy-ve.png" alt="Menu hủy vé"/>
 <br/><b>🎫 Hủy vé linh hoạt</b>
 <br/><sub>Hủy theo chuyến bay hoặc theo hành khách.</sub>
 </td>
